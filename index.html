@@ -1,0 +1,2531 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0a1020">
+  <title>บันทึกยอดโอน — EDC Glass</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-title" content="ยอดโอน">
+  <meta name="application-name" content="บันทึกยอดโอน">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+  /* ============================================================
+     THEME TOKENS — Aero / Liquid Glass (กลางคืน + กลางวัน)
+     ============================================================ */
+  :root{
+    --bg-1:#070c18; --bg-2:#0b1424;
+    --aurora-1:rgba(56,189,248,.30);
+    --aurora-2:rgba(139,92,246,.26);
+    --aurora-3:rgba(16,185,129,.20);
+
+    --glass:rgba(24,36,58,.62);
+    --glass-2:rgba(30,44,70,.78);
+    --glass-brd:rgba(255,255,255,.14);
+    --glass-brd-str:rgba(255,255,255,.28);
+    --sheen:linear-gradient(180deg,rgba(255,255,255,.16) 0%,rgba(255,255,255,.04) 42%,rgba(255,255,255,0) 60%);
+    --inner-light:inset 0 1px 0 rgba(255,255,255,.28), inset 0 -1px 0 rgba(0,0,0,.35);
+    --shadow-lg:0 18px 40px rgba(0,0,0,.55), 0 4px 10px rgba(0,0,0,.35);
+    --shadow-md:0 10px 26px rgba(0,0,0,.42);
+
+    --text:#f4f8ff; --text-muted:#93a6c4; --text-soft:#c7d4ea;
+
+    --c-sky:#38bdf8; --c-blue:#2563eb; --c-violet:#8b5cf6;
+    --g95:#f97316; --e20:#10b981; --b7:#3b82f6;
+    --success:#10b981; --warning:#f59e0b; --danger:#ef4444; --excel:#12a150;
+    --radius:22px; --radius-sm:15px;
+  }
+
+  body.light-mode{
+    --bg-1:#e9f0fa; --bg-2:#dce7f7;
+    --aurora-1:rgba(56,189,248,.55);
+    --aurora-2:rgba(167,139,250,.45);
+    --aurora-3:rgba(52,211,153,.38);
+
+    --glass:rgba(255,255,255,.62);
+    --glass-2:rgba(255,255,255,.82);
+    --glass-brd:rgba(255,255,255,.85);
+    --glass-brd-str:rgba(255,255,255,1);
+    --sheen:linear-gradient(180deg,rgba(255,255,255,.75) 0%,rgba(255,255,255,.25) 42%,rgba(255,255,255,0) 62%);
+    --inner-light:inset 0 1px 0 rgba(255,255,255,.95), inset 0 -1px 0 rgba(15,23,42,.06);
+    --shadow-lg:0 18px 40px rgba(30,58,110,.18), 0 4px 10px rgba(30,58,110,.10);
+    --shadow-md:0 10px 26px rgba(30,58,110,.14);
+
+    --text:#101a2e; --text-muted:#5b708f; --text-soft:#2b3c56;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0;font-family:'Prompt',sans-serif;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    background:linear-gradient(170deg,var(--bg-1),var(--bg-2));
+    color:var(--text); overflow:hidden;
+    transition:background .35s ease,color .35s ease;
+  }
+
+  /* แสงออโรร่าพื้นหลัง */
+  .aurora{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
+  .aurora i{position:absolute;display:block;border-radius:50%;filter:blur(70px);opacity:.95;}
+  .aurora i:nth-child(1){width:60vw;height:60vw;background:var(--aurora-1);top:-18vw;left:-14vw;animation:drift1 18s ease-in-out infinite;}
+  .aurora i:nth-child(2){width:52vw;height:52vw;background:var(--aurora-2);top:22vh;right:-20vw;animation:drift2 22s ease-in-out infinite;}
+  .aurora i:nth-child(3){width:58vw;height:58vw;background:var(--aurora-3);bottom:-22vw;left:8vw;animation:drift3 20s ease-in-out infinite;}
+  @keyframes drift1{0%,100%{transform:translate3d(0,0,0) scale(1)}50%{transform:translate3d(6vw,4vh,0) scale(1.12)}}
+  @keyframes drift2{0%,100%{transform:translate3d(0,0,0) scale(1.05)}50%{transform:translate3d(-7vw,-5vh,0) scale(.92)}}
+  @keyframes drift3{0%,100%{transform:translate3d(0,0,0) scale(.95)}50%{transform:translate3d(5vw,-6vh,0) scale(1.1)}}
+
+  /* ---------- โครงหน้าจอ: ไม่ล้นบน ไม่ล้นล่าง ---------- */
+  .container{
+    position:relative; z-index:1;
+    max-width:520px; margin:0 auto;
+    height:100dvh; display:flex; flex-direction:column;
+    padding-top:env(safe-area-inset-top);
+  }
+  .view-section{
+    display:none; flex:1 1 auto; min-height:0;
+    overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain;
+    padding:14px 14px calc(78px + env(safe-area-inset-bottom));
+  }
+  .view-section.active{display:block;animation:fadeUp .35s cubic-bezier(.2,.8,.25,1);}
+  .view-section::-webkit-scrollbar{width:0}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  @keyframes popIn{0%{opacity:0;transform:scale(.92) translateY(6px)}70%{transform:scale(1.02)}100%{opacity:1;transform:scale(1)}}
+  @keyframes popCheck{0%{transform:scale(0) rotate(-40deg)}60%{transform:scale(1.12) rotate(6deg)}100%{transform:scale(1) rotate(0)}}
+  @keyframes drawCheck{to{stroke-dashoffset:0}}
+  @keyframes ripple{0%{transform:scale(.6);opacity:.55}100%{transform:scale(2.1);opacity:0}}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+
+  /* ---------- พื้นผิวกระจก ---------- */
+  .glass{
+    position:relative;
+    background:var(--glass);
+    -webkit-backdrop-filter:blur(18px) saturate(180%);
+    backdrop-filter:blur(18px) saturate(180%);
+    border:1px solid var(--glass-brd);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow-lg), var(--inner-light);
+    overflow:hidden;
+  }
+  .glass::before{content:'';position:absolute;inset:0;background:var(--sheen);pointer-events:none;}
+
+  /* ============================================================
+     HEADER
+     ============================================================ */
+  .header{
+    background:linear-gradient(135deg,#0ea5e9 0%,#3b82f6 45%,#7c3aed 100%);
+    color:#fff;padding:20px 18px;border-radius:var(--radius);
+    border:1px solid rgba(255,255,255,.35);
+    box-shadow:0 20px 42px rgba(37,99,235,.42), 0 6px 14px rgba(124,58,237,.30), inset 0 1px 0 rgba(255,255,255,.55), inset 0 -2px 8px rgba(0,0,0,.20);
+    margin-bottom:16px;position:relative;overflow:hidden;
+    display:flex;justify-content:space-between;align-items:center;gap:12px;
+    animation:fadeUp .45s cubic-bezier(.2,.8,.25,1);
+  }
+  .header::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.35),rgba(255,255,255,.05) 46%,rgba(255,255,255,0) 60%);pointer-events:none;}
+  .header::after{content:'';position:absolute;width:190px;height:190px;border-radius:50%;background:rgba(255,255,255,.16);top:-72px;right:-56px;filter:blur(2px);}
+  .header-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.22);border:1px solid rgba(255,255,255,.4);padding:4px 10px;border-radius:999px;font-size:11px;font-weight:600;margin-bottom:8px;position:relative;z-index:2;backdrop-filter:blur(6px);}
+  .header-info h1{font-size:23px;font-weight:700;line-height:1.2;position:relative;z-index:2;text-shadow:0 2px 6px rgba(0,0,0,.28);}
+  .header-info p{font-size:12px;font-weight:500;color:#eaf4ff;position:relative;z-index:2;margin-top:3px;text-shadow:0 1px 3px rgba(0,0,0,.25);}
+
+  .btn-theme{
+    flex:0 0 auto;width:46px;height:46px;border-radius:50%;
+    background:rgba(255,255,255,.24);border:1px solid rgba(255,255,255,.55);
+    color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;
+    position:relative;z-index:2;backdrop-filter:blur(8px);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.7), 0 6px 14px rgba(0,0,0,.25);
+    transition:transform .25s cubic-bezier(.2,.8,.25,1), background .25s;
+  }
+  .btn-theme:active{transform:scale(.88) rotate(-25deg);}
+  .btn-theme svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .4s;}
+  .header-tools{display:flex;align-items:center;gap:8px;position:relative;z-index:2;flex:0 0 auto;}
+  .header-tools .btn-theme:active{transform:scale(.88) rotate(0);}
+
+  /* ============================================================
+     CARD หลัก
+     ============================================================ */
+  .card{padding:20px 18px;margin-bottom:4px;}
+  .card > *{position:relative;z-index:1;}
+
+  .section-label{display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:600;color:var(--text-muted);margin-bottom:13px;}
+  .section-label span{display:flex;align-items:center;gap:7px;}
+  .section-label svg{stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+
+  .action-buttons-right{display:flex;gap:12px;align-items:center;}
+  .btn-chip{
+    width:44px;height:44px;border-radius:14px;
+    background:var(--glass-2);border:1px solid var(--glass-brd);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;
+    box-shadow:var(--shadow-md), var(--inner-light);
+    transition:transform .12s, box-shadow .12s, background .25s;
+  }
+  .btn-chip::after{content:'';position:absolute;inset:0;border-radius:inherit;background:var(--sheen);pointer-events:none;}
+  .btn-chip svg{stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;position:relative;z-index:1;}
+  .btn-chip:active{transform:scale(.88);}
+  .btn-card-scan{color:var(--c-violet);}
+  .btn-phone{color:var(--c-sky);}
+  .btn-card-scan.has-data{color:#fff;background:linear-gradient(140deg,#a78bfa,#7c3aed);border-color:#c4b5fd;box-shadow:0 8px 20px rgba(139,92,246,.55), inset 0 1px 0 rgba(255,255,255,.6);}
+  .btn-phone.has-data{color:#fff;background:linear-gradient(140deg,#38bdf8,#0284c7);border-color:#bae6fd;box-shadow:0 8px 20px rgba(14,165,233,.55), inset 0 1px 0 rgba(255,255,255,.6);}
+  .status-dot{position:absolute;top:-3px;right:-3px;width:12px;height:12px;background:#22c55e;border-radius:50%;display:none;border:2px solid rgba(255,255,255,.85);box-shadow:0 0 10px rgba(34,197,94,.9);z-index:2;}
+  .has-data .status-dot{display:block;}
+
+  /* ปุ่มหน้าจ่าย / น้ำมัน */
+  .grid-pumps{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:22px;}
+  .grid-oils{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:22px;}
+  .grid-pump-btn,.grid-oil-btn{
+    position:relative;overflow:hidden;
+    background:var(--glass-2);color:var(--text-soft);
+    border:1px solid var(--glass-brd);height:54px;border-radius:16px;
+    font-size:18px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;
+    box-shadow:var(--shadow-md), var(--inner-light);
+    transition:transform .12s, box-shadow .12s, background .25s, color .25s;
+  }
+  .grid-oil-btn{font-size:16px;}
+  .grid-pump-btn::after,.grid-oil-btn::after{content:'';position:absolute;inset:0;background:var(--sheen);pointer-events:none;}
+  .grid-pump-btn:active,.grid-oil-btn:active{transform:scale(.9);}
+  .grid-oil-btn.disabled{opacity:.22;pointer-events:none;filter:grayscale(100%);}
+
+  .grid-pump-btn.active{
+    background:linear-gradient(150deg,#7dd3fc,#0ea5e9 55%,#0369a1);color:#fff;border-color:#bae6fd;
+    box-shadow:0 12px 26px rgba(14,165,233,.55), inset 0 2px 0 rgba(255,255,255,.75), inset 0 -3px 8px rgba(0,0,0,.25);
+    text-shadow:0 1px 3px rgba(0,0,0,.35);transform:translate(-1px,-2px);
+  }
+  .grid-oil-btn.g95.active{
+    background:linear-gradient(150deg,#fdba74,#f97316 55%,#c2410c);color:#fff;border-color:#fed7aa;
+    box-shadow:0 12px 26px rgba(249,115,22,.55), inset 0 2px 0 rgba(255,255,255,.7), inset 0 -3px 8px rgba(0,0,0,.25);
+    text-shadow:0 1px 3px rgba(0,0,0,.35);transform:translate(-1px,-2px);
+  }
+  .grid-oil-btn.e20.active{
+    background:linear-gradient(150deg,#6ee7b7,#10b981 55%,#047857);color:#fff;border-color:#a7f3d0;
+    box-shadow:0 12px 26px rgba(16,185,129,.55), inset 0 2px 0 rgba(255,255,255,.7), inset 0 -3px 8px rgba(0,0,0,.25);
+    text-shadow:0 1px 3px rgba(0,0,0,.35);transform:translate(-1px,-2px);
+  }
+  .grid-oil-btn.b7.active{
+    background:linear-gradient(150deg,#93c5fd,#3b82f6 55%,#1d4ed8);color:#fff;border-color:#bfdbfe;
+    box-shadow:0 12px 26px rgba(59,130,246,.55), inset 0 2px 0 rgba(255,255,255,.7), inset 0 -3px 8px rgba(0,0,0,.25);
+    text-shadow:0 1px 3px rgba(0,0,0,.35);transform:translate(-1px,-2px);
+  }
+
+  /* ช่องจำนวนเงิน */
+  .amount-wrapper{position:relative;display:flex;align-items:center;margin-bottom:16px;}
+  .amount-input{
+    width:100%;height:72px;
+    background:linear-gradient(180deg,rgba(2,8,20,.55),rgba(2,8,20,.30));
+    border:2px solid var(--glass-brd);border-radius:18px;
+    font-size:34px !important;font-weight:700 !important;color:#38bdf8 !important;text-align:center;outline:none;
+    padding:0 54px;transition:.3s;
+    box-shadow:inset 0 3px 10px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.14), 0 6px 18px rgba(0,0,0,.28);
+  }
+  body.light-mode .amount-input{
+    background:linear-gradient(180deg,rgba(255,255,255,.92),rgba(226,236,250,.85));
+    color:#0369a1 !important;
+    box-shadow:inset 0 3px 8px rgba(30,58,110,.14), inset 0 1px 0 rgba(255,255,255,1), 0 6px 18px rgba(30,58,110,.12);
+  }
+  .amount-input:focus{border-color:#38bdf8;box-shadow:0 0 0 4px rgba(56,189,248,.18), inset 0 3px 10px rgba(0,0,0,.35);}
+  .amount-input::placeholder{color:var(--text-muted);opacity:.5;}
+
+  .btn-clear-input{
+    position:absolute;right:16px;width:36px;height:36px;border-radius:50%;
+    background:linear-gradient(160deg,#64748b,#334155);color:#fff;border:1px solid rgba(255,255,255,.28);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+    box-shadow:0 5px 12px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.4);
+    opacity:0;pointer-events:none;transition:.25s;
+  }
+  .btn-clear-input svg{stroke:currentColor;fill:none;stroke-width:2.6;stroke-linecap:round;}
+  .btn-clear-input.show{opacity:1;pointer-events:auto;}
+  .btn-clear-input:active{transform:scale(.84);background:linear-gradient(160deg,#f87171,#dc2626);}
+
+  /* ปุ่มลัดจำนวนเงิน +10 … +1,000 */
+  .quick-amount{display:flex;gap:8px;margin-bottom:22px;}
+  .quick-btn{
+    flex:1;padding:12px 0;font-size:13.5px;font-weight:600;position:relative;overflow:hidden;
+    background:var(--glass-2);border:1px solid var(--glass-brd);border-radius:14px;color:var(--text-soft);cursor:pointer;
+    box-shadow:var(--shadow-md), var(--inner-light);
+    transition:transform .16s, color .2s, border-color .2s, box-shadow .25s;
+  }
+  .quick-btn::after{content:'';position:absolute;inset:0;background:var(--sheen);pointer-events:none;}
+  .quick-btn:active{transform:scale(.9);color:#38bdf8;border-color:#38bdf8;}
+
+  .action-btn-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .btn-qr-show,.btn-submit{
+    position:relative;overflow:hidden;
+    height:60px;border:1px solid rgba(255,255,255,.3);border-radius:18px;
+    font-size:16px;font-weight:700;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;gap:8px;color:#fff;
+    transition:transform .18s, box-shadow .25s;text-shadow:0 1px 3px rgba(0,0,0,.3);
+  }
+  .btn-qr-show::before,.btn-submit::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.38),rgba(255,255,255,.06) 48%,rgba(255,255,255,0) 62%);pointer-events:none;}
+  .btn-qr-show svg,.btn-submit svg{stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;position:relative;z-index:1;}
+  .btn-qr-show span,.btn-submit span{position:relative;z-index:1;}
+  .btn-qr-show{background:linear-gradient(150deg,#38bdf8,#2563eb 60%,#1e40af);box-shadow:0 14px 30px rgba(37,99,235,.5), inset 0 2px 0 rgba(255,255,255,.55), inset 0 -3px 8px rgba(0,0,0,.25);}
+  .btn-submit{background:linear-gradient(150deg,#34d399,#10b981 60%,#047857);box-shadow:0 14px 30px rgba(16,185,129,.5), inset 0 2px 0 rgba(255,255,255,.55), inset 0 -3px 8px rgba(0,0,0,.25);}
+  .btn-qr-show:active,.btn-submit:active{transform:scale(.95);box-shadow:0 5px 12px rgba(0,0,0,.3);}
+
+  /* ============================================================
+     หน้ารายการ
+     ============================================================ */
+  .summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
+  .summary-card{padding:16px 12px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;}
+  .summary-card > *{position:relative;z-index:1;}
+  .summary-title{font-size:12px;font-weight:600;color:var(--text-muted);display:flex;align-items:center;gap:6px;margin-bottom:6px;}
+  .summary-title svg{stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+  .summary-value{font-size:24px;font-weight:700;}
+  .summary-value.highlight{color:var(--warning);text-shadow:0 0 18px rgba(245,158,11,.45);}
+  .summary-value.total{color:var(--c-sky);text-shadow:0 0 18px rgba(56,189,248,.45);}
+
+  .section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding:13px 14px;}
+  .section-header > *{position:relative;z-index:1;}
+  .section-title{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px;color:var(--text);}
+  .section-title svg{stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;}
+  .header-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;}
+  .btn-export,.btn-reset,.btn-cleanup,.btn-zip{padding:10px 13px;border-radius:13px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;border:1px solid rgba(255,255,255,.25);transition:transform .16s,opacity .2s;white-space:nowrap;}
+  .btn-export svg,.btn-reset svg,.btn-cleanup svg,.btn-zip svg{stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;}
+  .btn-export{background:linear-gradient(150deg,#22c55e,#12a150 60%,#0b7038);color:#fff;box-shadow:0 8px 18px rgba(18,161,80,.45), inset 0 1px 0 rgba(255,255,255,.45);}
+  .btn-zip{background:linear-gradient(150deg,#fbbf24,#d97706 60%,#92400e);color:#fff;box-shadow:0 8px 18px rgba(217,119,6,.45), inset 0 1px 0 rgba(255,255,255,.45);}
+  .btn-reset{background:linear-gradient(150deg,#fb7185,#e11d48 60%,#9f1239);color:#fff;box-shadow:0 8px 18px rgba(225,29,72,.42), inset 0 1px 0 rgba(255,255,255,.4);}
+  .btn-cleanup{background:linear-gradient(150deg,#94a3b8,#475569 60%,#1e293b);color:#fff;box-shadow:0 8px 18px rgba(30,41,59,.4), inset 0 1px 0 rgba(255,255,255,.4);}
+  .btn-export:active,.btn-reset:active,.btn-cleanup:active,.btn-zip:active{transform:scale(.92);}
+
+  .record-list{display:flex;flex-direction:column;gap:13px;padding-bottom:8px;}
+  .record-item{padding:16px 16px 14px;display:flex;flex-direction:column;gap:12px;animation:popIn .38s cubic-bezier(.2,.9,.3,1.2);}
+  .record-item > *{position:relative;z-index:1;}
+  .record-item::after{content:'';position:absolute;left:0;top:0;bottom:0;width:6px;z-index:2;}
+  .record-item.pending::after{background:linear-gradient(180deg,#fcd34d,#f59e0b);box-shadow:0 0 16px rgba(245,158,11,.75);}
+  .record-item.cleared::after{background:linear-gradient(180deg,#6ee7b7,#10b981);box-shadow:0 0 16px rgba(16,185,129,.7);}
+  .record-item.cleared{opacity:.62;}
+  .record-item.pending .amount{color:var(--warning);}
+  .record-item.cleared .amount{color:var(--text-muted);}
+
+  .record-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding-left:6px;}
+  .tags{display:flex;flex-wrap:wrap;gap:6px;flex:1;}
+  .amount{font-size:23px;font-weight:700;white-space:nowrap;flex-shrink:0;line-height:1;margin-top:3px;}
+
+  .tag{padding:4px 9px;border-radius:9px;font-size:11px;font-weight:700;display:inline-flex;align-items:center;gap:4px;border:1px solid;box-shadow:inset 0 1px 0 rgba(255,255,255,.22);}
+  .tag svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;}
+  .tag-pump{background:rgba(148,163,184,.18);color:var(--text-soft);border-color:rgba(148,163,184,.4);}
+  .tag-gas95{background:rgba(249,115,22,.20);color:#fb923c;border-color:rgba(249,115,22,.45);}
+  .tag-e20{background:rgba(16,185,129,.20);color:#34d399;border-color:rgba(16,185,129,.45);}
+  .tag-b7{background:rgba(59,130,246,.20);color:#60a5fa;border-color:rgba(59,130,246,.45);}
+  .tag-card{background:rgba(139,92,246,.20);color:#a78bfa;border-color:rgba(139,92,246,.45);}
+  .tag-phone{background:rgba(14,165,233,.20);color:#38bdf8;border-color:rgba(14,165,233,.45);}
+  .tag-slip{background:rgba(234,179,8,.20);color:#facc15;border-color:rgba(234,179,8,.45);}
+  body.light-mode .tag-gas95{color:#c2410c}
+  body.light-mode .tag-e20{color:#047857}
+  body.light-mode .tag-b7{color:#1d4ed8}
+  body.light-mode .tag-card{color:#6d28d9}
+  body.light-mode .tag-phone{color:#0369a1}
+  body.light-mode .tag-slip{color:#a16207}
+
+  .record-bottom{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--text-muted);border-top:1px dashed var(--glass-brd);padding-top:12px;margin-left:6px;}
+  .record-time{display:flex;align-items:center;gap:6px;font-weight:600;}
+  .record-time svg{stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;}
+  .record-actions{display:flex;gap:7px;align-items:center;}
+  .r-btn{width:38px;height:38px;border-radius:12px;border:1px solid var(--glass-brd);cursor:pointer;display:flex;align-items:center;justify-content:center;background:var(--glass-2);color:var(--text-muted);box-shadow:var(--inner-light);transition:transform .16s;}
+  .r-btn svg{stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;}
+  .r-btn:active{transform:scale(.88);}
+  .r-btn.slip{color:#facc15;}
+  .r-btn.line{width:auto;padding:0 13px;font-size:12px;font-weight:600;gap:6px;background:linear-gradient(150deg,#34d399,#059669);color:#fff;border-color:rgba(255,255,255,.3);box-shadow:0 6px 14px rgba(5,150,105,.4), inset 0 1px 0 rgba(255,255,255,.4);}
+  .r-btn.line.sent{background:var(--glass-2);color:var(--text-muted);box-shadow:var(--inner-light);}
+  .r-btn.status.pending{background:linear-gradient(150deg,#fbbf24,#d97706);color:#fff;border-color:rgba(255,255,255,.3);box-shadow:0 6px 14px rgba(217,119,6,.4), inset 0 1px 0 rgba(255,255,255,.4);}
+  .r-btn.status.cleared{background:linear-gradient(150deg,#34d399,#059669);color:#fff;border-color:rgba(255,255,255,.3);box-shadow:0 6px 14px rgba(5,150,105,.4), inset 0 1px 0 rgba(255,255,255,.4);}
+  .r-btn.del:active{background:linear-gradient(150deg,#f87171,#dc2626);color:#fff;}
+
+  .empty-state{text-align:center;padding:52px 20px;color:var(--text-muted);}
+  .empty-state svg{width:56px;height:56px;stroke:currentColor;fill:none;stroke-width:1.5;opacity:.5;margin-bottom:12px;}
+  .empty-state p{font-size:14px;font-weight:500;}
+
+  /* ============================================================
+     BOTTOM NAV (เตี้ยลง + อนิเมชัน)
+     ============================================================ */
+  .bottom-nav{
+    position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+    width:100%;max-width:520px;height:64px;z-index:1000;
+    display:flex;justify-content:space-around;align-items:stretch;
+    background:var(--glass);
+    -webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);
+    border-top:1px solid var(--glass-brd-str);
+    box-shadow:0 -10px 30px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.3);
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  .nav-btn{
+    flex:1;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+    color:var(--text-muted);background:none;border:none;font-size:11.5px;font-weight:600;cursor:pointer;
+    position:relative;transition:color .3s;
+  }
+  .nav-btn svg{width:23px;height:23px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .35s cubic-bezier(.2,.9,.3,1.5);}
+  .nav-btn.active{color:#eaf6ff;text-shadow:0 1px 6px rgba(0,0,0,.35);}
+  body.light-mode .nav-btn.active{color:#06314f;text-shadow:0 1px 4px rgba(255,255,255,.7);}
+  /* เขตสว่างครึ่งซีก เลื่อนตามหน้าที่เลือก */
+  .nav-zone{
+    position:absolute;top:0;left:0;width:50%;height:100%;z-index:0;pointer-events:none;
+    background:linear-gradient(180deg,rgba(125,211,252,.40),rgba(37,99,235,.30) 55%,rgba(37,99,235,.14));
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.55), inset 0 -3px 14px rgba(0,0,0,.25), 0 0 26px rgba(56,189,248,.35);
+    transition:transform .42s cubic-bezier(.2,.9,.3,1.25), background .42s ease;
+  }
+  .nav-zone::after{content:'';position:absolute;top:0;bottom:0;right:0;width:1px;background:linear-gradient(180deg,rgba(255,255,255,.7),rgba(255,255,255,0));}
+  body.history-mode .nav-zone{
+    transform:translateX(100%);
+    background:linear-gradient(180deg,rgba(196,181,253,.42),rgba(124,58,237,.30) 55%,rgba(124,58,237,.14));
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.55), inset 0 -3px 14px rgba(0,0,0,.25), 0 0 26px rgba(167,139,250,.38);
+  }
+  body.history-mode .nav-zone::after{right:auto;left:0;}
+  body.light-mode .nav-zone{background:linear-gradient(180deg,rgba(125,211,252,.85),rgba(56,189,248,.55) 60%,rgba(56,189,248,.25));}
+  body.light-mode.history-mode .nav-zone{background:linear-gradient(180deg,rgba(196,181,253,.9),rgba(167,139,250,.55) 60%,rgba(167,139,250,.25));}
+  .nav-btn.active svg{transform:translateY(-3px) scale(1.08);}
+  .nav-btn:active svg{transform:scale(.85);}
+  .nav-badge-count{
+    position:absolute;top:-6px;right:-10px;background:linear-gradient(150deg,#fb7185,#e11d48);color:#fff;
+    font-size:10px;font-weight:700;min-width:19px;height:19px;border-radius:10px;
+    display:flex;align-items:center;justify-content:center;padding:0 5px;
+    border:2px solid rgba(255,255,255,.55);box-shadow:0 4px 10px rgba(225,29,72,.6);
+    opacity:0;transform:scale(0);transition:.3s cubic-bezier(.2,.9,.3,1.6);
+  }
+  .nav-badge-count.show{opacity:1;transform:scale(1);}
+
+  /* ============================================================
+     MODALS
+     ============================================================ */
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(3,7,18,.65);
+    -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+    display:none;align-items:center;justify-content:center;z-index:2000;padding:14px;
+    opacity:0;transition:opacity .3s ease;
+  }
+  .modal-overlay.active{display:flex;opacity:1;}
+  .modal-card{
+    position:relative;width:100%;max-width:370px;border-radius:26px;overflow:hidden;text-align:center;
+    background:var(--glass-2);
+    -webkit-backdrop-filter:blur(24px) saturate(190%);backdrop-filter:blur(24px) saturate(190%);
+    border:1px solid var(--glass-brd-str);
+    box-shadow:0 30px 60px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.4);
+    transform:scale(.88) translateY(14px);transition:transform .34s cubic-bezier(.2,.9,.3,1.3);
+  }
+  .modal-card::before{content:'';position:absolute;inset:0;background:var(--sheen);pointer-events:none;z-index:0;}
+  .modal-overlay.active .modal-card{transform:scale(1) translateY(0);}
+  .modal-card > *{position:relative;z-index:1;}
+
+  /* โมดัลกรอกตัวเลขทั่วไปอยู่กึ่งกลางจอ (ไม่ต้องกันที่ให้คีย์บอร์ดอีกต่อไป) */
+  .input-modal-body{padding:28px 26px 26px;}
+  .input-modal-body h3{color:var(--text);margin-bottom:6px;font-size:19px;font-weight:700;}
+  .input-modal-body .hint{font-size:12.5px;color:var(--text-muted);margin-bottom:18px;}
+  .modal-icon{width:54px;height:54px;border-radius:18px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:inset 0 2px 0 rgba(255,255,255,.55);}
+  .modal-icon svg{width:26px;height:26px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;}
+  .modal-icon.sky{background:linear-gradient(150deg,#38bdf8,#0284c7);box-shadow:0 10px 24px rgba(2,132,199,.5), inset 0 2px 0 rgba(255,255,255,.55);}
+  .modal-icon.violet{background:linear-gradient(150deg,#a78bfa,#7c3aed);box-shadow:0 10px 24px rgba(124,58,237,.5), inset 0 2px 0 rgba(255,255,255,.55);}
+
+  /* ---------- คีย์แพดตัวเลขในตัวแอป (ไม่พึ่งคีย์บอร์ดของเครื่อง) ---------- */
+  .numpad-display{
+    width:100%;min-height:58px;display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(180deg,rgba(2,8,20,.5),rgba(2,8,20,.26));
+    border:2px solid var(--glass-brd);border-radius:16px;
+    font-size:23px;font-weight:700;letter-spacing:2px;color:#38bdf8;
+    box-shadow:inset 0 3px 9px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.12);
+    margin-bottom:8px;transition:border-color .2s;word-break:break-all;padding:6px 10px;
+  }
+  .numpad-display-card{color:#a78bfa;font-size:19px;letter-spacing:1.5px;}
+  .numpad-display.placeholder{color:var(--text-muted);opacity:.5;font-weight:600;}
+  .numpad-display.shake{animation:npShake .32s;}
+  @keyframes npShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+  body.light-mode .numpad-display{
+    background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(230,239,250,.9));
+    box-shadow:inset 0 3px 8px rgba(30,58,110,.13), inset 0 1px 0 rgba(255,255,255,1);
+  }
+  .numpad-counter{text-align:center;font-size:11.5px;font-weight:600;color:var(--text-muted);margin-bottom:16px;}
+
+  .btn-scan-full{
+    width:100%;height:48px;margin-bottom:16px;border-radius:14px;cursor:pointer;
+    background:linear-gradient(150deg,#a78bfa,#7c3aed);color:#fff;border:1px solid rgba(255,255,255,.35);
+    display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px;font-weight:600;
+    box-shadow:0 8px 18px rgba(124,58,237,.4), inset 0 1px 0 rgba(255,255,255,.5);transition:transform .16s;
+  }
+  .btn-scan-full svg{stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+  .btn-scan-full:active{transform:scale(.96);}
+
+  .numpad-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;}
+  .numpad-key{
+    height:56px;border-radius:16px;font-size:21px;font-weight:700;cursor:pointer;
+    background:var(--glass-2);border:1px solid var(--glass-brd);color:var(--text);
+    box-shadow:var(--shadow-md), var(--inner-light);position:relative;overflow:hidden;
+    transition:transform .12s cubic-bezier(.2,.8,.25,1), box-shadow .2s;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .numpad-key::after{content:'';position:absolute;inset:0;background:var(--sheen);pointer-events:none;}
+  .numpad-key:active{transform:scale(.9);box-shadow:0 4px 10px rgba(0,0,0,.3);}
+  .numpad-key-fn{color:var(--text-muted);font-size:14px;font-weight:600;}
+  .numpad-key-fn svg{stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;position:relative;z-index:1;}
+
+  .cleanup-chips{display:flex;gap:8px;}
+  .cleanup-chip{
+    flex:1;padding:12px 0;border-radius:14px;font-size:13px;font-weight:600;cursor:pointer;
+    background:var(--glass-2);border:1px solid var(--glass-brd);color:var(--text-soft);
+    box-shadow:var(--inner-light);transition:transform .16s,background .2s,color .2s;
+  }
+  .cleanup-chip:active{transform:scale(.94);}
+  .cleanup-chip.active{
+    background:linear-gradient(150deg,#fb7185,#e11d48);color:#fff;border-color:rgba(255,255,255,.4);
+    box-shadow:0 8px 18px rgba(225,29,72,.4), inset 0 1px 0 rgba(255,255,255,.5);
+  }
+  .cleanup-preview{
+    font-size:13px;font-weight:600;color:var(--warning);background:rgba(245,158,11,.12);
+    border:1px solid rgba(245,158,11,.35);border-radius:12px;padding:10px 14px;margin-bottom:20px;
+  }
+  .cleanup-date-input{
+    width:100%;height:52px;font-size:16px;margin-bottom:14px;padding:0 14px;
+    background:linear-gradient(180deg,rgba(2,8,20,.5),rgba(2,8,20,.26));
+    border:2px solid var(--glass-brd);border-radius:16px;color:var(--text);outline:none;
+    box-shadow:inset 0 3px 9px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.12);
+  }
+  body.light-mode .cleanup-date-input{
+    background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(230,239,250,.9));color:#0f172a;
+    box-shadow:inset 0 3px 8px rgba(30,58,110,.13), inset 0 1px 0 rgba(255,255,255,1);
+  }
+  .btn-modal-close,.btn-modal-camera,.btn-modal-save{
+    position:relative;overflow:hidden;height:54px;border-radius:17px;font-weight:700;cursor:pointer;
+    border:1px solid rgba(255,255,255,.28);font-size:15.5px;color:#fff;
+    display:flex;align-items:center;justify-content:center;gap:6px;transition:transform .18s;
+  }
+  .btn-modal-close{background:var(--glass);color:var(--text);border-color:var(--glass-brd);box-shadow:var(--inner-light);}
+  .btn-modal-camera{background:linear-gradient(150deg,#38bdf8,#0284c7);box-shadow:0 10px 22px rgba(2,132,199,.45), inset 0 2px 0 rgba(255,255,255,.5);}
+  .btn-modal-save{background:linear-gradient(150deg,#34d399,#059669);box-shadow:0 10px 22px rgba(5,150,105,.45), inset 0 2px 0 rgba(255,255,255,.5);}
+  .btn-modal-close:active,.btn-modal-camera:active,.btn-modal-save:active{transform:scale(.94);}
+  .btn-modal-camera svg,.btn-modal-save svg{stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;}
+
+  /* Scanner */
+  #liveScannerModal{z-index:2500;}
+  #liveScannerModal .modal-card{max-width:420px;background:rgba(6,10,20,.92);border-color:rgba(139,92,246,.6);}
+  .scanner-header{padding:16px 18px;font-size:15px;font-weight:700;color:#fff;display:flex;justify-content:space-between;align-items:center;background:linear-gradient(150deg,rgba(139,92,246,.4),rgba(30,41,59,.4));}
+  .scanner-header button{background:none;border:none;color:#fff;cursor:pointer;display:flex;padding:4px;}
+  .scanner-header svg{stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;}
+  .scanner-body{position:relative;width:100%;aspect-ratio:4/3;background:#000;overflow:hidden;}
+  .scanner-video{width:100%;height:100%;object-fit:cover;}
+  .scanner-overlay-box{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:85%;height:55%;border:3px solid rgba(167,139,250,.95);border-radius:18px;box-shadow:0 0 0 9999px rgba(0,0,0,.7), 0 0 30px rgba(167,139,250,.6) inset;}
+  .scanner-laser{position:absolute;width:100%;height:3px;background:#c4b5fd;box-shadow:0 0 18px #a78bfa;top:0;animation:scanLaser 2s infinite ease-in-out;}
+  @keyframes scanLaser{0%{top:0}50%{top:100%}100%{top:0}}
+  .scanner-status{position:absolute;left:0;right:0;bottom:10px;text-align:center;font-size:12.5px;font-weight:600;color:#e9d5ff;text-shadow:0 1px 4px rgba(0,0,0,.9);padding:0 14px;}
+  .scanner-footer{padding:16px;}
+  .btn-close-scanner{width:100%;padding:14px 0;border-radius:16px;border:1px solid rgba(255,255,255,.25);background:linear-gradient(150deg,#475569,#1e293b);color:#fff;font-size:15px;font-weight:700;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.3);}
+
+  /* QR Modal */
+  #qrModal .modal-card{max-width:500px;height:94dvh;max-height:860px;display:flex;flex-direction:column;}
+  .qr-card-header{background:linear-gradient(135deg,#0ea5e9,#2563eb 50%,#7c3aed);color:#fff;padding:18px 20px;font-size:17px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:9px;text-shadow:0 1px 4px rgba(0,0,0,.3);}
+  .qr-card-header svg{stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;}
+  .store-details{padding:12px 16px;border-top:1px solid var(--glass-brd);font-size:12.5px;color:var(--text-muted);text-align:center;}
+  .store-name{font-weight:700;font-size:14px;color:var(--text);margin-bottom:3px;}
+  .qr-info-bar{display:flex;justify-content:space-around;align-items:center;padding:10px 10px;font-size:14px;border-bottom:1px dashed var(--glass-brd);color:var(--text);background:rgba(255,255,255,.05);gap:8px;}
+  .qr-info-bar:not(.after-slip) .info-cell{
+    display:flex;align-items:baseline;justify-content:center;gap:6px;white-space:nowrap;
+  }
+  .qr-info-bar:not(.after-slip) .info-cell span{color:var(--text);font-weight:600;font-size:14px;}
+  .qr-info-bar:not(.after-slip) .info-cell.pump b{color:#0ea5e9 !important;font-size:18px;font-weight:800;}
+  .qr-info-bar:not(.after-slip) .info-cell.oil.g95 b{color:#f97316 !important;font-size:18px;font-weight:800;}
+  .qr-info-bar:not(.after-slip) .info-cell.oil.e20 b{color:#10b981 !important;font-size:18px;font-weight:800;}
+  .qr-info-bar:not(.after-slip) .info-cell.oil.b7 b{color:#3b82f6 !important;font-size:18px;font-weight:800;}
+  .qr-info-bar.after-slip{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:stretch;}
+  .info-cell{text-align:center;padding:4px 6px;}
+  .qr-info-bar.after-slip .info-cell{
+    border-radius:12px;padding:8px 6px;display:flex;flex-direction:column;justify-content:center;min-height:56px;
+  }
+  .qr-info-bar.after-slip .info-cell span{font-size:11px;opacity:.9;color:#fff;}
+  .qr-info-bar.after-slip .info-cell b{font-size:22px;line-height:1.15;color:#fff !important;}
+  .qr-info-bar.after-slip .info-cell.pump{background:#38bdf8;}
+  .qr-info-bar.after-slip .info-cell.oil.g95{background:#f97316;}
+  .qr-info-bar.after-slip .info-cell.oil.e20{background:#10b981;}
+  .qr-info-bar.after-slip .info-cell.oil.b7{background:#3b82f6;}
+  .edit-toggle{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--text-soft);}
+  .edit-toggle .switch{width:40px;height:24px;}
+  .edit-toggle .switch::after{width:18px;height:18px;}
+  .edit-toggle .switch.on::after{transform:translateX(16px);}
+  .qr-edit-picks{display:none;padding:8px 12px 10px;border-bottom:1px dashed var(--glass-brd);}
+  .qr-edit-picks.show{display:block;}
+  .qr-edit-picks .mini-pumps,.qr-edit-picks .mini-oils{margin-top:6px;}
+  .note-box.compact{min-height:44px;margin-top:8px;font-size:12px;display:none;}
+  .note-box.compact.show{display:block;}
+  .qr-post-slip{display:none;align-items:center;gap:8px;}
+  .qr-post-slip.show{display:flex;}
+  .btn-call-cust{
+    width:36px;height:36px;border-radius:50%;border:2px solid #94a3b8;
+    background:#64748b;color:#fff;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;flex:0 0 auto;
+  }
+  .btn-call-cust.on{
+    background:#22c55e;border-color:#86efac;
+    box-shadow:0 0 0 3px rgba(34,197,94,.25);
+  }
+  .btn-call-cust svg{stroke:#fff;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;}
+  .qr-code-box{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#fff;padding:14px;overflow-y:auto;}
+  .qr-img{width:94%;max-width:380px;aspect-ratio:1/1;border-radius:18px;border:5px solid #eef4fb;padding:8px;box-shadow:0 12px 30px rgba(30,58,110,.22);}
+  /* QR ค่อยๆ ขยายจากเล็กไปใหญ่พร้อมหมุนเบาๆ ตอนสร้างเสร็จ */
+  .qr-img.pop-in{animation:qrPopIn .55s cubic-bezier(.2,.85,.3,1.3);}
+  @keyframes qrPopIn{
+    0%{opacity:0;transform:scale(.15) rotate(-8deg);}
+    60%{opacity:1;transform:scale(1.06) rotate(1deg);}
+    100%{opacity:1;transform:scale(1) rotate(0);}
+  }
+  .qr-price-display{margin-top:14px;font-size:36px;font-weight:700;color:#0284c7;}
+  .qr-card-footer{padding:14px;display:flex;gap:10px;border-top:1px solid var(--glass-brd);background:var(--glass);}
+
+  /* Loading */
+  .loading-wrapper{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;height:100%;}
+  .wave-spinner{display:flex;justify-content:center;align-items:center;gap:8px;height:62px;margin-bottom:14px;}
+  .wave-spinner div{width:9px;height:36px;border-radius:7px;animation:wavePulse 1s ease-in-out infinite;}
+  .wave-spinner div:nth-child(1){animation-delay:-.45s;background:linear-gradient(180deg,#7dd3fc,#0284c7);}
+  .wave-spinner div:nth-child(2){animation-delay:-.3s;background:linear-gradient(180deg,#6ee7b7,#059669);}
+  .wave-spinner div:nth-child(3){animation-delay:-.15s;background:linear-gradient(180deg,#c4b5fd,#7c3aed);}
+  .wave-spinner div:nth-child(4){animation-delay:0s;background:linear-gradient(180deg,#fcd34d,#f59e0b);}
+  @keyframes wavePulse{0%,100%{transform:scaleY(.45);opacity:.45}50%{transform:scaleY(1.35);opacity:1}}
+  .loading-text{font-size:15px;font-weight:600;color:#64748b;letter-spacing:.3px;}
+  .loading-bar{width:150px;height:6px;border-radius:4px;margin-top:14px;overflow:hidden;background:rgba(148,163,184,.3);}
+  .loading-bar i{display:block;height:100%;width:40%;border-radius:4px;background:linear-gradient(90deg,#38bdf8,#8b5cf6,#38bdf8);background-size:200% 100%;animation:shimmer 1.1s linear infinite;}
+
+  .qr-content{display:none;flex-direction:column;align-items:center;width:100%;animation:fadeIn .45s ease-out;}
+  .slip-preview-container{margin-top:6px;width:100%;display:none;text-align:center;}
+  .slip-preview-img{width:100%;max-width:100%;max-height:min(44dvh,380px);object-fit:contain;border-radius:14px;border:4px solid #10b981;box-shadow:0 10px 26px rgba(16,185,129,.3);}
+  .slip-price-display{margin-top:8px;font-size:27px;font-weight:700;color:#10b981;}
+  .slip-ok{font-size:14px;color:#10b981;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:9px;}
+  .slip-edit{width:100%;margin-top:10px;text-align:left;}
+  .slip-edit label{display:block;font-size:11px;font-weight:600;color:#64748b;margin:8px 0 6px;}
+  .mini-pumps,.mini-oils{display:flex;flex-wrap:wrap;gap:6px;}
+  .mini-pumps button,.mini-oils button,.extra-add{
+    height:34px;min-width:36px;padding:0 10px;border:0;border-radius:10px;cursor:pointer;
+    background:#e2e8f0;color:#334155;font-weight:700;font-size:13px;
+  }
+  .mini-pumps button.on{background:#0ea5e9;color:#fff;}
+  .mini-oils button.on.g95{background:#f97316;color:#fff;}
+  .mini-oils button.on.e20{background:#10b981;color:#fff;}
+  .mini-oils button.on.b7{background:#3b82f6;color:#fff;}
+  .note-box{
+    width:100%;min-height:64px;border-radius:12px;border:1px solid #cbd5e1;
+    padding:10px 12px;font-size:13px;font-family:inherit;resize:vertical;color:#0f172a;
+  }
+  .extra-row{display:flex;gap:6px;align-items:center;margin-top:6px;flex-wrap:wrap;}
+  .extra-list{display:flex;flex-direction:column;gap:6px;margin-top:8px;}
+  .extra-item{background:#f1f5f9;border-radius:10px;padding:8px 10px;font-size:12px;color:#334155;display:flex;justify-content:space-between;gap:8px;}
+  .extra-item button{border:0;background:transparent;color:#ef4444;font-weight:700;cursor:pointer;}
+  .slip-ok svg{stroke:currentColor;fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;}
+
+  /* Success overlay */
+  .success-overlay{position:fixed;inset:0;background:rgba(3,7,18,.86);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:3000;opacity:0;visibility:hidden;transition:.3s;}
+  .success-overlay.active{opacity:1;visibility:visible;}
+  .success-check{position:relative;width:96px;height:96px;border-radius:50%;background:linear-gradient(150deg,#6ee7b7,#10b981 55%,#047857);display:flex;align-items:center;justify-content:center;color:#fff;transform:scale(0);margin-bottom:18px;box-shadow:0 0 50px rgba(16,185,129,.7), inset 0 3px 0 rgba(255,255,255,.6), inset 0 -4px 12px rgba(0,0,0,.25);}
+  .success-overlay.active .success-check{animation:popCheck .55s cubic-bezier(.2,.9,.3,1.6) forwards;}
+  .success-check span{position:absolute;inset:0;border-radius:50%;border:3px solid rgba(52,211,153,.7);}
+  .success-overlay.active .success-check span{animation:ripple 1.1s ease-out infinite;}
+  .success-check svg{width:50px;height:50px;stroke:#fff;fill:none;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;}
+  .success-check svg polyline{stroke-dasharray:36;stroke-dashoffset:36;}
+  .success-overlay.active .success-check svg polyline{animation:drawCheck .45s .25s cubic-bezier(.4,0,.2,1) forwards;}
+  .success-overlay h3{color:#f8fafc;font-weight:700;font-size:21px;}
+  .success-overlay p{color:#94a3b8;font-size:13px;margin-top:5px;}
+
+  /* Toast */
+  .toast{position:fixed;bottom:86px;left:50%;transform:translateX(-50%) translateY(90px);background:rgba(30,41,59,.92);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);color:#fff;padding:13px 22px;border-radius:30px;font-size:13.5px;font-weight:500;opacity:0;transition:.42s cubic-bezier(.2,.9,.3,1.3);z-index:9999;box-shadow:0 14px 32px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.28);border:1px solid rgba(255,255,255,.18);pointer-events:none;max-width:88%;text-align:center;}
+  .toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+  
+
+  /* ===== ส่วนเสริมหลังคืนธีมกระจก ===== */
+  .amount-input{
+    display:flex;align-items:center;justify-content:center;
+    line-height:1;
+    padding-top:0;padding-bottom:0;
+  }
+  .amount-tap{cursor:pointer;user-select:none;-webkit-user-select:none;}
+  .amount-tap.placeholder{color:var(--text-muted)!important;opacity:.55;font-weight:600!important;}
+
+  .modal-icon.amount{background:linear-gradient(150deg,#38bdf8,#2563eb);box-shadow:0 10px 24px rgba(37,99,235,.5), inset 0 2px 0 rgba(255,255,255,.55);}
+
+  /* คีย์แพดเต็มจอ แต่แผงปุ่มกะทัดรัดอยู่ช่วงล่าง เอื้อมถึง */
+  .modal-overlay.pad-full{padding:0;align-items:stretch;justify-content:stretch;}
+  .modal-overlay.pad-full .modal-card{
+    width:100%;max-width:520px;margin:0 auto;
+    height:100%;height:100dvh;max-height:none;
+    border-radius:0;display:flex;flex-direction:column;
+    transform:none;text-align:center;
+    background:linear-gradient(170deg,var(--bg-1),var(--bg-2));
+    -webkit-backdrop-filter:none;backdrop-filter:none;
+  }
+  .pad-sheet{
+    flex:1;min-height:0;display:flex;flex-direction:column;justify-content:flex-end;
+    padding:calc(10px + env(safe-area-inset-top)) 16px calc(14px + env(safe-area-inset-bottom));
+  }
+  .pad-sheet-head{flex:0 0 auto;margin-bottom:6px;}
+  .pad-sheet-head .modal-icon{width:42px;height:42px;border-radius:14px;margin:0 auto 8px;}
+  .pad-sheet-head h3{margin-bottom:2px;font-size:17px;}
+  .pad-sheet-head .hint{margin-bottom:8px;font-size:12px;}
+  .pad-sheet{justify-content:flex-start;}
+  .pad-sheet-head{margin-top:4px;}
+  .pad-sheet .numpad-display{
+    min-height:86px;height:86px;font-size:clamp(34px,8.5vw,46px);letter-spacing:1.6px;margin:6px 0 8px;
+    display:flex;align-items:center;justify-content:center;line-height:1;
+  }
+  .pad-sheet .numpad-display-card{font-size:clamp(22px,6vw,32px);letter-spacing:1.2px;}
+  .voice-row{display:none;gap:8px;margin:0 0 10px;justify-content:center;align-items:center;}
+  .voice-row.show{display:flex;}
+  .voice-ico{
+    width:40px;height:40px;border-radius:50%;cursor:pointer;
+    background:var(--glass-2);border:1px solid var(--glass-brd);color:var(--text-soft);
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:var(--inner-light);
+  }
+  .voice-ico svg{stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+  .voice-ico.active{
+    color:#fff;border-color:#bae6fd;
+    background:linear-gradient(140deg,#38bdf8,#0284c7);
+    box-shadow:0 6px 14px rgba(14,165,233,.4);
+  }
+  .voice-ico.mute-off{opacity:.45;}
+  .pad-sheet .numpad-counter{margin-bottom:8px;}
+  .pad-sheet .btn-scan-full{height:42px;margin-bottom:8px;flex:0 0 auto;}
+  .pad-sheet{
+    padding-left:12px;padding-right:12px;
+  }
+  .pad-sheet .numpad-grid{
+    flex:0 0 auto;
+    height:min(40dvh, 300px);
+    display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(4,1fr);
+    gap:9px;margin:8px 0 12px;
+  }
+  .pad-sheet .numpad-key{
+    height:100%;min-height:0;max-height:68px;
+    border-radius:16px;font-size:23px;font-weight:700;
+    touch-action:manipulation;
+  }
+  .pad-sheet .numpad-key:active{transform:scale(.94);}
+  .pad-sheet .numpad-key-fn{font-size:13px;}
+  .pad-sheet .action-btn-row{flex:0 0 auto;margin-top:0;}
+  .pad-quick{display:flex;gap:8px;margin:0 0 8px;flex:0 0 auto;}
+  .pad-quick button{
+    flex:1;height:36px;border-radius:12px;font-size:12px;font-weight:600;cursor:pointer;
+    background:var(--glass-2);border:1px solid var(--glass-brd);color:var(--text-soft);
+    box-shadow:var(--inner-light);
+  }
+  .pad-quick button:active{transform:scale(.94);color:#38bdf8;}
+
+  .cleanup-foot{display:flex;justify-content:center;padding:22px 8px 8px;}
+  .btn-cleanup-mini{
+    background:transparent;border:none;color:var(--text-muted);
+    font-size:11px;font-weight:500;cursor:pointer;
+    opacity:.42;padding:8px 12px;display:inline-flex;align-items:center;gap:5px;
+  }
+  .btn-cleanup-mini svg{stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+  .btn-cleanup-mini:active{opacity:.85;}
+
+  /* ไม่เล่นอนิเมชันตอนโชว์ QR */
+  .qr-img.pop-in{animation:none;}
+  .qr-content{animation:none;}
+
+  /* Loading — จุดเด้งไล่สี */
+  .wave-spinner,.load-orbit{display:none;}
+  .load-bounce{display:flex;align-items:flex-end;justify-content:center;gap:8px;height:36px;margin-bottom:8px;}
+  .load-bounce i{width:11px;height:11px;border-radius:50%;display:block;animation:loadBounce .72s ease-in-out infinite;}
+  .load-bounce i:nth-child(1){background:#38bdf8;animation-delay:0s}
+  .load-bounce i:nth-child(2){background:#8b5cf6;animation-delay:.12s}
+  .load-bounce i:nth-child(3){background:#34d399;animation-delay:.24s}
+  .load-bounce i:nth-child(4){background:#f59e0b;animation-delay:.36s}
+  @keyframes loadBounce{
+    0%,80%,100%{transform:translateY(0) scale(.9);opacity:.35}
+    40%{transform:translateY(-12px) scale(1.15);opacity:1}
+  }
+
+  .settings-row{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    text-align:left;padding:12px 0;border-bottom:1px solid var(--glass-brd);
+  }
+  .settings-row:last-child{border-bottom:0;}
+  .settings-row h4{font-size:14px;font-weight:700;color:var(--text);}
+  .settings-row p{font-size:12px;color:var(--text-muted);margin-top:3px;}
+  .switch{
+    position:relative;width:48px;height:28px;flex:0 0 auto;border-radius:999px;
+    background:#475569;border:0;cursor:pointer;
+  }
+  .switch::after{
+    content:'';position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;
+    background:#fff;transition:transform .2s;
+  }
+  .switch.on{background:#10b981;}
+  .switch.on::after{transform:translateX(20px);}
+  .storage-box{
+    text-align:left;margin:8px 0 14px;padding:12px 14px;border-radius:14px;
+    background:var(--glass-2);border:1px solid var(--glass-brd);font-size:13px;color:var(--text-soft);
+  }
+  .storage-box b{color:var(--c-sky);font-size:16px;}
+  .loading-bar{width:160px;height:5px;border-radius:99px;margin-top:10px;overflow:hidden;background:rgba(148,163,184,.28);}
+  .loading-bar i{
+    display:block;height:100%;width:38%;border-radius:99px;
+    background:linear-gradient(90deg,#38bdf8,#8b5cf6,#34d399);
+    background-size:200% 100%;
+    animation:loadSlide 1s ease-in-out infinite;
+  }
+  @keyframes loadSlide{
+    0%{transform:translateX(-70%)}
+    100%{transform:translateX(280%)}
+  }
+</style>
+</head>
+<body>
+
+<div class="aurora"><i></i><i></i><i></i></div>
+
+<!-- ===== แจ้งเตือนบันทึกสำเร็จ (ไอคอนถูก + อนิเมชันวาดเส้น) ===== -->
+<div id="successOverlay" class="success-overlay">
+  <div class="success-check">
+    <span></span>
+    <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+  </div>
+  <h3>บันทึกเรียบร้อย</h3>
+  <p>เพิ่มรายการลงในระบบแล้ว</p>
+</div>
+
+<div class="container">
+
+  <!-- ================= VIEW 1 : บันทึกยอด ================= -->
+  <div id="viewHome" class="view-section active">
+
+    <div class="header">
+      <div class="header-info">
+        <div class="header-badge">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2"/><path d="M12 18h.01"/></svg>
+          ถุงเงิน &amp; QR สแกนจ่าย
+        </div>
+        <h1>บันทึกยอดโอน</h1>
+        <p>หจก. ทุ่งยางแดงเอ็นเตอร์ไพรส์</p>
+      </div>
+      <div class="header-tools">
+        <button class="btn-theme" id="settingsBtn" onclick="openSettingsModal()" title="ตั้งค่า">
+          <svg viewBox="0 0 24 24" width="22" height="22"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9c.3.6.9 1 1.5 1.1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+        </button>
+        <button class="btn-theme" onclick="toggleTheme()" id="themeBtn" title="สลับโหมดกลางวัน/กลางคืน"></button>
+      </div>
+    </div>
+
+    <div class="card glass">
+      <form id="transferForm" onsubmit="event.preventDefault(); triggerQR();">
+
+        <div class="section-label">
+          <span><svg width="17" height="17" viewBox="0 0 24 24"><path d="M3 22v-8a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v8"/><path d="M14 13h2a2 2 0 0 1 2 2v2a2 2 0 0 0 4 0v-7a3 3 0 0 0-3-3h-1"/><path d="M5 12V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v8"/></svg> เลขที่หน้าจ่าย</span>
+          <div class="action-buttons-right">
+            <button type="button" class="btn-chip btn-card-scan" id="btnCardIcon" onclick="openCardModal()" title="บัตรสมาชิก (16 หลัก)">
+              <svg width="22" height="22" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M7 9v6"/><path d="M11 9v6"/><path d="M15 9v6"/><path d="M18 9v6"/></svg>
+              <div class="status-dot"></div>
+            </button>
+            <button type="button" class="btn-chip btn-phone" id="btnPhoneIcon" onclick="openPhoneModal()" title="เบอร์โทรศัพท์ (10 หลัก)">
+              <svg width="20" height="20" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              <div class="status-dot"></div>
+            </button>
+          </div>
+        </div>
+
+        <div class="grid-pumps">
+          <button type="button" class="grid-pump-btn" id="p1" onclick="selectPump(1)">1</button>
+          <button type="button" class="grid-pump-btn" id="p2" onclick="selectPump(2)">2</button>
+          <button type="button" class="grid-pump-btn" id="p3" onclick="selectPump(3)">3</button>
+          <button type="button" class="grid-pump-btn" id="p4" onclick="selectPump(4)">4</button>
+          <button type="button" class="grid-pump-btn" id="p5" onclick="selectPump(5)">5</button>
+          <button type="button" class="grid-pump-btn" id="p6" onclick="selectPump(6)">6</button>
+          <button type="button" class="grid-pump-btn" id="p7" onclick="selectPump(7)">7</button>
+          <button type="button" class="grid-pump-btn" id="p8" onclick="selectPump(8)">8</button>
+        </div>
+
+        <div class="section-label">
+          <span><svg width="17" height="17" viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg> ชนิดน้ำมัน</span>
+        </div>
+
+        <div class="grid-oils">
+          <button type="button" class="grid-oil-btn g95" id="oilG95" onclick="selectOil('G95')">G95</button>
+          <button type="button" class="grid-oil-btn e20" id="oilE20" onclick="selectOil('E20')">E20</button>
+          <button type="button" class="grid-oil-btn b7" id="oilB7" onclick="selectOil('B7')">B7</button>
+        </div>
+
+        <div class="section-label">
+          <span><svg width="17" height="17" viewBox="0 0 24 24"><rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg> จำนวนเงิน (บาท)</span>
+        </div>
+
+        <div class="amount-wrapper">
+          <div id="amountInput" class="amount-input amount-tap placeholder" role="button" tabindex="0" onclick="openAmountModal()" aria-label="กรอกจำนวนเงิน">0</div>
+          <button type="button" id="clearBtn" class="btn-clear-input" title="ล้างยอด">
+            <svg width="15" height="15" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+
+        <div class="quick-amount">
+          <button type="button" class="quick-btn" data-add="10">+10</button>
+          <button type="button" class="quick-btn" data-add="50">+50</button>
+          <button type="button" class="quick-btn" data-add="100">+100</button>
+          <button type="button" class="quick-btn" data-add="500">+500</button>
+          <button type="button" class="quick-btn" data-add="1000">+1,000</button>
+        </div>
+
+        <div class="action-btn-row">
+          <button type="button" class="btn-qr-show" onclick="triggerQR()">
+            <svg width="21" height="21" viewBox="0 0 24 24"><rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/><path d="M3 12h.01"/><path d="M12 3h.01"/><path d="M12 16v.01"/><path d="M16 12h1"/><path d="M21 12v.01"/><path d="M12 21v-1"/></svg>
+            <span>สร้าง QR</span>
+          </button>
+          <button type="button" class="btn-submit" onclick="saveRecord()">
+            <svg width="21" height="21" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            <span>บันทึกรายการ</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= VIEW 2 : รายการ ================= -->
+  <div id="viewHistory" class="view-section">
+    <div class="summary-grid">
+      <div class="summary-card glass">
+        <span class="summary-title">
+          <svg width="14" height="14" viewBox="0 0 24 24"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/></svg>
+          ค้างแจ้งแคชเชียร์
+        </span>
+        <span class="summary-value highlight" id="pendingCount">0 รายการ</span>
+      </div>
+      <div class="summary-card glass">
+        <span class="summary-title">
+          <svg width="14" height="14" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>
+          ยอดโอนรวมวันนี้
+        </span>
+        <span class="summary-value total" id="totalAmount">฿0</span>
+      </div>
+    </div>
+
+    <div class="section-header glass">
+      <div class="section-title">
+        <svg width="18" height="18" viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>
+        ประวัติการบันทึก
+      </div>
+      <div class="header-actions">
+        <button class="btn-reset" onclick="resetDayRecords()">
+          <svg width="14" height="14" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 3 3 9 9 9"/></svg>
+          เริ่มใหม่
+        </button>
+        <button class="btn-zip" id="btnZipExport" onclick="exportZipAll()">
+          <svg width="14" height="14" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export
+        </button>
+      </div>
+    </div>
+
+    <div id="recordList" class="record-list"></div>
+  </div>
+
+</div>
+
+<!-- ================= BOTTOM NAV ================= -->
+<nav class="bottom-nav">
+  <div class="nav-zone" id="navZone"></div>
+  <button class="nav-btn active" id="navBtnHome" onclick="switchView('Home')">
+    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    บันทึกยอด
+  </button>
+  <button class="nav-btn" id="navBtnHistory" onclick="switchView('History')">
+    <div style="position:relative;display:flex;">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      <div class="nav-badge-count" id="navBadgeCount">0</div>
+    </div>
+    รายการ
+  </button>
+</nav>
+
+<!-- ================= SCANNER MODAL ================= -->
+<div id="liveScannerModal" class="modal-overlay">
+  <div class="modal-card">
+    <div class="scanner-header">
+      สแกนบาร์โค้ดบัตร 16 หลัก
+      <button onclick="closeLiveScanner()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="scanner-body">
+      <video id="liveCameraVideo" class="scanner-video" playsinline autoplay></video>
+      <div class="scanner-overlay-box"><div class="scanner-laser"></div></div>
+      <div id="scannerStatus" class="scanner-status">กำลังเตรียมกล้อง...</div>
+    </div>
+    <div class="scanner-footer">
+      <button class="btn-close-scanner" onclick="closeLiveScanner()">ยกเลิกกล้องสแกน</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= NUMPAD เต็มจอ (ราคา / เบอร์ / บัตร) ================= -->
+<div id="padModal" class="modal-overlay pad-full">
+  <div class="modal-card">
+    <div class="pad-sheet" id="padModalContent">
+      <div class="pad-sheet-head">
+        <div class="modal-icon sky" id="padIcon">
+          <svg id="padIconSvg" viewBox="0 0 24 24"><rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/></svg>
+        </div>
+        <h3 id="padTitle">จำนวนเงิน</h3>
+        <p class="hint" id="padHint">แตะตัวเลขด้านล่าง — ไม่ใช้คีย์บอร์ดเครื่อง</p>
+      </div>
+      <div class="numpad-display" id="padDisplay">0</div>
+      <div class="numpad-counter" id="padCounter">0 บาท</div>
+      <div class="voice-row" id="voiceRow">
+        <button type="button" class="voice-ico active" id="voiceMale" onclick="setPadVoice('male')" title="เสียงผู้ชาย">
+          <svg width="18" height="18" viewBox="0 0 24 24"><circle cx="9" cy="9" r="4"/><path d="M16 8h5v5"/><path d="M21 8l-6.2 6.2"/><path d="M5 22v-3a4 4 0 0 1 4-4h0"/></svg>
+        </button>
+        <button type="button" class="voice-ico" id="voiceFemale" onclick="setPadVoice('female')" title="เสียงผู้หญิง">
+          <svg width="18" height="18" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M12 12v8"/><path d="M9 17h6"/><path d="M8 22l4-4 4 4"/></svg>
+        </button>
+        <button type="button" class="voice-ico" id="voiceMute" onclick="togglePadSound()" title="เปิด/ปิดเสียง">
+          <svg width="18" height="18" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a9 9 0 0 1 0 14"/></svg>
+        </button>
+      </div>
+      <button type="button" class="btn-scan-full" id="padScanBtn" onclick="openLiveScanner()" style="display:none;">
+        <svg width="20" height="20" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><line x1="3" y1="12" x2="21" y2="12"/></svg>
+        เปิดกล้องสแกนบาร์โค้ดแทนการกด
+      </button>
+      <div class="pad-quick" id="padQuickRow" style="display:none;">
+        <button type="button" onclick="padAddQuick(10)">+10</button>
+        <button type="button" onclick="padAddQuick(50)">+50</button>
+        <button type="button" onclick="padAddQuick(100)">+100</button>
+        <button type="button" onclick="padAddQuick(500)">+500</button>
+        <button type="button" onclick="padAddQuick(1000)">+1,000</button>
+      </div>
+      <div class="numpad-grid" id="padGrid">
+        <button type="button" class="numpad-key" data-pad="1">1</button>
+        <button type="button" class="numpad-key" data-pad="2">2</button>
+        <button type="button" class="numpad-key" data-pad="3">3</button>
+        <button type="button" class="numpad-key" data-pad="4">4</button>
+        <button type="button" class="numpad-key" data-pad="5">5</button>
+        <button type="button" class="numpad-key" data-pad="6">6</button>
+        <button type="button" class="numpad-key" data-pad="7">7</button>
+        <button type="button" class="numpad-key" data-pad="8">8</button>
+        <button type="button" class="numpad-key" data-pad="9">9</button>
+        <button type="button" class="numpad-key numpad-key-fn" id="padKeyBL" data-pad="bl">ล้าง</button>
+        <button type="button" class="numpad-key" data-pad="0">0</button>
+        <button type="button" class="numpad-key numpad-key-fn" data-pad="bs">
+          <svg width="22" height="22" viewBox="0 0 24 24"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Z"/><line x1="18" y1="9" x2="12" y2="15"/><line x1="12" y1="9" x2="18" y2="15"/></svg>
+        </button>
+      </div>
+      <div class="action-btn-row">
+        <button type="button" class="btn-modal-close" onclick="closePadModal()">ยกเลิก</button>
+        <button type="button" class="btn-modal-save" onclick="savePadData()">
+          <svg width="18" height="18" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> ตกลง
+        </button>
+      </div>
+    </div>
+    <div id="padLoadingWrapper" class="loading-wrapper" style="display:none;padding:44px 20px;">
+      <div class="load-bounce"><i></i><i></i><i></i><i></i></div>
+      <div class="loading-text" id="padLoadingText" style="color:var(--text);">กำลังบันทึก...</div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= SETTINGS MODAL ================= -->
+<div id="settingsModal" class="modal-overlay">
+  <div class="modal-card">
+    <div class="input-modal-body" style="text-align:left;">
+      <div class="modal-icon sky" style="margin-left:0;">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9c.3.6.9 1 1.5 1.1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+      </div>
+      <h3 style="text-align:left;">ตั้งค่า</h3>
+      <p class="hint" style="text-align:left;">เปิด-ปิดฟังก์ชันและจัดการพื้นที่เก็บข้อมูล</p>
+
+      <div class="settings-row">
+        <div>
+          <h4>ส่งไลน์ในหน้ารายการ</h4>
+          <p>ปิดแล้วปุ่ม LINE จะหายจากรายการ</p>
+        </div>
+        <button type="button" class="switch on" id="lineSwitch" onclick="toggleLineSetting()"></button>
+      </div>
+      <div class="settings-row">
+        <div>
+          <h4>โอนเพิ่ม</h4>
+          <p>เก็บเบอร์ลูกค้าเดิมไว้จนบันทึกครั้งสุดท้าย แล้วค่อยปิดสวิตช์นี้</p>
+        </div>
+        <button type="button" class="switch" id="addMoreSwitch" onclick="toggleAddMoreSetting()"></button>
+      </div>
+
+      <div class="settings-row" style="align-items:flex-start;flex-direction:column;">
+        <div>
+          <h4>พื้นที่ใช้งาน</h4>
+          <p>ข้อมูลรายการและรูปสลิปในเครื่องนี้</p>
+        </div>
+        <div class="storage-box" id="storageBox">กำลังคำนวณ...</div>
+        <button type="button" class="btn-modal-save" style="width:100%;background:linear-gradient(150deg,#94a3b8,#475569);" onclick="closeSettingsModal();openCleanupModal();">
+          ลบข้อมูลเก่า
+        </button>
+      </div>
+
+      <div class="action-btn-row" style="margin-top:16px;">
+        <button type="button" class="btn-modal-close" style="grid-column:1/-1;" onclick="closeSettingsModal()">ปิด</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= CLEANUP MODAL (ลบข้อมูลเก่า) ================= -->
+<div id="cleanupModal" class="modal-overlay">
+  <div class="modal-card">
+    <div class="input-modal-body">
+      <div class="modal-icon" style="background:linear-gradient(150deg,#94a3b8,#475569);box-shadow:0 10px 24px rgba(51,65,85,.5), inset 0 2px 0 rgba(255,255,255,.5);">
+        <svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+      </div>
+      <h3>ลบข้อมูลเก่า</h3>
+      <p class="hint">เลือกช่วงเวลาที่ต้องการลบ ข้อมูลใหม่กว่าจะไม่ถูกแตะต้อง</p>
+
+      <div class="cleanup-chips">
+        <button type="button" class="cleanup-chip" data-days="7" onclick="updateCleanupPreview(7)">เก่ากว่า 7 วัน</button>
+        <button type="button" class="cleanup-chip active" data-days="30" onclick="updateCleanupPreview(30)">เก่ากว่า 30 วัน</button>
+        <button type="button" class="cleanup-chip" data-days="90" onclick="updateCleanupPreview(90)">เก่ากว่า 90 วัน</button>
+      </div>
+
+      <p class="hint" style="margin:14px 0 8px;text-align:left;">หรือกำหนดวันที่เอง (ลบทุกอย่างก่อนวันนี้)</p>
+      <input type="date" id="cleanupCustomDate" class="cleanup-date-input" onchange="updateCleanupPreviewCustom()">
+
+      <div class="cleanup-preview" id="cleanupPreview">จะลบ 0 รายการที่เก่ากว่า 30 วัน</div>
+
+      <div class="action-btn-row">
+        <button type="button" class="btn-modal-close" onclick="closeCleanupModal()">ยกเลิก</button>
+        <button type="button" class="btn-modal-save" style="background:linear-gradient(150deg,#fb7185,#e11d48);box-shadow:0 10px 22px rgba(225,29,72,.45), inset 0 2px 0 rgba(255,255,255,.5);" onclick="confirmCleanup()">
+          <svg width="18" height="18" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg> ลบเลย
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= QR MODAL ================= -->
+<div id="qrModal" class="modal-overlay">
+  <div class="modal-card">
+    <div class="qr-card-header">
+      <svg width="20" height="20" viewBox="0 0 24 24"><rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/></svg>
+      สแกนจ่าย QR Payment
+    </div>
+    <div class="qr-info-bar" id="qrInfoBar">
+      <div class="info-cell pump" id="modalPumpCell"><span>หน้าจ่าย</span><b id="modalPump">-</b></div>
+      <div class="info-cell oil" id="modalOilCell"><span>น้ำมัน</span><b id="modalOil">-</b></div>
+      <div class="qr-post-slip" id="qrPostSlip">
+        <label class="edit-toggle">แก้ไข
+          <button type="button" class="switch" id="qrEditSwitch" onclick="toggleQrEdit()"></button>
+        </label>
+        <button type="button" class="btn-call-cust" id="needContactBtn" onclick="toggleNeedContact()" title="ต้องติดต่อลูกค้า">
+          <svg width="16" height="16" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-4.24-1.18"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="qr-edit-picks" id="qrEditPicks">
+      <div class="mini-pumps" id="slipPumpEdit"></div>
+      <div class="mini-oils" id="slipOilEdit"></div>
+    </div>
+    <div class="qr-code-box">
+      <div id="loadingWrapper" class="loading-wrapper">
+        <div class="load-bounce"><i></i><i></i><i></i><i></i></div>
+        <div class="loading-text" id="qrLoadingText">กำลังเตรียมข้อมูลร้านค้า...</div>
+        <div class="loading-bar"><i></i></div>
+      </div>
+      <div id="qrContentWrapper" class="qr-content">
+        <img id="qrImage" class="qr-img" src="" alt="QR">
+        <div class="qr-price-display" id="modalPrice">฿0.00</div>
+        <div id="slipPreviewContainer" class="slip-preview-container">
+          <span class="slip-ok">
+            <svg width="19" height="19" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> ถ่ายสลิปเรียบร้อย
+          </span>
+          <img id="slipPreviewImg" class="slip-preview-img" src="">
+          <div id="slipPriceDisplay" class="slip-price-display">฿0.00</div>
+          <textarea id="slipNote" class="note-box compact" placeholder="หมายเหตุ เช่น โอน 100 จ่ายสด 100" rows="2"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="store-details" id="storeDetails">
+      <div class="store-name">ชื่อบัญชี : หจก. ทุ่งยางแดงเอ็นเตอร์ไพรส์</div>
+      <div>รหัสร้านค้า : BG094353WQ20000939H</div>
+    </div>
+    <div class="qr-card-footer">
+      <button type="button" class="btn-modal-close" style="flex:.8;" onclick="closeQRModal()">ปิด</button>
+      <input type="file" id="slipInput" accept="image/*" capture="environment" style="display:none;" onchange="handleSlipUpload(event)">
+      <button type="button" class="btn-modal-camera" style="flex:1.2;" onclick="document.getElementById('slipInput').click()">
+        <svg width="19" height="19" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        สลิป
+      </button>
+      <button type="button" class="btn-modal-save" style="flex:1.2;" onclick="saveFromModal()">
+        <svg width="19" height="19" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
+        บันทึก
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+/* ตัวช่วยเก็บข้อมูลในเครื่อง (กันกรณีเบราว์เซอร์ปิดการใช้งาน) */
+function safeGet(k){ try { return localStorage.getItem(k); } catch(e){ return null; } }
+function safeSet(k,v){ try { localStorage.setItem(k,v); return true; } catch(e){ return false; } }
+
+let sfxCtx = null;
+function ensureSfx(){
+  try{
+    if(!sfxCtx) sfxCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if(sfxCtx.state === 'suspended') sfxCtx.resume();
+  }catch(e){}
+  return sfxCtx;
+}
+function tone(freq, dur, type, vol){
+  const ctx = ensureSfx();
+  if(!ctx) return;
+  try{
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type = type || 'sine';
+    o.frequency.value = freq;
+    const t = ctx.currentTime;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol || 0.08, t + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(ctx.destination);
+    o.start(t); o.stop(t + dur + 0.02);
+  }catch(e){}
+}
+function playTap(){ tone(880, 0.07, 'triangle', 0.07); }
+function playSuccess(){ tone(523, 0.09, 'sine', 0.07); setTimeout(()=>tone(784, 0.16, 'sine', 0.08), 90); }
+function playClear(){ tone(440, 0.08, 'triangle', 0.06); setTimeout(()=>tone(330, 0.12, 'sine', 0.05), 80); }
+function playDelete(){ tone(220, 0.16, 'sawtooth', 0.04); }
+function playStatus(){ tone(660, 0.1, 'square', 0.035); }
+let scanBeepAudio = null;
+function playScanBeep(){
+  try{
+    if(!scanBeepAudio) scanBeepAudio = new Audio('audio/beep.mp3');
+    scanBeepAudio.currentTime = 0;
+    scanBeepAudio.play().catch(()=>{});
+  }catch(e){}
+}
+document.addEventListener('pointerdown', ensureSfx, {once:true});
+
+/* ===================================================
+   0. ชุดไอคอน SVG (ใช้แทนอิโมจิทั้งหมด)
+   =================================================== */
+const ICONS = {
+  sun:  '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.2 4.2l1.5 1.5M18.3 18.3l1.5 1.5M2 12h2M20 12h2M4.2 19.8l1.5-1.5M18.3 5.7l1.5-1.5"/></svg>',
+  moon: '<svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>',
+  clock:'<svg width="13" height="13" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>',
+  phone:'<svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>',
+  card: '<svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>',
+  clip: '<svg viewBox="0 0 24 24"><path d="M21.4 11.05 12.2 20.2a5.5 5.5 0 0 1-7.8-7.8l9.2-9.1a3.7 3.7 0 1 1 5.2 5.2l-9.2 9.1a1.8 1.8 0 1 1-2.6-2.6l8.5-8.4"/></svg>',
+  down: '<svg width="17" height="17" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
+  check:'<svg width="17" height="17" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>',
+  hour: '<svg width="17" height="17" viewBox="0 0 24 24"><path d="M5 22h14M5 2h14M17 22v-4.2a2 2 0 0 0-.6-1.4L12 12l-4.4 4.4a2 2 0 0 0-.6 1.4V22M7 2v4.2a2 2 0 0 0 .6 1.4L12 12l4.4-4.4A2 2 0 0 0 17 6.2V2"/></svg>',
+  trash:'<svg width="17" height="17" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>',
+  send: '<svg width="15" height="15" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>',
+  empty:'<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>'
+};
+
+/* ===================================================
+   1. ระบบธีม กลางวัน / กลางคืน
+   =================================================== */
+const themeBtn = document.getElementById('themeBtn');
+function paintThemeBtn(isLight){
+  themeBtn.innerHTML = isLight ? ICONS.moon : ICONS.sun;
+  document.querySelector('meta[name="theme-color"]').setAttribute('content', isLight ? '#e9f0fa' : '#0a1020');
+}
+(function initTheme(){
+  const saved = safeGet('edc_theme') || 'dark';
+  const isLight = saved === 'light';
+  if(isLight) document.body.classList.add('light-mode');
+  paintThemeBtn(isLight);
+})();
+function toggleTheme(){
+  const isLight = document.body.classList.toggle('light-mode');
+  safeSet('edc_theme', isLight ? 'light' : 'dark');
+  paintThemeBtn(isLight);
+}
+
+/* ===================================================
+   2. ตัวแปรระบบ
+   =================================================== */
+let records = [];
+let dbReady = false;
+let idbDB = null;
+const DB_NAME = 'pumpTransferDB';
+const DB_VERSION = 1;
+const STORE = 'records';
+
+/* ===================================================
+   2.1 IndexedDB — เก็บได้มากกว่า localStorage มาก
+        ไม่มีเพดานตายตัวที่ 5-10MB จึงเก็บรูปสลิปคมชัดได้
+        (ถ้าเบราว์เซอร์เก่าไม่รองรับ จะสำรองไป localStorage อัตโนมัติ)
+   =================================================== */
+function openDB(){
+  return new Promise((resolve, reject) => {
+    if(!('indexedDB' in window)){ reject(new Error('no-idb')); return; }
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = e => {
+      const db = e.target.result;
+      if(!db.objectStoreNames.contains(STORE)) db.createObjectStore(STORE, { keyPath:'id' });
+    };
+    req.onsuccess = e => resolve(e.target.result);
+    req.onerror   = () => reject(req.error);
+  });
+}
+function idbGetAll(){
+  return new Promise((resolve, reject) => {
+    const req = idbDB.transaction(STORE,'readonly').objectStore(STORE).getAll();
+    req.onsuccess = () => resolve(req.result || []);
+    req.onerror   = () => reject(req.error);
+  });
+}
+function idbPut(record){
+  return new Promise((resolve, reject) => {
+    const tx = idbDB.transaction(STORE,'readwrite');
+    tx.objectStore(STORE).put(record);
+    tx.oncomplete = resolve; tx.onerror = () => reject(tx.error);
+  });
+}
+function idbDeleteOne(id){
+  return new Promise((resolve, reject) => {
+    const tx = idbDB.transaction(STORE,'readwrite');
+    tx.objectStore(STORE).delete(id);
+    tx.oncomplete = resolve; tx.onerror = () => reject(tx.error);
+  });
+}
+function idbDeleteMany(ids){
+  return new Promise((resolve, reject) => {
+    const tx = idbDB.transaction(STORE,'readwrite');
+    const store = tx.objectStore(STORE);
+    ids.forEach(id => store.delete(id));
+    tx.oncomplete = resolve; tx.onerror = () => reject(tx.error);
+  });
+}
+function idbClearAll(){
+  return new Promise((resolve, reject) => {
+    const tx = idbDB.transaction(STORE,'readwrite');
+    tx.objectStore(STORE).clear();
+    tx.oncomplete = resolve; tx.onerror = () => reject(tx.error);
+  });
+}
+
+/* บันทึก/ลบจริงลงเครื่อง เลือกใช้ IndexedDB ก่อน ถ้าใช้ไม่ได้ค่อยสำรองเป็น localStorage
+   (การเรียกเหล่านี้ไม่บล็อก UI — แก้หน้าจอให้เสร็จก่อน แล้วค่อยเขียนลงดิสก์ตามหลัง) */
+function persistPut(record){
+  if(dbReady){ idbPut(record).catch(()=>{}); return; }
+  safeSet('gas_station_transfers', JSON.stringify(records));
+}
+function persistDeleteOne(id){
+  if(dbReady){ idbDeleteOne(id).catch(()=>{}); return; }
+  safeSet('gas_station_transfers', JSON.stringify(records));
+}
+function persistDeleteMany(ids){
+  if(dbReady){ idbDeleteMany(ids).catch(()=>{}); return; }
+  safeSet('gas_station_transfers', JSON.stringify(records));
+}
+function persistClearAll(){
+  if(dbReady){ idbClearAll().catch(()=>{}); return; }
+  safeSet('gas_station_transfers', JSON.stringify(records));
+}
+
+async function initStorage(){
+  try{
+    idbDB = await openDB();
+    records = await idbGetAll();
+    dbReady = true;
+  }catch(e){
+    dbReady = false;
+    try{ records = JSON.parse(safeGet('gas_station_transfers') || '[]') || []; }catch(err){ records = []; }
+  }
+  records.sort((a,b) => b.id - a.id);
+  renderList();
+}
+let selectedPumpNum = null, selectedOil = null, currentMember = "";
+let currentSlipBase64 = null, currentSlipFilename = "";
+let currentNote = "";
+let extraFills = [];
+
+const amountInput   = document.getElementById('amountInput');
+const clearBtn      = document.getElementById('clearBtn');
+const btnPhoneIcon  = document.getElementById('btnPhoneIcon');
+const btnCardIcon   = document.getElementById('btnCardIcon');
+const padModal      = document.getElementById('padModal');
+const qrModal       = document.getElementById('qrModal');
+const recordList    = document.getElementById('recordList');
+const pendingCount  = document.getElementById('pendingCount');
+const totalAmount   = document.getElementById('totalAmount');
+const navBadgeCount = document.getElementById('navBadgeCount');
+const toast         = document.getElementById('toast');
+const qrImage       = document.getElementById('qrImage');
+const modalPrice    = document.getElementById('modalPrice');
+const slipPriceDisplay = document.getElementById('slipPriceDisplay');
+const qrLoadingText = document.getElementById('qrLoadingText');
+
+const allowedE20Pumps = [3,4,7,8];
+
+/* ===================================================
+   3. สลับหน้าจอ
+   =================================================== */
+function switchView(viewName){
+  playTap();
+  document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+  const view = document.getElementById('view'+viewName);
+  view.classList.add('active');
+  document.getElementById('navBtn'+viewName).classList.add('active');
+  document.body.classList.toggle('history-mode', viewName === 'History');
+  view.scrollTop = 0;   /* ให้ข้อมูลบนสุดอยู่ครบ ไม่เลยขอบจอ */
+}
+
+/* ===================================================
+   4. เลือกหน้าจ่าย / ชนิดน้ำมัน
+   =================================================== */
+function selectPump(num){
+  playTap();
+  selectedPumpNum = num;
+  document.querySelectorAll('.grid-pump-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('p'+num).classList.add('active');
+  const btnE20 = document.getElementById('oilE20');
+  if(!allowedE20Pumps.includes(num)){
+    btnE20.classList.add('disabled');
+    if(selectedOil === 'E20') selectOil(null);
+  } else btnE20.classList.remove('disabled');
+}
+function selectOil(type){
+  if(type === 'E20' && selectedPumpNum && !allowedE20Pumps.includes(selectedPumpNum)) return;
+  if(type) playTap();
+  selectedOil = type;
+  document.querySelectorAll('.grid-oil-btn').forEach(b => b.classList.remove('active'));
+  if(type) document.getElementById('oil'+type).classList.add('active');
+}
+
+/* ===================================================
+   5. คีย์แพดเต็มจอในตัวแอป (ราคา / เบอร์ / บัตร)
+      ไม่มี <input> ให้โฟกัส จึงไม่มีคีย์บอร์ดเครื่องขึ้นมา
+   =================================================== */
+let padTarget = null;   // 'phone' | 'card' | 'amount'
+let padValue  = "";
+const PAD_MAXLEN = { phone:10, card:16, amount:10 };
+const PAD_ICONS = {
+  phone:  '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>',
+  card:   '<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M7 9v6"/><path d="M11 9v6"/><path d="M15 9v6"/><path d="M18 9v6"/>',
+  amount: '<rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/>'
+};
+
+function getAmountValue(){
+  const raw = (amountInput.dataset.value || '').trim();
+  return raw;
+}
+function setAmountValue(v){
+  const str = String(v ?? '');
+  amountInput.dataset.value = str;
+  if(!str){
+    amountInput.textContent = '0';
+    amountInput.classList.add('placeholder');
+  } else {
+    const n = parseFloat(str);
+    amountInput.textContent = isNaN(n) ? str : n.toLocaleString('en-US', { maximumFractionDigits: 2 });
+    amountInput.classList.remove('placeholder');
+  }
+  toggleClearBtn();
+}
+
+function groupPhoneDigits(v){ return v; }
+
+let padVoice = (function(){ try { return localStorage.getItem('edc_pad_voice') || 'male'; } catch(e){ return 'male'; } })();
+let padSoundOn = (function(){ try { return (safeGet('edc_pad_sound') || '1') !== '0'; } catch(e){ return true; } })();
+let lineEnabled = (function(){ try { return (safeGet('edc_line_enabled') || '1') !== '0'; } catch(e){ return true; } })();
+let addMoreEnabled = (function(){ try { return (safeGet('edc_add_more') || '0') === '1'; } catch(e){ return false; } })();
+let qrEditOn = false;
+let needContact = false;
+
+let padAudio = null;
+function setPadVoice(v){
+  padVoice = v === 'female' ? 'female' : 'male';
+  try { localStorage.setItem('edc_pad_voice', padVoice); } catch(e){}
+  const m = document.getElementById('voiceMale');
+  const f = document.getElementById('voiceFemale');
+  if(m) m.classList.toggle('active', padVoice === 'male');
+  if(f) f.classList.toggle('active', padVoice === 'female');
+}
+function paintMuteBtn(){
+  const b = document.getElementById('voiceMute');
+  if(!b) return;
+  b.classList.toggle('mute-off', !padSoundOn);
+  b.classList.toggle('active', padSoundOn);
+  b.innerHTML = padSoundOn
+    ? '<svg width="18" height="18" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a9 9 0 0 1 0 14"/></svg>'
+    : '<svg width="18" height="18" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>';
+}
+function togglePadSound(){
+  padSoundOn = !padSoundOn;
+  safeSet('edc_pad_sound', padSoundOn ? '1' : '0');
+  paintMuteBtn();
+}
+function playPadDigit(d){
+  if(padTarget !== 'phone' || !padSoundOn) return;
+  if(!/^[0-9]$/.test(d)) return;
+  try{
+    if(padAudio){ padAudio.pause(); padAudio.currentTime = 0; }
+    padAudio = new Audio('audio/' + padVoice + '/' + d + '.mp3');
+    padAudio.play().catch(()=>{});
+  }catch(e){}
+}
+function toggleLineSetting(){
+  lineEnabled = !lineEnabled;
+  safeSet('edc_line_enabled', lineEnabled ? '1' : '0');
+  const sw = document.getElementById('lineSwitch');
+  if(sw) sw.classList.toggle('on', lineEnabled);
+  const am = document.getElementById('addMoreSwitch');
+  if(am) am.classList.toggle('on', addMoreEnabled);
+  renderList();
+}
+function toggleAddMoreSetting(){
+  addMoreEnabled = !addMoreEnabled;
+  safeSet('edc_add_more', addMoreEnabled ? '1' : '0');
+  const sw = document.getElementById('addMoreSwitch');
+  if(sw) sw.classList.toggle('on', addMoreEnabled);
+  showToast(addMoreEnabled ? 'โอนเพิ่ม: เก็บเบอร์เดิมไว้' : 'ปิดโอนเพิ่ม: ครั้งถัดไปจะล้างเบอร์หลังบันทึก');
+}
+function toggleQrEdit(){
+  qrEditOn = !qrEditOn;
+  const sw = document.getElementById('qrEditSwitch');
+  const box = document.getElementById('qrEditPicks');
+  const note = document.getElementById('slipNote');
+  if(sw) sw.classList.toggle('on', qrEditOn);
+  if(box) box.classList.toggle('show', qrEditOn);
+  if(note) note.classList.toggle('show', qrEditOn);
+  if(qrEditOn) renderSlipEditors();
+}
+function setPostSlipTools(on){
+  const row = document.getElementById('qrPostSlip');
+  const bar = document.getElementById('qrInfoBar');
+  if(row) row.classList.toggle('show', !!on);
+  if(bar) bar.classList.toggle('after-slip', !!on);
+  if(!on){
+    qrEditOn = false;
+    const sw = document.getElementById('qrEditSwitch'); if(sw) sw.classList.remove('on');
+    const box = document.getElementById('qrEditPicks'); if(box) box.classList.remove('show');
+    const note = document.getElementById('slipNote'); if(note) note.classList.remove('show');
+    needContact = false;
+    const cb = document.getElementById('needContactBtn'); if(cb) cb.classList.remove('on');
+  }
+}
+function toggleNeedContact(){
+  needContact = !needContact;
+  const btn = document.getElementById('needContactBtn');
+  if(btn) btn.classList.toggle('on', needContact);
+  showToast(needContact ? 'ติดธง: ต้องติดต่อลูกค้า' : 'ยกเลิกธงติดต่อลูกค้า');
+}
+function oilKey(v){
+  const t = String(v || '').toUpperCase().replace(/\s+/g,'');
+  if(t.includes('E20')) return 'E20';
+  if(t.includes('B7') || t.includes('ดีเซล') || t.includes('DIESEL')) return 'B7';
+  if(t.includes('95') || t.includes('G95') || t.includes('GAS')) return 'G95';
+  return t || '';
+}
+function paintOilCell(){
+  const cell = document.getElementById('modalOilCell');
+  const mo = document.getElementById('modalOil');
+  if(!cell) return;
+  const key = oilKey(selectedOil);
+  cell.classList.remove('g95','e20','b7');
+  if(key === 'E20') cell.classList.add('e20');
+  else if(key === 'B7') cell.classList.add('b7');
+  else if(key === 'G95') cell.classList.add('g95');
+  if(mo){
+    mo.textContent = selectedOil || '-';
+    if(!cell.closest('.after-slip')){
+      mo.style.color = key === 'E20' ? '#10b981' : key === 'B7' ? '#3b82f6' : '#f97316';
+    } else {
+      mo.style.color = '#fff';
+    }
+  }
+}
+function formatBytes(n){
+  if(n < 1024) return n + ' B';
+  if(n < 1048576) return (n/1024).toFixed(1) + ' KB';
+  if(n < 1073741824) return (n/1048576).toFixed(2) + ' MB';
+  return (n/1073741824).toFixed(2) + ' GB';
+}
+function estimateStorage(){
+  let bytes = 0;
+  try{ bytes += new Blob([JSON.stringify(records)]).size; }catch(e){
+    records.forEach(r => { bytes += 200; if(r.slipImage) bytes += Math.floor((r.slipImage.length||0)*0.75); });
+  }
+  return bytes;
+}
+function openSettingsModal(){
+  const sw = document.getElementById('lineSwitch');
+  if(sw) sw.classList.toggle('on', lineEnabled);
+  const am = document.getElementById('addMoreSwitch');
+  if(am) am.classList.toggle('on', addMoreEnabled);
+  const box = document.getElementById('storageBox');
+  if(box){
+    const n = estimateStorage();
+    box.innerHTML = 'ใช้ไปแล้ว <b>' + formatBytes(n) + '</b><br><span style="font-size:12px;color:var(--text-muted)">' + records.length + ' รายการในเครื่องนี้</span>';
+  }
+  document.getElementById('settingsModal').classList.add('active');
+}
+function closeSettingsModal(){ document.getElementById('settingsModal').classList.remove('active'); }
+function groupCardDigits(v){
+  let out = '';
+  for(let i=0;i<v.length;i++){ out += v[i]; if(i%4===3 && i!==v.length-1) out += ' '; }
+  return out;
+}
+function formatAmountPad(v){
+  if(!v) return '0';
+  if(v.endsWith('.')){
+    const n = parseFloat(v.slice(0,-1));
+    return (isNaN(n) ? '0' : n.toLocaleString('en-US')) + '.';
+  }
+  const n = parseFloat(v);
+  if(isNaN(n)) return v;
+  if(v.includes('.')){
+    const [a,b] = v.split('.');
+    return Number(a).toLocaleString('en-US') + '.' + b;
+  }
+  return n.toLocaleString('en-US');
+}
+
+function configurePadChrome(){
+  const icon = document.getElementById('padIcon');
+  const svg  = document.getElementById('padIconSvg');
+  const title= document.getElementById('padTitle');
+  const hint = document.getElementById('padHint');
+  const scan = document.getElementById('padScanBtn');
+  const quick= document.getElementById('padQuickRow');
+  const bl   = document.getElementById('padKeyBL');
+  const disp = document.getElementById('padDisplay');
+  icon.className = 'modal-icon ' + (padTarget === 'card' ? 'violet' : padTarget === 'phone' ? 'sky' : 'amount');
+  svg.innerHTML = PAD_ICONS[padTarget];
+  disp.classList.toggle('numpad-display-card', padTarget === 'card');
+  const voiceRow = document.getElementById('voiceRow');
+  if(voiceRow) voiceRow.classList.toggle('show', padTarget === 'phone');
+  setPadVoice(padVoice);
+  paintMuteBtn();
+  if(padTarget === 'phone'){
+    title.textContent = 'เบอร์โทรศัพท์ลูกค้า';
+    hint.textContent  = 'กรอก 10 หลัก — ไม่ใช้คีย์บอร์ดเครื่อง';
+    scan.style.display = 'none';
+    quick.style.display = 'none';
+    bl.textContent = 'ล้าง';
+  } else if(padTarget === 'card'){
+    title.textContent = 'บัตรสมาชิก Blue Card';
+    hint.textContent  = 'กรอก 16 หลัก หรือสแกนบาร์โค้ด';
+    scan.style.display = '';
+    quick.style.display = 'none';
+    bl.textContent = 'ล้าง';
+  } else {
+    title.textContent = 'จำนวนเงิน (บาท)';
+    hint.textContent  = 'กรอกยอดโอน — จุดทศนิยมกดได้ที่มุมล่างซ้าย';
+    scan.style.display = 'none';
+    quick.style.display = 'flex';
+    bl.textContent = '.';
+  }
+}
+
+function renderPad(){
+  const display = document.getElementById('padDisplay');
+  const counter = document.getElementById('padCounter');
+  const maxLen  = PAD_MAXLEN[padTarget];
+  if(padTarget === 'amount'){
+    if(!padValue){
+      display.textContent = '0';
+      display.classList.add('placeholder');
+    } else {
+      display.classList.remove('placeholder');
+      display.textContent = formatAmountPad(padValue);
+    }
+    const n = parseFloat(padValue) || 0;
+    counter.textContent = n > 0 ? `฿${n.toLocaleString('en-US', { minimumFractionDigits: padValue.includes('.') ? Math.min(2,(padValue.split('.')[1]||'').length) : 0, maximumFractionDigits: 2 })}` : 'กรอกยอดเงิน';
+    return;
+  }
+  if(padValue.length === 0){
+    display.textContent = padTarget === 'phone' ? '0000000000' : 'XXXX XXXX XXXX XXXX';
+    display.classList.add('placeholder');
+  } else {
+    display.classList.remove('placeholder');
+    display.textContent = padTarget === 'phone' ? groupPhoneDigits(padValue) : groupCardDigits(padValue);
+  }
+  counter.textContent = `${padValue.length}/${maxLen} หลัก`;
+}
+function padShake(){
+  const display = document.getElementById('padDisplay');
+  display.classList.remove('shake'); void display.offsetWidth; display.classList.add('shake');
+  if(navigator.vibrate) navigator.vibrate(15);
+}
+function padPress(d){
+  if(padTarget === 'amount'){
+    if(d === '.'){ padBottomLeft(); return; }
+    const [intp, decp] = padValue.split('.');
+    if(padValue.includes('.')){
+      if((decp || '').length >= 2){ padShake(); return; }
+    } else if((intp || padValue).replace(/^0+/,'').length >= 7 && padValue !== ''){
+      padShake(); return;
+    }
+    if(padValue === '0' && d !== '.') padValue = d;
+    else padValue += d;
+    if(navigator.vibrate) navigator.vibrate(8);
+    renderPad();
+    return;
+  }
+  const maxLen = PAD_MAXLEN[padTarget];
+  if(padValue.length >= maxLen){ padShake(); return; }
+  padValue += d;
+  if(navigator.vibrate) navigator.vibrate(8);
+  playPadDigit(d);
+  renderPad();
+}
+function padBackspace(){ padValue = padValue.slice(0,-1); renderPad(); }
+function padClear(){ padValue = ''; renderPad(); }
+function padBottomLeft(){
+  if(padTarget !== 'amount'){ padClear(); return; }
+  if(padValue.includes('.')){ padShake(); return; }
+  if(!padValue) padValue = '0.';
+  else padValue += '.';
+  if(navigator.vibrate) navigator.vibrate(8);
+  renderPad();
+}
+function padAddQuick(n){
+  const cur = parseFloat(padValue) || 0;
+  const next = +(cur + n).toFixed(2);
+  padValue = String(next);
+  renderPad();
+}
+
+function openPadModal(mode){
+  padTarget = mode;
+  if(mode === 'phone') padValue = currentMember.length === 10 ? currentMember : '';
+  else if(mode === 'card') padValue = currentMember.length === 16 ? currentMember : '';
+  else padValue = getAmountValue();
+  configurePadChrome();
+  renderPad();
+  document.getElementById('padModalContent').style.display = 'flex';
+  document.getElementById('padLoadingWrapper').style.display = 'none';
+  padModal.classList.add('active');
+}
+function closePadModal(){ padModal.classList.remove('active'); }
+function openPhoneModal(){ openPadModal('phone'); }
+function closePhoneModal(){ closePadModal(); }
+function openCardModal(){ openPadModal('card'); }
+function closeCardModal(){ closePadModal(); }
+function openAmountModal(){ openPadModal('amount'); }
+
+function savePadData(){
+  if(padTarget === 'phone'){
+    if(padValue.length > 0 && padValue.length !== 10){ showToast('กรุณากรอกเบอร์โทรให้ครบ 10 หลัก'); return; }
+    finishPadSave(() => { currentMember = padValue; updateMainButtonsUI(); });
+  } else if(padTarget === 'card'){
+    if(padValue.length > 0 && padValue.length !== 16){ showToast('บัตรสมาชิกต้องมี 16 หลักเป๊ะๆ'); return; }
+    finishPadSave(() => { currentMember = padValue; updateMainButtonsUI(); });
+  } else {
+    const n = parseFloat(padValue) || 0;
+    if(n <= 0){ showToast('กรุณากรอกจำนวนเงิน'); return; }
+    setAmountValue(padValue.replace(/\.0+$/,'').replace(/\.$/,''));
+    closePadModal();
+  }
+}
+function finishPadSave(apply){
+  document.getElementById('padModalContent').style.display = 'none';
+  document.getElementById('padLoadingWrapper').style.display = 'flex';
+  setTimeout(() => {
+    apply();
+    padModal.classList.remove('active');
+    setTimeout(() => {
+      document.getElementById('padModalContent').style.display = 'flex';
+      document.getElementById('padLoadingWrapper').style.display = 'none';
+    }, 320);
+  }, 380);
+}
+
+function updateMainButtonsUI(){
+  btnPhoneIcon.classList.remove('has-data');
+  btnCardIcon.classList.remove('has-data');
+  if(currentMember.length === 10) btnPhoneIcon.classList.add('has-data');
+  else if(currentMember.length === 16) btnCardIcon.classList.add('has-data');
+}
+
+/* ===================================================
+   8. Live Barcode Scanner
+   =================================================== */
+let liveStream = null, scanInterval = null;
+const liveScannerModal = document.getElementById('liveScannerModal');
+const videoEl = document.getElementById('liveCameraVideo');
+
+let zxingReader = null, scanCanvas = null, zxingBusy = false;
+const scanStatusEl = () => document.getElementById('scannerStatus');
+function setScanStatus(msg){ const el = scanStatusEl(); if(el) el.textContent = msg; }
+
+/* โหลด ZXing แบบ lazy ไว้ใช้กับเครื่องที่ไม่มี BarcodeDetector (เช่น iPhone / Firefox) */
+function loadZXing(){
+  return new Promise((resolve, reject) => {
+    if(window.ZXing) return resolve(window.ZXing);
+    const sc = document.createElement('script');
+    sc.src = 'https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js';
+    sc.onload = () => window.ZXing ? resolve(window.ZXing) : reject(new Error('no global'));
+    sc.onerror = () => reject(new Error('load failed'));
+    document.head.appendChild(sc);
+  });
+}
+
+async function openLiveScanner(){
+  /* ตรวจเงื่อนไขทีละข้อ เพื่อบอกสาเหตุได้ชัดว่าทำไมกล้องไม่ขึ้น */
+  if(!window.isSecureContext){
+    showToast('กล้องใช้ได้เฉพาะเมื่อเปิดผ่าน https:// หรือ localhost'); return;
+  }
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+    showToast('เบราว์เซอร์นี้ไม่รองรับการเรียกกล้อง'); return;
+  }
+  liveScannerModal.classList.add('active');
+  setScanStatus('กำลังขอสิทธิ์ใช้กล้อง...');
+
+  try{
+    liveStream = await navigator.mediaDevices.getUserMedia({
+      video:{ facingMode:{ ideal:'environment' }, width:{ ideal:1280 }, height:{ ideal:720 } },
+      audio:false
+    });
+  }catch(err){
+    let msg = 'เปิดกล้องไม่สำเร็จ';
+    if(err.name === 'NotAllowedError')      msg = 'ถูกปฏิเสธสิทธิ์กล้อง — กดไอคอนแม่กุญแจข้าง URL แล้วอนุญาต Camera';
+    else if(err.name === 'NotFoundError')   msg = 'ไม่พบกล้องบนอุปกรณ์นี้';
+    else if(err.name === 'NotReadableError')msg = 'กล้องถูกแอปอื่นใช้อยู่ ปิดแอปกล้องแล้วลองใหม่';
+    else if(err.name === 'SecurityError')   msg = 'หน้านี้ถูกฝังอยู่ใน iframe ที่ไม่อนุญาตกล้อง กรุณาเปิดลิงก์ตรงในเบราว์เซอร์';
+    showToast(msg); closeLiveScanner(); return;
+  }
+
+  videoEl.srcObject = liveStream;
+  videoEl.setAttribute('playsinline','');
+  try{ await videoEl.play(); }catch(e){}
+
+  if('BarcodeDetector' in window){
+    try{
+      const supported = await window.BarcodeDetector.getSupportedFormats();
+      const want = ['code_128','code_39','codabar','ean_13','itf','qr_code'].filter(f => supported.includes(f));
+      const detector = new window.BarcodeDetector({ formats: want.length ? want : supported });
+      setScanStatus('เล็งบาร์โค้ดให้อยู่ในกรอบ');
+      scanInterval = setInterval(async () => {
+        try{
+          const codes = await detector.detect(videoEl);
+          if(codes.length) handleRawScan(codes[0].rawValue);
+        }catch(e){}
+      }, 350);
+      return;
+    }catch(e){ /* ตกไปใช้ ZXing */ }
+  }
+
+  setScanStatus('กำลังเตรียมตัวอ่านบาร์โค้ด...');
+  try{
+    const ZX = await loadZXing();
+    const hints = new Map();
+    hints.set(ZX.DecodeHintType.POSSIBLE_FORMATS, [
+      ZX.BarcodeFormat.CODE_128, ZX.BarcodeFormat.CODE_39, ZX.BarcodeFormat.CODABAR,
+      ZX.BarcodeFormat.ITF, ZX.BarcodeFormat.EAN_13, ZX.BarcodeFormat.QR_CODE
+    ]);
+    hints.set(ZX.DecodeHintType.TRY_HARDER, true);
+    zxingReader = new ZX.MultiFormatReader();
+    zxingReader.setHints(hints);
+    scanCanvas = document.createElement('canvas');
+    setScanStatus('เล็งบาร์โค้ดให้อยู่ในกรอบ');
+    scanInterval = setInterval(() => decodeFrameWithZXing(ZX), 320);
+  }catch(e){
+    showToast('เครื่องนี้อ่านบาร์โค้ดอัตโนมัติไม่ได้ กรุณาพิมพ์เลข 16 หลักแทน');
+    closeLiveScanner();
+  }
+}
+
+function decodeFrameWithZXing(ZX){
+  if(zxingBusy || !videoEl.videoWidth) return;
+  zxingBusy = true;
+  try{
+    const w = videoEl.videoWidth, h = videoEl.videoHeight;
+    scanCanvas.width = w; scanCanvas.height = h;
+    const ctx = scanCanvas.getContext('2d', { willReadFrequently:true });
+    ctx.drawImage(videoEl, 0, 0, w, h);
+    const data = ctx.getImageData(0, 0, w, h);
+    const lum = new ZX.RGBLuminanceSource(toLuminanceArray(data), w, h);
+    const bitmap = new ZX.BinaryBitmap(new ZX.HybridBinarizer(lum));
+    const result = zxingReader.decode(bitmap);
+    if(result) handleRawScan(result.getText());
+  }catch(e){ /* ยังไม่เจอโค้ดในเฟรมนี้ */ }
+  finally{ zxingReader && zxingReader.reset && zxingReader.reset(); zxingBusy = false; }
+}
+function toLuminanceArray(imgData){
+  const d = imgData.data, out = new Uint8ClampedArray(imgData.width * imgData.height * 4);
+  out.set(d);
+  return out;
+}
+
+function handleRawScan(raw){
+  const val = String(raw || '').replace(/\D/g,'');
+  if(val.length >= 16){ handleSuccessfulLiveScan(val.substring(0,16)); }
+  else { setScanStatus(`อ่านได้ ${val.length} หลัก — ต้องการ 16 หลัก ลองเลื่อนกล้องอีกนิด`); }
+}
+
+function closeLiveScanner(){
+  if(scanInterval) clearInterval(scanInterval);
+  scanInterval = null; zxingBusy = false;
+  if(liveStream) liveStream.getTracks().forEach(t => t.stop());
+  liveStream = null;
+  try{ videoEl.srcObject = null; }catch(e){}
+  liveScannerModal.classList.remove('active');
+}
+function handleSuccessfulLiveScan(val){
+  playScanBeep();
+  closeLiveScanner();
+  document.getElementById('padModalContent').style.display = 'none';
+  document.getElementById('padLoadingWrapper').style.display = 'flex';
+  setTimeout(() => {
+    currentMember = val; updateMainButtonsUI(); padModal.classList.remove('active');
+    showToast('สแกนสำเร็จและบันทึกอัตโนมัติแล้ว');
+    setTimeout(() => {
+      document.getElementById('padModalContent').style.display = 'flex';
+      document.getElementById('padLoadingWrapper').style.display = 'none';
+    }, 320);
+  }, 700);
+}
+
+/* ===================================================
+   9. ช่องจำนวนเงิน + ปุ่มลัด (คีย์บอร์ดไม่หด)
+   =================================================== */
+function toggleClearBtn(){
+  if(getAmountValue()) clearBtn.classList.add('show');
+  else clearBtn.classList.remove('show');
+}
+document.querySelectorAll('.quick-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const add = parseFloat(btn.dataset.add);
+    const next = +((parseFloat(getAmountValue()) || 0) + add).toFixed(2);
+    setAmountValue(String(next));
+  });
+});
+clearBtn.addEventListener('click', ev => {
+  ev.stopPropagation();
+  setAmountValue('');
+});
+
+/* ===================================================
+   10. PromptPay + QR
+   =================================================== */
+function getLocalDateString(d){
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function calculateCRC16(data){
+  let crc = 0xFFFF;
+  for(let i=0;i<data.length;i++){
+    crc ^= (data.charCodeAt(i) << 8);
+    for(let j=0;j<8;j++){ crc = (crc & 0x8000) ? ((crc<<1)^0x1021)&0xFFFF : (crc<<1)&0xFFFF; }
+  }
+  return ("0000"+crc.toString(16).toUpperCase()).slice(-4);
+}
+function generatePromptPayPayload(amount){
+  const STATIC_PAYLOAD = "00020101021130820016A00000067701011201150107537000882050219BG094353WQ20000939H0316PTTTUNGYANGDAENG53037645802TH62080704000063042BAF";
+  if(!amount || amount <= 0) return STATIC_PAYLOAD;
+  let payload = "00020101021230820016A00000067701011201150107537000882050219BG094353WQ20000939H0316PTTTUNGYANGDAENG5303764";
+  const amtStr = Number(amount).toFixed(2);
+  payload += "54" + ("0"+amtStr.length).slice(-2) + amtStr + "5802TH6208070400006304";
+  return payload + calculateCRC16(payload);
+}
+
+let qrLoadTimers = [];
+function triggerQR(){
+  const amount = parseFloat(getAmountValue()) || 0;
+  if(!selectedPumpNum || !selectedOil || amount <= 0){
+    showToast('กรุณาระบุหน้าจ่าย ชนิดน้ำมัน และจำนวนเงินให้ครบ'); return;
+  }
+  
+  qrLoadTimers.forEach(clearTimeout); qrLoadTimers = [];
+  document.getElementById('loadingWrapper').style.display = 'flex';
+  document.getElementById('qrContentWrapper').style.display = 'none';
+  qrModal.classList.add('active');
+
+  document.getElementById('modalPump').textContent = selectedPumpNum || '-';
+  paintOilCell();
+  modalPrice.textContent = `฿${amount.toLocaleString()}`;
+
+  currentSlipBase64 = null; currentNote = ''; extraFills = [];
+  setPostSlipTools(false);
+  qrImage.style.display = 'block';
+  modalPrice.style.display = 'block';
+  document.getElementById('slipPreviewContainer').style.display = 'none';
+  document.getElementById('slipPreviewImg').src = '';
+  const noteEl = document.getElementById('slipNote'); if(noteEl) noteEl.value = '';
+  renderSlipEditors();
+
+  /* หน่วงขึ้นเล็กน้อย + มีข้อความบอกขั้นตอน ดูมีระบบมากขึ้น */
+  qrLoadingText.textContent = 'กำลังเตรียมข้อมูลร้านค้า...';
+  qrLoadTimers.push(setTimeout(() => { qrLoadingText.textContent = 'กำลังเข้ารหัสยอดเงิน...'; }, 260));
+  qrLoadTimers.push(setTimeout(() => { qrLoadingText.textContent = 'กำลังสร้าง QR Code...'; }, 520));
+  qrLoadTimers.push(setTimeout(() => {
+    const finish = () => {
+      document.getElementById('loadingWrapper').style.display = 'none';
+      document.getElementById('qrContentWrapper').style.display = 'flex';
+    };
+    try{
+      const qr = qrcode(0, 'M');
+      qr.addData(generatePromptPayPayload(amount));
+      qr.make();
+      qrImage.src = qr.createDataURL(10, 4);
+    }catch(err){
+      showToast('สร้าง QR ไม่สำเร็จ ลองใหม่อีกครั้ง');
+    }
+    finish();
+  }, 820));
+}
+
+function closeQRModal(){ qrLoadTimers.forEach(clearTimeout); qrLoadTimers = []; qrModal.classList.remove('active'); }
+function saveFromModal(){ closeQRModal(); setTimeout(saveRecord, 300); }
+
+function showToast(msg){
+  toast.textContent = msg; toast.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => toast.classList.remove('show'), 2500);
+}
+function showSuccessAnimation(){
+  const ov = document.getElementById('successOverlay');
+  ov.classList.add('active');
+  if(navigator.vibrate) navigator.vibrate(35);
+  setTimeout(() => ov.classList.remove('active'), 1400);
+}
+function saveToStorage(){ renderList(); }  /* คงชื่อฟังก์ชันไว้เพื่อความเข้ากันได้ — แค่รีเฟรชหน้าจอ ตัวบันทึกจริงอยู่ที่ persist* */
+
+/* ===================================================
+   11. สลิป
+   =================================================== */
+function renderSlipEditors(){
+  const pbox = document.getElementById('slipPumpEdit');
+  const obox = document.getElementById('slipOilEdit');
+  const ep = document.getElementById('extraPump');
+  if(!pbox || !obox) return;
+  pbox.innerHTML = '';
+  for(let i=1;i<=8;i++){
+    const b = document.createElement('button');
+    b.type='button'; b.textContent=i;
+    if(selectedPumpNum===i) b.classList.add('on');
+    b.onclick = () => { selectPump(i); updateModalMeta(); renderSlipEditors(); };
+    pbox.appendChild(b);
+  }
+  obox.innerHTML = '';
+  ['G95','E20','B7'].forEach(o => {
+    const b = document.createElement('button');
+    b.type='button'; b.textContent=o; b.className=o.toLowerCase();
+    if(selectedOil===o) b.classList.add('on');
+    b.onclick = () => { selectOil(o); updateModalMeta(); renderSlipEditors(); };
+    obox.appendChild(b);
+  });
+  renderExtraFills();
+}
+function updateModalMeta(){
+  const mp = document.getElementById('modalPump');
+  const mo = document.getElementById('modalOil');
+  if(mp) mp.textContent = selectedPumpNum || '-';
+  paintOilCell();
+}
+function focusSlipNote(){
+  const box = document.getElementById('slipPreviewContainer');
+  if(box) box.style.display = 'block';
+  const el = document.getElementById('slipNote');
+  if(el){ el.focus(); el.scrollIntoView({block:'center'}); }
+}
+function addExtraFill(){
+  const pump = Number((document.getElementById('extraPump')||{}).value || selectedPumpNum || 1);
+  const oil = (document.getElementById('extraOil')||{}).value || 'G95';
+  const amt = parseFloat((document.getElementById('extraAmt')||{}).value || 0);
+  if(!amt || amt<=0){ showToast('กรอกยอดรายการเติมก่อน'); return; }
+  extraFills.push({ pump, oil, amount: amt });
+  const inp = document.getElementById('extraAmt'); if(inp) inp.value='';
+  renderExtraFills();
+}
+function removeExtraFill(i){ extraFills.splice(i,1); renderExtraFills(); }
+function renderExtraFills(){
+  const box = document.getElementById('extraList');
+  if(!box) return;
+  if(!extraFills.length){ box.innerHTML = ''; return; }
+  const sum = extraFills.reduce((t,x)=>t+x.amount,0);
+  box.innerHTML = extraFills.map((x,i)=>`<div class="extra-item"><span>ตู้ ${x.pump} · ${x.oil} · ฿${x.amount.toLocaleString()}</span><button type="button" onclick="removeExtraFill(${i})">ลบ</button></div>`).join('')
+    + `<div class="extra-item"><span>รวมรายการเติม ฿${sum.toLocaleString()} (ยอดโอนหลักยังเป็นตาม QR)</span><span></span></div>`;
+}
+
+function handleSlipUpload(event){
+  const file = event.target.files[0];
+  event.target.value = '';
+  if(!file) return;
+  const pump = selectedPumpNum || '0', amount = getAmountValue() || '0';
+  const now = new Date();
+  const timeTag = now.toTimeString().split(' ')[0].replace(/:/g,'-');
+  currentSlipFilename = `slip_P${pump}_${amount}THB_${getLocalDateString(now)}_${timeTag}.jpg`;
+  showToast('กำลังจัดรูปสลิป...');
+
+  const finishImg = (bmp) => {
+    const MAX = 2200;
+    const scale = Math.min(1, MAX / Math.max(bmp.width, bmp.height));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.round(bmp.width * scale);
+    canvas.height = Math.round(bmp.height * scale);
+    const ctx = canvas.getContext('2d', { alpha:false });
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(bmp, 0, 0, canvas.width, canvas.height);
+    currentSlipBase64 = canvas.toDataURL('image/jpeg', 0.93);
+    qrImage.style.display = 'none'; modalPrice.style.display = 'none';
+    document.getElementById('slipPreviewContainer').style.display = 'block';
+    document.getElementById('slipPreviewImg').src = currentSlipBase64;
+    slipPriceDisplay.textContent = `฿${(parseFloat(getAmountValue())||0).toLocaleString()}`;
+    renderSlipEditors();
+    setPostSlipTools(true);
+    paintOilCell();
+    showToast('ถ่ายสลิปเรียบร้อย');
+  };
+
+  if(window.createImageBitmap){
+    createImageBitmap(file).then(finishImg).catch(()=>{
+      const reader = new FileReader();
+      reader.onload = ev => { const img=new Image(); img.onload=()=>finishImg(img); img.src=ev.target.result; };
+      reader.readAsDataURL(file);
+    });
+  } else {
+    const reader = new FileReader();
+    reader.onload = ev => { const img=new Image(); img.onload=()=>finishImg(img); img.src=ev.target.result; };
+    reader.readAsDataURL(file);
+  }
+}
+
+/* ===================================================
+   12. บันทึกรายการ
+   =================================================== */
+function saveRecord(){
+  const amount = parseFloat(getAmountValue());
+  if(!selectedPumpNum || !selectedOil || isNaN(amount) || amount <= 0){
+    showToast('กรุณาระบุหน้าจ่าย ชนิดน้ำมัน และจำนวนเงิน'); return;
+  }
+  const noteEl = document.getElementById('slipNote');
+  currentNote = noteEl ? noteEl.value.trim() : (currentNote||'');
+  const extraText = extraFills.length
+    ? extraFills.map(x => `ตู้${x.pump} ${x.oil} ${x.amount}`).join(' + ')
+    : '';
+  const now = new Date();
+  const newRecord = {
+    id: Date.now(),
+    pump: 'หน้าจ่าย ' + selectedPumpNum,
+    oilType: selectedOil,
+    amount: amount,
+    phone: currentMember,
+    note: currentNote,
+    extras: extraFills.slice(),
+    extraText,
+    needContact: !!needContact,
+    date: now.toLocaleDateString('th-TH', { year:'numeric', month:'short', day:'numeric' }),
+    time: now.toLocaleTimeString('th-TH', { hour:'2-digit', minute:'2-digit', second:'2-digit' }),
+    cleared:false, lineSent:false,
+    slipImage: currentSlipBase64, slipFilename: currentSlipFilename
+  };
+
+  records.unshift(newRecord);
+  saveToStorage();
+  persistPut(newRecord);
+
+  setAmountValue('');
+  currentSlipBase64 = null; currentSlipFilename = ""; currentNote=''; extraFills=[]; needContact=false;
+  if(!addMoreEnabled) currentMember = "";
+  updateMainButtonsUI();
+  playSuccess();
+  showSuccessAnimation();
+}
+
+function toggleStatus(id){
+  playStatus();
+  records = records.map(i => i.id === id ? {...i, cleared: !i.cleared} : i);
+  saveToStorage();
+  const updated = records.find(r => r.id === id);
+  if(updated) persistPut(updated);
+}
+function shareToLine(id){
+  const item = records.find(r => r.id === id); if(!item) return;
+  records = records.map(r => r.id === id ? {...r, lineSent:true} : r);
+  saveToStorage();
+  const updated = records.find(r => r.id === id);
+  if(updated) persistPut(updated);
+  const memberText = item.phone ? `\nข้อมูลสมาชิก: ${item.phone}` : '';
+  const noteText = item.note ? `\nหมายเหตุ: ${item.note}` : '';
+  const extraText = item.extraText ? `\nรายการเติม: ${item.extraText}` : '';
+  const contactText = item.needContact ? '\nต้องติดต่อลูกค้า' : '';
+
+  const msg = `แจ้งยอดโอน\n${item.pump}\nน้ำมัน: ${item.oilType}\nยอดเงิน: ${item.amount.toLocaleString()} บาท${memberText}${extraText}${noteText}${contactText}\nวันที่: ${item.date}\nเวลา: ${item.time}`;
+  window.open(`https://line.me/R/msg/text/?${encodeURIComponent(msg)}`, '_blank');
+}
+function downloadSlip(id){
+  const item = records.find(r => r.id === id);
+  if(!item || !item.slipImage){ showToast('ไม่มีรูปสลิปในระบบ'); return; }
+  const a = document.createElement('a');
+  a.href = item.slipImage; a.download = item.slipFilename || `slip_${item.pump}_${item.amount}THB.jpg`;
+  document.body.appendChild(a); a.click(); a.remove();
+  showToast('ดาวน์โหลดรูปลงเครื่องแล้ว');
+}
+function deleteRecord(id){
+  if(confirm('ลบรายการนี้ใช่หรือไม่?')){
+    playDelete();
+    records = records.filter(i => i.id !== id);
+    saveToStorage();
+    persistDeleteOne(id);
+  }
+}
+function resetDayRecords(){
+  if(confirm('ต้องการเริ่มกะใหม่ และลบข้อมูลของรอบนี้ทั้งหมดใช่หรือไม่?')){
+    playClear();
+    records = []; saveToStorage(); persistClearAll(); showToast('เริ่มวันใหม่เรียบร้อย');
+  }
+}
+
+/* ===================================================
+   12.1 ลบข้อมูลเก่า (ตามช่วงวัน) — ไม่กระทบรายการล่าสุด
+   =================================================== */
+function openCleanupModal(){
+  document.getElementById('cleanupCustomDate').value = '';
+  updateCleanupPreview(30);
+  document.getElementById('cleanupModal').classList.add('active');
+}
+function closeCleanupModal(){ document.getElementById('cleanupModal').classList.remove('active'); }
+
+function updateCleanupPreview(days){
+  document.querySelectorAll('.cleanup-chip').forEach(c => c.classList.remove('active'));
+  const chip = document.querySelector(`.cleanup-chip[data-days="${days}"]`);
+  if(chip) chip.classList.add('active');
+  const cutoff = Date.now() - days*86400000;
+  const count = records.filter(r => r.id < cutoff).length;
+  document.getElementById('cleanupPreview').textContent =
+    count > 0 ? `จะลบ ${count} รายการที่เก่ากว่า ${days} วัน` : `ไม่มีรายการที่เก่ากว่า ${days} วัน`;
+  document.getElementById('cleanupModal').dataset.cutoff = cutoff;
+}
+function updateCleanupPreviewCustom(){
+  const val = document.getElementById('cleanupCustomDate').value;
+  document.querySelectorAll('.cleanup-chip').forEach(c => c.classList.remove('active'));
+  if(!val){ document.getElementById('cleanupPreview').textContent = 'เลือกวันที่ต้องการลบก่อนหน้านั้นทั้งหมด'; return; }
+  const cutoff = new Date(val + 'T00:00:00').getTime();
+  const count = records.filter(r => r.id < cutoff).length;
+  document.getElementById('cleanupPreview').textContent =
+    count > 0 ? `จะลบ ${count} รายการที่ก่อนวันที่ ${val}` : `ไม่มีรายการก่อนวันที่ ${val}`;
+  document.getElementById('cleanupModal').dataset.cutoff = cutoff;
+}
+function confirmCleanup(){
+  const cutoff = Number(document.getElementById('cleanupModal').dataset.cutoff || 0);
+  if(!cutoff){ showToast('กรุณาเลือกช่วงเวลาก่อน'); return; }
+  const toRemove = records.filter(r => r.id < cutoff).map(r => r.id);
+  if(toRemove.length === 0){ showToast('ไม่มีรายการให้ลบในช่วงที่เลือก'); return; }
+  if(!confirm(`ยืนยันลบ ${toRemove.length} รายการเก่า? การลบนี้ย้อนกลับไม่ได้`)) return;
+  records = records.filter(r => r.id >= cutoff);
+  saveToStorage();
+  persistDeleteMany(toRemove);
+  closeCleanupModal();
+  showToast(`ลบข้อมูลเก่าแล้ว ${toRemove.length} รายการ`);
+}
+
+/* ===================================================
+   13. Export CSV
+   =================================================== */
+function buildAnalysis(){
+  const n = records.length;
+  const amts = records.map(r => r.amount).sort((a,b) => a-b);
+  const total = amts.reduce((a,b) => a+b, 0);
+  const avg = n ? total/n : 0;
+  const median = !n ? 0 : (n%2 ? amts[(n-1)/2] : (amts[n/2-1]+amts[n/2])/2);
+
+  const byOil = {}, byPump = {}, byHour = {};
+  let cleared=0, lineSent=0, withSlip=0, withCard=0, withPhone=0;
+  records.forEach(r => {
+    byOil[r.oilType] = byOil[r.oilType] || {c:0,s:0};
+    byOil[r.oilType].c++; byOil[r.oilType].s += r.amount;
+    byPump[r.pump] = byPump[r.pump] || {c:0,s:0};
+    byPump[r.pump].c++; byPump[r.pump].s += r.amount;
+    const h = (r.time || '').split(':')[0] || '-';
+    byHour[h] = byHour[h] || {c:0,s:0};
+    byHour[h].c++; byHour[h].s += r.amount;
+    if(r.cleared) cleared++;
+    if(r.lineSent) lineSent++;
+    if(r.slipImage) withSlip++;
+    if(r.phone && r.phone.length === 16) withCard++;
+    else if(r.phone && r.phone.length === 10) withPhone++;
+  });
+  const pct = x => n ? +( (x/n*100).toFixed(1) ) : 0;
+  return { n, total, avg, median, min: amts[0]||0, max: amts[n-1]||0,
+           byOil, byPump, byHour, cleared, lineSent, withSlip, withCard, withPhone, pct };
+}
+
+/* สร้างสมุดงาน Excel (2 ชีต) คืนเป็น workbook object — ใช้ร่วมกันทั้งปุ่ม Excel เดี่ยวๆ และปุ่ม ZIP รวม */
+function buildWorkbook(){
+  const a = buildAnalysis();
+  const dateStr = getLocalDateString(new Date());
+
+  /* ---------- SHEET 1 : สรุปยอดตามปกติ ---------- */
+  const s1 = [['วันที่','เวลา','หน้าจ่าย','ชนิดน้ำมัน','จำนวนเงิน (บาท)','ข้อมูลสมาชิก','หมายเหตุ','ต้องติดต่อลูกค้า','รายการเติมรวม','สถานะการแจ้ง','การส่ง LINE','รูปสลิป']];
+  records.forEach(r => s1.push([
+    r.date, r.time, r.pump, r.oilType, r.amount,
+    r.phone ? String(r.phone) : '-',
+    r.note || '-',
+    r.needContact ? 'ต้องติดต่อลูกค้า' : '-',
+    r.extraText || '-',
+    r.cleared ? 'เคลียร์แล้ว' : 'รอเคลียร์',
+    r.lineSent ? 'ส่งแล้ว' : 'ยังไม่ส่ง',
+    r.slipFilename || '-'
+  ]));
+  s1.push([], ['สรุปยอดขายรวม (บาท)']);
+  s1.push(['รวมทุกชนิดน้ำมัน', a.total]);
+  ['G95','E20','B7'].forEach(o => s1.push(['รวม ' + o, a.byOil[o] ? a.byOil[o].s : 0]));
+  s1.push(['จำนวนรายการทั้งหมด', a.n]);
+
+  const ws1 = XLSX.utils.aoa_to_sheet(s1);
+  ws1['!cols'] = [{wch:16},{wch:11},{wch:12},{wch:12},{wch:16},{wch:20},{wch:14},{wch:12},{wch:34}];
+
+  /* ---------- SHEET 2 : วิเคราะห์เชิงลึก ---------- */
+  const s2 = [];
+  s2.push(['รายงานวิเคราะห์เชิงลึก — บันทึกยอดโอน']);
+  s2.push(['ออกรายงานวันที่', dateStr]);
+  s2.push([]);
+  s2.push(['1) ภาพรวม']);
+  s2.push(['ตัวชี้วัด','ค่า','หน่วย']);
+  s2.push(['จำนวนรายการทั้งหมด', a.n, 'รายการ']);
+  s2.push(['ยอดโอนรวม', a.total, 'บาท']);
+  s2.push(['ยอดเฉลี่ยต่อรายการ', +a.avg.toFixed(2), 'บาท']);
+  s2.push(['ค่ามัธยฐาน (Median)', +a.median.toFixed(2), 'บาท']);
+  s2.push(['รายการสูงสุด', a.max, 'บาท']);
+  s2.push(['รายการต่ำสุด', a.min, 'บาท']);
+  s2.push([]);
+
+  s2.push(['2) แยกตามชนิดน้ำมัน']);
+  s2.push(['ชนิดน้ำมัน','จำนวนรายการ','สัดส่วนรายการ (%)','ยอดรวม (บาท)','สัดส่วนยอด (%)','เฉลี่ยต่อรายการ']);
+  Object.keys(a.byOil).sort().forEach(k => {
+    const o = a.byOil[k];
+    s2.push([k, o.c, a.pct(o.c), o.s, a.total ? +(o.s/a.total*100).toFixed(1) : 0, +(o.s/o.c).toFixed(2)]);
+  });
+  s2.push([]);
+
+  s2.push(['3) แยกตามหน้าจ่าย']);
+  s2.push(['หน้าจ่าย','จำนวนรายการ','ยอดรวม (บาท)','สัดส่วนยอด (%)','เฉลี่ยต่อรายการ']);
+  Object.keys(a.byPump).sort().forEach(k => {
+    const o = a.byPump[k];
+    s2.push([k, o.c, o.s, a.total ? +(o.s/a.total*100).toFixed(1) : 0, +(o.s/o.c).toFixed(2)]);
+  });
+  s2.push([]);
+
+  s2.push(['4) การกระจายตามช่วงเวลา (รายชั่วโมง)']);
+  s2.push(['ช่วงเวลา','จำนวนรายการ','ยอดรวม (บาท)','สัดส่วนยอด (%)']);
+  const hours = Object.keys(a.byHour).sort();
+  hours.forEach(h => {
+    const o = a.byHour[h];
+    s2.push([h + ':00 - ' + h + ':59', o.c, o.s, a.total ? +(o.s/a.total*100).toFixed(1) : 0]);
+  });
+  s2.push([]);
+
+  s2.push(['5) คุณภาพการทำงาน / ความครบถ้วนของข้อมูล']);
+  s2.push(['หัวข้อ','จำนวน','คิดเป็น (%)']);
+  s2.push(['แจ้งแคชเชียร์แล้ว (เคลียร์)', a.cleared, a.pct(a.cleared)]);
+  s2.push(['ยังค้างแจ้งแคชเชียร์', a.n - a.cleared, a.pct(a.n - a.cleared)]);
+  s2.push(['ส่งแจ้งทาง LINE แล้ว', a.lineSent, a.pct(a.lineSent)]);
+  s2.push(['มีรูปสลิปแนบ', a.withSlip, a.pct(a.withSlip)]);
+  s2.push(['ผูกบัตรสมาชิก 16 หลัก', a.withCard, a.pct(a.withCard)]);
+  s2.push(['ผูกเบอร์โทร 10 หลัก', a.withPhone, a.pct(a.withPhone)]);
+  s2.push(['ไม่ระบุข้อมูลลูกค้า', a.n - a.withCard - a.withPhone, a.pct(a.n - a.withCard - a.withPhone)]);
+  s2.push([]);
+
+  /* ---------- ข้อสรุปเชิงลึกอัตโนมัติ ---------- */
+  const topOil = Object.keys(a.byOil).sort((x,y) => a.byOil[y].s - a.byOil[x].s)[0];
+  const topPump = Object.keys(a.byPump).sort((x,y) => a.byPump[y].s - a.byPump[x].s)[0];
+  const peakHour = hours.sort((x,y) => a.byHour[y].s - a.byHour[x].s)[0];
+  const lowPump = Object.keys(a.byPump).sort((x,y) => a.byPump[x].s - a.byPump[y].s)[0];
+
+  s2.push(['6) ข้อสรุปเชิงลึก']);
+  s2.push(['ลำดับ','ข้อสังเกต']);
+  let i = 1;
+  if(topOil) s2.push([i++, `น้ำมัน ${topOil} ทำยอดสูงสุด ${a.byOil[topOil].s.toLocaleString()} บาท คิดเป็น ${(a.byOil[topOil].s/a.total*100).toFixed(1)}% ของยอดรวม`]);
+  if(topPump) s2.push([i++, `${topPump} เป็นหน้าจ่ายที่ทำยอดสูงสุด ${a.byPump[topPump].s.toLocaleString()} บาท จาก ${a.byPump[topPump].c} รายการ`]);
+  if(lowPump && lowPump !== topPump) s2.push([i++, `${lowPump} มียอดต่ำสุดที่ ${a.byPump[lowPump].s.toLocaleString()} บาท อาจตรวจสอบตำแหน่งหรือช่วงเวลาให้บริการ`]);
+  if(peakHour) s2.push([i++, `ช่วงเวลา ${peakHour}:00-${peakHour}:59 คือชั่วโมงเร่งด่วน มี ${a.byHour[peakHour].c} รายการ รวม ${a.byHour[peakHour].s.toLocaleString()} บาท`]);
+  s2.push([i++, `ยอดเฉลี่ยต่อรายการ ${a.avg.toFixed(2)} บาท เทียบกับมัธยฐาน ${a.median.toFixed(2)} บาท` +
+    (a.avg > a.median * 1.2 ? ' — มีรายการยอดสูงผิดปกติดึงค่าเฉลี่ยขึ้น' : ' — การกระจายยอดค่อนข้างสม่ำเสมอ')]);
+  if(a.n - a.cleared > 0) s2.push([i++, `ยังค้างแจ้งแคชเชียร์ ${a.n - a.cleared} รายการ รวม ${records.filter(r => !r.cleared).reduce((t,r) => t+r.amount,0).toLocaleString()} บาท ควรเคลียร์ก่อนปิดกะ`]);
+  else s2.push([i++, 'แจ้งแคชเชียร์ครบทุกรายการแล้ว ไม่มียอดค้าง']);
+  s2.push([i++, `แนบสลิปเป็นหลักฐาน ${a.pct(a.withSlip)}% ของรายการ` + (a.pct(a.withSlip) < 50 ? ' — แนะนำถ่ายสลิปให้มากขึ้นเพื่อกันข้อโต้แย้ง' : ' — อยู่ในเกณฑ์ดี')]);
+  s2.push([i++, `เก็บข้อมูลลูกค้าได้ ${a.pct(a.withCard + a.withPhone)}% ของรายการ` + (a.pct(a.withCard + a.withPhone) < 40 ? ' — ยังเก็บได้น้อย' : ' — อยู่ในเกณฑ์ดี')]);
+
+  const ws2 = XLSX.utils.aoa_to_sheet(s2);
+  ws2['!cols'] = [{wch:30},{wch:78},{wch:20},{wch:18},{wch:18},{wch:18}];
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws1, 'สรุปยอดโอน');
+  XLSX.utils.book_append_sheet(wb, ws2, 'วิเคราะห์เชิงลึก');
+  return wb;
+}
+
+/* ปุ่ม Excel เดี่ยว — ดาวน์โหลดเฉพาะไฟล์ .xlsx (ไม่รวมรูป) */
+function exportExcel(){
+  if(records.length === 0){ showToast('ไม่มีข้อมูลให้ Export'); return; }
+  if(typeof XLSX === 'undefined'){ exportCSVFallback(); return; }
+  const wb = buildWorkbook();
+  XLSX.writeFile(wb, `สรุปยอดโอน_${getLocalDateString(new Date())}.xlsx`);
+  showToast('ดาวน์โหลด Excel 2 ชีตสำเร็จ');
+}
+
+/* โหลด JSZip แบบ lazy ตอนกดใช้งานจริงเท่านั้น */
+function loadJSZip(){
+  return new Promise((resolve, reject) => {
+    if(window.JSZip) return resolve(window.JSZip);
+    const sc = document.createElement('script');
+    sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+    sc.onload = () => window.JSZip ? resolve(window.JSZip) : reject(new Error('no global'));
+    sc.onerror = () => reject(new Error('load failed'));
+    document.head.appendChild(sc);
+  });
+}
+
+/* ปุ่ม ZIP รวม — ไฟล์เดียวมีทั้ง Excel (2 ชีต) และรูปสลิปทุกใบ จัดโฟลเดอร์ slips/ ให้ */
+async function exportZipAll(){
+  if(records.length === 0){ showToast('ไม่มีข้อมูลให้ Export'); return; }
+  if(typeof XLSX === 'undefined'){ showToast('โหลดระบบ Excel ไม่สำเร็จ ลองรีเฟรชหน้าแล้วลองใหม่'); return; }
+
+  const zipBtn = document.getElementById('btnZipExport');
+  const zipBtnLabel = zipBtn ? zipBtn.innerHTML : null;
+  if(zipBtn){ zipBtn.disabled = true; zipBtn.style.opacity = '.6'; }
+  showToast('กำลังเตรียมไฟล์ ZIP...');
+
+  try{
+    const JSZipLib = await loadJSZip();
+    const zip = new JSZipLib();
+    const dateStr = getLocalDateString(new Date());
+
+    /* 1) ไฟล์ Excel */
+    const wb = buildWorkbook();
+    const xlsxBinary = XLSX.write(wb, { bookType:'xlsx', type:'array' });
+    zip.file(`สรุปยอดโอน_${dateStr}.xlsx`, xlsxBinary);
+
+    /* 2) รูปสลิปทั้งหมด ใส่โฟลเดอร์ slips/ */
+    const imgFolder = zip.folder('slips');
+    let imgCount = 0;
+    records.forEach((r, idx) => {
+      if(r.slipImage){
+        const commaIdx = r.slipImage.indexOf(',');
+        const base64Data = commaIdx >= 0 ? r.slipImage.slice(commaIdx + 1) : r.slipImage;
+        const filename = r.slipFilename || `slip_${idx+1}.jpg`;
+        imgFolder.file(filename, base64Data, { base64:true });
+        imgCount++;
+      }
+    });
+
+    const blob = await zip.generateAsync({ type:'blob', compression:'DEFLATE', compressionOptions:{ level:6 } },
+      meta => { if(zipBtn) zipBtn.textContent = `กำลังบีบอัด ${Math.round(meta.percent)}%`; }
+    );
+
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `รายงานยอดโอน_${dateStr}.zip`;
+    document.body.appendChild(a); a.click(); a.remove();
+
+    showToast(imgCount > 0
+      ? `ดาวน์โหลด ZIP สำเร็จ (Excel + รูป ${imgCount} รูป)`
+      : 'ดาวน์โหลด ZIP สำเร็จ (Excel — ยังไม่มีรูปสลิปในรอบนี้)');
+  }catch(err){
+    showToast('สร้างไฟล์ ZIP ไม่สำเร็จ กรุณาลองใหม่');
+  }finally{
+    if(zipBtn){ zipBtn.disabled = false; zipBtn.style.opacity = ''; if(zipBtnLabel) zipBtn.innerHTML = zipBtnLabel; }
+  }
+}
+
+/* สำรอง: ถ้าโหลดไลบรารีไม่ได้ ให้ออกเป็น CSV แทน */
+function exportCSVFallback(){
+  let csv = "\uFEFFวันที่,เวลา,หน้าจ่าย,ชนิดน้ำมัน,จำนวนเงิน (บาท),ข้อมูลสมาชิก,สถานะการแจ้ง,การส่งLINE,รูปสลิป\n";
+  let totalAmt = 0;
+  records.forEach(item => {
+    totalAmt += item.amount;
+    csv += `"${item.date}","${item.time}","${item.pump}","${item.oilType}","${item.amount}","${item.phone||'-'}","${item.cleared?'เคลียร์แล้ว':'รอเคลียร์'}","${item.lineSent?'ส่งแล้ว':'ยังไม่ส่ง'}","${item.slipFilename||'-'}"\n`;
+  });
+  csv += `\n,,,รวมทั้งหมด,${totalAmt},,,,\n`;
+  const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `สรุปยอดโอน_${getLocalDateString(new Date())}.csv`;
+  document.body.appendChild(a); a.click(); a.remove();
+  showToast('ออกไฟล์ CSV แทน (โหลดไลบรารี Excel ไม่สำเร็จ)');
+}
+
+/* ===================================================
+   14. แสดงรายการ (ไอคอน SVG ทั้งหมด)
+   =================================================== */
+function renderList(){
+  recordList.innerHTML = '';
+  if(records.length === 0){
+    pendingCount.textContent = '0 รายการ';
+    totalAmount.textContent = '฿0';
+    navBadgeCount.classList.remove('show');
+    recordList.innerHTML = `<div class="empty-state">${ICONS.empty}<p>ยังไม่มีรายการบันทึกในรอบนี้</p></div>`;
+    return;
+  }
+
+  let pending = 0, total = 0;
+  records.forEach(item => {
+    if(!item.cleared) pending++;
+    total += item.amount;
+
+    const oilClass = item.oilType === 'E20' ? 'tag-e20' : item.oilType === 'B7' ? 'tag-b7' : 'tag-gas95';
+    const slipTag  = item.slipImage ? `<span class="tag tag-slip">${ICONS.clip} สลิป</span>` : '';
+    const slipBtn  = item.slipImage ? `<button class="r-btn slip" onclick="downloadSlip(${item.id})" title="โหลดสลิป">${ICONS.down}</button>` : '';
+    let memberTag = '';
+    if(item.phone){
+      memberTag = item.phone.length === 16
+        ? `<span class="tag tag-card">${ICONS.card} ${item.phone}</span>`
+        : `<span class="tag tag-phone">${ICONS.phone} ${item.phone}</span>`;
+    }
+    if(item.note) memberTag += `<span class="tag tag-slip">หมายเหตุ</span>`;
+    if(item.extraText) memberTag += `<span class="tag tag-pump">หลายรายการ</span>`;
+    if(item.needContact) memberTag += `<span class="tag tag-slip">ต้องติดต่อ</span>`;
+
+
+    const el = document.createElement('div');
+    el.className = `record-item glass ${item.cleared ? 'cleared' : 'pending'}`;
+    el.innerHTML = `
+      <div class="record-top">
+        <div class="tags">
+          <span class="tag tag-pump">${item.pump}</span>
+          <span class="tag ${oilClass}">${item.oilType}</span>
+          ${slipTag} ${memberTag}
+        </div>
+        <div class="amount">฿${item.amount.toLocaleString()}</div>
+      </div>
+      <div class="record-bottom">
+        <div class="record-time">${ICONS.clock} ${item.time}</div>
+        <div class="record-actions">
+          ${slipBtn}
+          ${lineEnabled ? `<button class="r-btn line ${item.lineSent ? 'sent' : ''}" onclick="shareToLine(${item.id})">${ICONS.send} ${item.lineSent ? 'ส่งแล้ว' : 'LINE'}</button>` : ''}
+          <button class="r-btn status ${item.cleared ? 'cleared' : 'pending'}" onclick="toggleStatus(${item.id})" title="${item.cleared ? 'เคลียร์แล้ว' : 'รอเคลียร์'}">${item.cleared ? ICONS.check : ICONS.hour}</button>
+          <button class="r-btn del" onclick="deleteRecord(${item.id})" title="ลบ">${ICONS.trash}</button>
+        </div>
+      </div>`;
+    recordList.appendChild(el);
+  });
+
+  pendingCount.textContent = `${pending} รายการ`;
+  totalAmount.textContent = `฿${total.toLocaleString()}`;
+  if(pending > 0){ navBadgeCount.textContent = pending; navBadgeCount.classList.add('show'); }
+  else navBadgeCount.classList.remove('show');
+}
+
+(function bindFastPad(){
+  const grid = document.getElementById('padGrid');
+  if(!grid) return;
+  let lastTs = 0;
+  const fire = (btn) => {
+    const now = Date.now();
+    if(now - lastTs < 20) return;
+    lastTs = now;
+    const d = btn.getAttribute('data-pad');
+    if(d === 'bl') padBottomLeft();
+    else if(d === 'bs') padBackspace();
+    else if(d != null) padPress(d);
+  };
+  grid.addEventListener('pointerdown', e => {
+    const btn = e.target.closest('.numpad-key');
+    if(!btn) return;
+    e.preventDefault();
+    fire(btn);
+  }, {passive:false});
+})();
+
+initStorage();
+toggleClearBtn();
+
+/* ลงทะเบียน Service Worker (ทำงานเฉพาะเมื่อโฮสต์บน https เช่น GitHub Pages) */
+if('serviceWorker' in navigator && location.protocol === 'https:'){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
