@@ -20,7 +20,7 @@
 
   <style>
   /* ============================================================
-     THEME TOKENS — Aero / Liquid Glass (กลางคืน + กลางวัน)
+     THEME TOKENS — Aero / Liquid Glass
      ============================================================ */
   :root{
     --bg-1:#070c18; --bg-2:#0b1424;
@@ -40,8 +40,7 @@
     --text:#f4f8ff; --text-muted:#93a6c4; --text-soft:#c7d4ea;
 
     --c-sky:#38bdf8; --c-blue:#2563eb; --c-violet:#8b5cf6;
-    --g95:#f97316; --e20:#10b981; --b7:#3b82f6;
-    --success:#10b981; --warning:#f59e0b; --danger:#ef4444; --excel:#12a150;
+    --warning:#f59e0b;
     --radius:22px; --radius-sm:15px;
   }
 
@@ -81,7 +80,7 @@
   @keyframes drift2{0%,100%{transform:translate3d(0,0,0) scale(1.05)}50%{transform:translate3d(-7vw,-5vh,0) scale(.92)}}
   @keyframes drift3{0%,100%{transform:translate3d(0,0,0) scale(.95)}50%{transform:translate3d(5vw,-6vh,0) scale(1.1)}}
 
-  /* ---------- โครงหน้าจอ: ไม่ล้นบน ไม่ล้นล่าง ---------- */
+  /* โครงหน้าจอ */
   .container{
     position:relative; z-index:1;
     max-width:520px; margin:0 auto;
@@ -104,7 +103,6 @@
   @keyframes fadeIn{from{opacity:0}to{opacity:1}}
   @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
 
-  /* ---------- พื้นผิวกระจก ---------- */
   .glass{
     position:relative;
     background:var(--glass);
@@ -117,9 +115,7 @@
   }
   .glass::before{content:'';position:absolute;inset:0;background:var(--sheen);pointer-events:none;}
 
-  /* ============================================================
-     HEADER
-     ============================================================ */
+  /* HEADER */
   .header{
     background:linear-gradient(135deg,#0ea5e9 0%,#3b82f6 45%,#7c3aed 100%);
     color:#fff;padding:20px 18px;border-radius:var(--radius);
@@ -127,13 +123,12 @@
     box-shadow:0 20px 42px rgba(37,99,235,.42), 0 6px 14px rgba(124,58,237,.30), inset 0 1px 0 rgba(255,255,255,.55), inset 0 -2px 8px rgba(0,0,0,.20);
     margin-bottom:16px;position:relative;overflow:hidden;
     display:flex;justify-content:space-between;align-items:center;gap:12px;
-    animation:fadeUp .45s cubic-bezier(.2,.8,.25,1);
   }
   .header::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.35),rgba(255,255,255,.05) 46%,rgba(255,255,255,0) 60%);pointer-events:none;}
   .header::after{content:'';position:absolute;width:190px;height:190px;border-radius:50%;background:rgba(255,255,255,.16);top:-72px;right:-56px;filter:blur(2px);}
-  .header-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.22);border:1px solid rgba(255,255,255,.4);padding:4px 10px;border-radius:999px;font-size:11px;font-weight:600;margin-bottom:8px;position:relative;z-index:2;backdrop-filter:blur(6px);}
+  .header-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.22);border:1px solid rgba(255,255,255,.4);padding:4px 10px;border-radius:999px;font-size:11px;font-weight:600;margin-bottom:8px;position:relative;z-index:2;}
   .header-info h1{font-size:23px;font-weight:700;line-height:1.2;position:relative;z-index:2;text-shadow:0 2px 6px rgba(0,0,0,.28);}
-  .header-info p{font-size:12px;font-weight:500;color:#eaf4ff;position:relative;z-index:2;margin-top:3px;text-shadow:0 1px 3px rgba(0,0,0,.25);}
+  .header-info p{font-size:12px;font-weight:500;color:#eaf4ff;position:relative;z-index:2;margin-top:3px;}
 
   .btn-theme{
     flex:0 0 auto;width:46px;height:46px;border-radius:50%;
@@ -141,39 +136,30 @@
     color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;
     position:relative;z-index:2;backdrop-filter:blur(8px);
     box-shadow:inset 0 1px 0 rgba(255,255,255,.7), 0 6px 14px rgba(0,0,0,.25);
-    transition:transform .25s cubic-bezier(.2,.8,.25,1), background .25s;
   }
-  .btn-theme:active{transform:scale(.88) rotate(-25deg);}
-  .btn-theme svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .4s;}
+  .btn-theme svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
   .header-tools{display:flex;align-items:center;gap:8px;position:relative;z-index:2;flex:0 0 auto;}
-  .header-tools .btn-theme:active{transform:scale(.88) rotate(0);}
 
-  /* ============================================================
-     CARD หลัก
-     ============================================================ */
+  /* CARD หลัก */
   .card{padding:20px 18px;margin-bottom:4px;}
   .card > *{position:relative;z-index:1;}
-
   .section-label{display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:600;color:var(--text-muted);margin-bottom:13px;}
   .section-label span{display:flex;align-items:center;gap:7px;}
   .section-label svg{stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
-
   .action-buttons-right{display:flex;gap:12px;align-items:center;}
   .btn-chip{
     width:44px;height:44px;border-radius:14px;
     background:var(--glass-2);border:1px solid var(--glass-brd);
     display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;
     box-shadow:var(--shadow-md), var(--inner-light);
-    transition:transform .12s, box-shadow .12s, background .25s;
   }
   .btn-chip::after{content:'';position:absolute;inset:0;border-radius:inherit;background:var(--sheen);pointer-events:none;}
   .btn-chip svg{stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;position:relative;z-index:1;}
-  .btn-chip:active{transform:scale(.88);}
   .btn-card-scan{color:var(--c-violet);}
   .btn-phone{color:var(--c-sky);}
-  .btn-card-scan.has-data{color:#fff;background:linear-gradient(140deg,#a78bfa,#7c3aed);border-color:#c4b5fd;box-shadow:0 8px 20px rgba(139,92,246,.55), inset 0 1px 0 rgba(255,255,255,.6);}
-  .btn-phone.has-data{color:#fff;background:linear-gradient(140deg,#38bdf8,#0284c7);border-color:#bae6fd;box-shadow:0 8px 20px rgba(14,165,233,.55), inset 0 1px 0 rgba(255,255,255,.6);}
-  .status-dot{position:absolute;top:-3px;right:-3px;width:12px;height:12px;background:#22c55e;border-radius:50%;display:none;border:2px solid rgba(255,255,255,.85);box-shadow:0 0 10px rgba(34,197,94,.9);z-index:2;}
+  .btn-card-scan.has-data{color:#fff;background:linear-gradient(140deg,#a78bfa,#7c3aed);border-color:#c4b5fd;}
+  .btn-phone.has-data{color:#fff;background:linear-gradient(140deg,#38bdf8,#0284c7);border-color:#bae6fd;}
+  .status-dot{position:absolute;top:-3px;right:-3px;width:12px;height:12px;background:#22c55e;border-radius:50%;display:none;border:2px solid rgba(255,255,255,.85);z-index:2;}
   .has-data .status-dot{display:block;}
 
   /* ปุ่มหน้าจ่าย / น้ำมัน */
@@ -185,73 +171,64 @@
     border:1px solid var(--glass-brd);height:54px;border-radius:16px;
     font-size:18px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;
     box-shadow:var(--shadow-md), var(--inner-light);
-    transition:transform .12s, box-shadow .12s, background .25s, color .25s;
   }
   .grid-oil-btn{font-size:16px;}
   .grid-pump-btn::after,.grid-oil-btn::after{content:'';position:absolute;inset:0;background:var(--sheen);pointer-events:none;}
-  .grid-pump-btn:active,.grid-oil-btn:active{transform:scale(.9);}
   .grid-oil-btn.disabled{opacity:.22;pointer-events:none;filter:grayscale(100%);}
-
   .grid-pump-btn.active{
     background:linear-gradient(150deg,#7dd3fc,#0ea5e9 55%,#0369a1);color:#fff;border-color:#bae6fd;
     box-shadow:0 12px 26px rgba(14,165,233,.55), inset 0 2px 0 rgba(255,255,255,.75), inset 0 -3px 8px rgba(0,0,0,.25);
-    text-shadow:0 1px 3px rgba(0,0,0,.35);transform:translate(-1px,-2px);
   }
   .grid-oil-btn.g95.active{
     background:linear-gradient(150deg,#fdba74,#f97316 55%,#c2410c);color:#fff;border-color:#fed7aa;
     box-shadow:0 12px 26px rgba(249,115,22,.55), inset 0 2px 0 rgba(255,255,255,.7), inset 0 -3px 8px rgba(0,0,0,.25);
-    text-shadow:0 1px 3px rgba(0,0,0,.35);transform:translate(-1px,-2px);
   }
   .grid-oil-btn.e20.active{
     background:linear-gradient(150deg,#6ee7b7,#10b981 55%,#047857);color:#fff;border-color:#a7f3d0;
     box-shadow:0 12px 26px rgba(16,185,129,.55), inset 0 2px 0 rgba(255,255,255,.7), inset 0 -3px 8px rgba(0,0,0,.25);
-    text-shadow:0 1px 3px rgba(0,0,0,.35);transform:translate(-1px,-2px);
   }
   .grid-oil-btn.b7.active{
     background:linear-gradient(150deg,#93c5fd,#3b82f6 55%,#1d4ed8);color:#fff;border-color:#bfdbfe;
     box-shadow:0 12px 26px rgba(59,130,246,.55), inset 0 2px 0 rgba(255,255,255,.7), inset 0 -3px 8px rgba(0,0,0,.25);
-    text-shadow:0 1px 3px rgba(0,0,0,.35);transform:translate(-1px,-2px);
   }
 
   /* ช่องจำนวนเงิน */
   .amount-wrapper{position:relative;display:flex;align-items:center;margin-bottom:16px;}
   .amount-input{
-    width:100%;height:72px;
+    width:100%;height:72px; display:flex;align-items:center;justify-content:center;
     background:linear-gradient(180deg,rgba(2,8,20,.55),rgba(2,8,20,.30));
     border:2px solid var(--glass-brd);border-radius:18px;
-    font-size:34px !important;font-weight:700 !important;color:#38bdf8 !important;text-align:center;outline:none;
-    padding:0 54px;transition:.3s;
-    box-shadow:inset 0 3px 10px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.14), 0 6px 18px rgba(0,0,0,.28);
+    font-size:34px !important;font-weight:700 !important;color:#38bdf8 !important;text-align:center;
+    padding:0 54px; box-shadow:inset 0 3px 10px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.14);
+    cursor:pointer; user-select:none; -webkit-user-select:none; transition: .3s;
+  }
+  .amount-input.locked {
+    opacity: 0.65; background: rgba(2,8,20,0.85) !important; cursor: not-allowed; border-color: rgba(255,255,255,0.1) !important;
   }
   body.light-mode .amount-input{
     background:linear-gradient(180deg,rgba(255,255,255,.92),rgba(226,236,250,.85));
-    color:#0369a1 !important;
-    box-shadow:inset 0 3px 8px rgba(30,58,110,.14), inset 0 1px 0 rgba(255,255,255,1), 0 6px 18px rgba(30,58,110,.12);
+    color:#0369a1 !important; box-shadow:inset 0 3px 8px rgba(30,58,110,.14), inset 0 1px 0 rgba(255,255,255,1);
   }
-  .amount-input:focus{border-color:#38bdf8;box-shadow:0 0 0 4px rgba(56,189,248,.18), inset 0 3px 10px rgba(0,0,0,.35);}
-  .amount-input::placeholder{color:var(--text-muted);opacity:.5;}
-
+  body.light-mode .amount-input.locked { background: rgba(226,236,250,0.85) !important; opacity: 0.7; }
+  .amount-input.placeholder{color:var(--text-muted)!important;opacity:.55;font-weight:600!important;}
   .btn-clear-input{
     position:absolute;right:16px;width:36px;height:36px;border-radius:50%;
     background:linear-gradient(160deg,#64748b,#334155);color:#fff;border:1px solid rgba(255,255,255,.28);
     display:flex;align-items:center;justify-content:center;cursor:pointer;
     box-shadow:0 5px 12px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.4);
-    opacity:0;pointer-events:none;transition:.25s;
+    opacity:0;pointer-events:none;
   }
   .btn-clear-input svg{stroke:currentColor;fill:none;stroke-width:2.6;stroke-linecap:round;}
   .btn-clear-input.show{opacity:1;pointer-events:auto;}
-  .btn-clear-input:active{transform:scale(.84);background:linear-gradient(160deg,#f87171,#dc2626);}
 
-  /* ปุ่มลัดจำนวนเงิน +10 … +1,000 */
+  /* ปุ่มลัดจำนวนเงิน */
   .quick-amount{display:flex;gap:8px;margin-bottom:22px;}
   .quick-btn{
     flex:1;padding:12px 0;font-size:13.5px;font-weight:600;position:relative;overflow:hidden;
     background:var(--glass-2);border:1px solid var(--glass-brd);border-radius:14px;color:var(--text-soft);cursor:pointer;
     box-shadow:var(--shadow-md), var(--inner-light);
-    transition:transform .16s, color .2s, border-color .2s, box-shadow .25s;
   }
   .quick-btn::after{content:'';position:absolute;inset:0;background:var(--sheen);pointer-events:none;}
-  .quick-btn:active{transform:scale(.9);color:#38bdf8;border-color:#38bdf8;}
 
   .action-btn-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
   .btn-qr-show,.btn-submit{
@@ -259,14 +236,28 @@
     height:60px;border:1px solid rgba(255,255,255,.3);border-radius:18px;
     font-size:16px;font-weight:700;cursor:pointer;
     display:flex;align-items:center;justify-content:center;gap:8px;color:#fff;
-    transition:transform .18s, box-shadow .25s;text-shadow:0 1px 3px rgba(0,0,0,.3);
+    text-shadow:0 1px 3px rgba(0,0,0,.3);
   }
   .btn-qr-show::before,.btn-submit::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.38),rgba(255,255,255,.06) 48%,rgba(255,255,255,0) 62%);pointer-events:none;}
   .btn-qr-show svg,.btn-submit svg{stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;position:relative;z-index:1;}
   .btn-qr-show span,.btn-submit span{position:relative;z-index:1;}
   .btn-qr-show{background:linear-gradient(150deg,#38bdf8,#2563eb 60%,#1e40af);box-shadow:0 14px 30px rgba(37,99,235,.5), inset 0 2px 0 rgba(255,255,255,.55), inset 0 -3px 8px rgba(0,0,0,.25);}
   .btn-submit{background:linear-gradient(150deg,#34d399,#10b981 60%,#047857);box-shadow:0 14px 30px rgba(16,185,129,.5), inset 0 2px 0 rgba(255,255,255,.55), inset 0 -3px 8px rgba(0,0,0,.25);}
-  .btn-qr-show:active,.btn-submit:active{transform:scale(.95);box-shadow:0 5px 12px rgba(0,0,0,.3);}
+
+  /* Edit Banner */
+  .edit-banner {
+    display: none;
+    background: linear-gradient(150deg, #f59e0b, #d97706);
+    color: #fff; padding: 12px 18px; border-radius: var(--radius);
+    margin-bottom: 12px; justify-content: space-between; align-items: center;
+    font-weight: 600; font-size: 14px; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+    animation: fadeUp .3s ease-out;
+  }
+  .edit-banner button {
+    background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4);
+    color: #fff; border-radius: 8px; padding: 6px 12px; font-size: 12px;
+    font-weight: 700; cursor: pointer;
+  }
 
   /* ============================================================
      หน้ารายการ
@@ -285,13 +276,11 @@
   .section-title{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px;color:var(--text);}
   .section-title svg{stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;}
   .header-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;}
-  .btn-export,.btn-reset,.btn-cleanup,.btn-zip{padding:10px 13px;border-radius:13px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;border:1px solid rgba(255,255,255,.25);transition:transform .16s,opacity .2s;white-space:nowrap;}
+  .btn-export,.btn-reset,.btn-cleanup,.btn-zip{padding:10px 13px;border-radius:13px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;border:1px solid rgba(255,255,255,.25);white-space:nowrap;}
   .btn-export svg,.btn-reset svg,.btn-cleanup svg,.btn-zip svg{stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;}
   .btn-export{background:linear-gradient(150deg,#22c55e,#12a150 60%,#0b7038);color:#fff;box-shadow:0 8px 18px rgba(18,161,80,.45), inset 0 1px 0 rgba(255,255,255,.45);}
   .btn-zip{background:linear-gradient(150deg,#fbbf24,#d97706 60%,#92400e);color:#fff;box-shadow:0 8px 18px rgba(217,119,6,.45), inset 0 1px 0 rgba(255,255,255,.45);}
   .btn-reset{background:linear-gradient(150deg,#fb7185,#e11d48 60%,#9f1239);color:#fff;box-shadow:0 8px 18px rgba(225,29,72,.42), inset 0 1px 0 rgba(255,255,255,.4);}
-  .btn-cleanup{background:linear-gradient(150deg,#94a3b8,#475569 60%,#1e293b);color:#fff;box-shadow:0 8px 18px rgba(30,41,59,.4), inset 0 1px 0 rgba(255,255,255,.4);}
-  .btn-export:active,.btn-reset:active,.btn-cleanup:active,.btn-zip:active{transform:scale(.92);}
 
   .record-list{display:flex;flex-direction:column;gap:13px;padding-bottom:8px;}
   .record-item{padding:16px 16px 14px;display:flex;flex-direction:column;gap:12px;animation:popIn .38s cubic-bezier(.2,.9,.3,1.2);}
@@ -323,26 +312,32 @@
   body.light-mode .tag-phone{color:#0369a1}
   body.light-mode .tag-slip{color:#a16207}
 
-  .record-bottom{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--text-muted);border-top:1px dashed var(--glass-brd);padding-top:12px;margin-left:6px;}
-  .record-time{display:flex;align-items:center;gap:6px;font-weight:600;}
-  .record-time svg{stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;}
-  .record-actions{display:flex;gap:7px;align-items:center;}
-  .r-btn{width:38px;height:38px;border-radius:12px;border:1px solid var(--glass-brd);cursor:pointer;display:flex;align-items:center;justify-content:center;background:var(--glass-2);color:var(--text-muted);box-shadow:var(--inner-light);transition:transform .16s;}
-  .r-btn svg{stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;}
+  /* ปรับปรุงโครงสร้าง record-bottom เพื่อรองรับปุ่มจำนวนมากแบบ Wrap ยืดหยุ่น ให้ไม่ทับเวลา */
+  .record-bottom{display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; font-size:11px; color:var(--text-muted); border-top:1px dashed var(--glass-brd); padding-top:12px; margin-left:6px; gap:8px;}
+  .record-time{display:flex; align-items:center; gap:5px; font-weight:600; white-space:nowrap; font-size:11px;}
+  /* คืนค่าไอคอนนาฬิกาเป็นเส้นขอบ ไม่ทึบดำ */
+  .record-time svg{width:14px; height:14px; stroke:currentColor; fill:none; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round;}
+  
+  .record-actions{display:flex; gap:6px; align-items:center; flex-wrap:wrap; justify-content:flex-end; flex:1 1 auto;}
+  .r-btn{width:38px; height:38px; border-radius:12px; border:1px solid var(--glass-brd); cursor:pointer; display:flex; align-items:center; justify-content:center; background:var(--glass-2); color:var(--text-muted); box-shadow:var(--inner-light); transition:transform .16s;}
+  .r-btn svg{stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;width:17px;height:17px;}
   .r-btn:active{transform:scale(.88);}
+  
+  .r-btn.view{color:#38bdf8;}
+  .r-btn.edit{color:#a78bfa;}
   .r-btn.slip{color:#facc15;}
-  .r-btn.line{width:auto;padding:0 13px;font-size:12px;font-weight:600;gap:6px;background:linear-gradient(150deg,#34d399,#059669);color:#fff;border-color:rgba(255,255,255,.3);box-shadow:0 6px 14px rgba(5,150,105,.4), inset 0 1px 0 rgba(255,255,255,.4);}
-  .r-btn.line.sent{background:var(--glass-2);color:var(--text-muted);box-shadow:var(--inner-light);}
-  .r-btn.status.pending{background:linear-gradient(150deg,#fbbf24,#d97706);color:#fff;border-color:rgba(255,255,255,.3);box-shadow:0 6px 14px rgba(217,119,6,.4), inset 0 1px 0 rgba(255,255,255,.4);}
-  .r-btn.status.cleared{background:linear-gradient(150deg,#34d399,#059669);color:#fff;border-color:rgba(255,255,255,.3);box-shadow:0 6px 14px rgba(5,150,105,.4), inset 0 1px 0 rgba(255,255,255,.4);}
-  .r-btn.del:active{background:linear-gradient(150deg,#f87171,#dc2626);color:#fff;}
+  .r-btn.line{width:auto; padding:0 12px; font-size:11.5px; font-weight:600; gap:6px; background:linear-gradient(150deg,#34d399,#059669); color:#fff; border-color:rgba(255,255,255,.3); box-shadow:0 6px 14px rgba(5,150,105,.4), inset 0 1px 0 rgba(255,255,255,.4);}
+  .r-btn.line.sent{background:var(--glass-2); color:var(--text-muted); box-shadow:var(--inner-light);}
+  .r-btn.status.pending{background:linear-gradient(150deg,#fbbf24,#d97706); color:#fff; border-color:rgba(255,255,255,.3); box-shadow:0 6px 14px rgba(217,119,6,.4), inset 0 1px 0 rgba(255,255,255,.4);}
+  .r-btn.status.cleared{background:linear-gradient(150deg,#34d399,#059669); color:#fff; border-color:rgba(255,255,255,.3); box-shadow:0 6px 14px rgba(5,150,105,.4), inset 0 1px 0 rgba(255,255,255,.4);}
+  .r-btn.del:active{background:linear-gradient(150deg,#f87171,#dc2626); color:#fff;}
 
-  .empty-state{text-align:center;padding:52px 20px;color:var(--text-muted);}
-  .empty-state svg{width:56px;height:56px;stroke:currentColor;fill:none;stroke-width:1.5;opacity:.5;margin-bottom:12px;}
-  .empty-state p{font-size:14px;font-weight:500;}
+  .empty-state{text-align:center; padding:52px 20px; color:var(--text-muted);}
+  .empty-state svg{width:56px; height:56px; stroke:currentColor; fill:none; stroke-width:1.5; opacity:.5; margin-bottom:12px;}
+  .empty-state p{font-size:14px; font-weight:500;}
 
   /* ============================================================
-     BOTTOM NAV (เตี้ยลง + อนิเมชัน)
+     BOTTOM NAV 
      ============================================================ */
   .bottom-nav{
     position:fixed;bottom:0;left:50%;transform:translateX(-50%);
@@ -411,7 +406,6 @@
   .modal-overlay.active .modal-card{transform:scale(1) translateY(0);}
   .modal-card > *{position:relative;z-index:1;}
 
-  /* โมดัลกรอกตัวเลขทั่วไปอยู่กึ่งกลางจอ (ไม่ต้องกันที่ให้คีย์บอร์ดอีกต่อไป) */
   .input-modal-body{padding:28px 26px 26px;}
   .input-modal-body h3{color:var(--text);margin-bottom:6px;font-size:19px;font-weight:700;}
   .input-modal-body .hint{font-size:12.5px;color:var(--text-muted);margin-bottom:18px;}
@@ -420,7 +414,7 @@
   .modal-icon.sky{background:linear-gradient(150deg,#38bdf8,#0284c7);box-shadow:0 10px 24px rgba(2,132,199,.5), inset 0 2px 0 rgba(255,255,255,.55);}
   .modal-icon.violet{background:linear-gradient(150deg,#a78bfa,#7c3aed);box-shadow:0 10px 24px rgba(124,58,237,.5), inset 0 2px 0 rgba(255,255,255,.55);}
 
-  /* ---------- คีย์แพดตัวเลขในตัวแอป (ไม่พึ่งคีย์บอร์ดของเครื่อง) ---------- */
+  /* ---------- คีย์แพดตัวเลขในตัวแอป ---------- */
   .numpad-display{
     width:100%;min-height:58px;display:flex;align-items:center;justify-content:center;
     background:linear-gradient(180deg,rgba(2,8,20,.5),rgba(2,8,20,.26));
@@ -561,7 +555,6 @@
   .btn-call-cust svg{stroke:#fff;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;}
   .qr-code-box{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#fff;padding:14px;overflow-y:auto;}
   .qr-img{width:94%;max-width:380px;aspect-ratio:1/1;border-radius:18px;border:5px solid #eef4fb;padding:8px;box-shadow:0 12px 30px rgba(30,58,110,.22);}
-  /* QR ค่อยๆ ขยายจากเล็กไปใหญ่พร้อมหมุนเบาๆ ตอนสร้างเสร็จ */
   .qr-img.pop-in{animation:qrPopIn .55s cubic-bezier(.2,.85,.3,1.3);}
   @keyframes qrPopIn{
     0%{opacity:0;transform:scale(.15) rotate(-8deg);}
@@ -627,7 +620,6 @@
   .toast{position:fixed;bottom:86px;left:50%;transform:translateX(-50%) translateY(90px);background:rgba(30,41,59,.92);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);color:#fff;padding:13px 22px;border-radius:30px;font-size:13.5px;font-weight:500;opacity:0;transition:.42s cubic-bezier(.2,.9,.3,1.3);z-index:9999;box-shadow:0 14px 32px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.28);border:1px solid rgba(255,255,255,.18);pointer-events:none;max-width:88%;text-align:center;}
   .toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
   
-
   /* ===== ส่วนเสริมหลังคืนธีมกระจก ===== */
   .amount-input{
     display:flex;align-items:center;justify-content:center;
@@ -636,6 +628,10 @@
   }
   .amount-tap{cursor:pointer;user-select:none;-webkit-user-select:none;}
   .amount-tap.placeholder{color:var(--text-muted)!important;opacity:.55;font-weight:600!important;}
+  .amount-input.locked {
+    opacity: 0.65; background: rgba(2,8,20,0.85) !important; cursor: not-allowed; border-color: rgba(255,255,255,0.1) !important;
+  }
+  body.light-mode .amount-input.locked { background: rgba(226,236,250,0.85) !important; opacity: 0.7; }
 
   .modal-icon.amount{background:linear-gradient(150deg,#38bdf8,#2563eb);box-shadow:0 10px 24px rgba(37,99,235,.5), inset 0 2px 0 rgba(255,255,255,.55);}
 
@@ -705,6 +701,7 @@
     box-shadow:var(--inner-light);
   }
   .pad-quick button:active{transform:scale(.94);color:#38bdf8;}
+  .pad-quick button:disabled{opacity:0.3; cursor:not-allowed; transform:none !important; color:inherit;}
 
   .cleanup-foot{display:flex;justify-content:center;padding:22px 8px 8px;}
   .btn-cleanup-mini{
@@ -715,11 +712,9 @@
   .btn-cleanup-mini svg{stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
   .btn-cleanup-mini:active{opacity:.85;}
 
-  /* ไม่เล่นอนิเมชันตอนโชว์ QR */
   .qr-img.pop-in{animation:none;}
   .qr-content{animation:none;}
 
-  /* Loading — จุดเด้งไล่สี */
   .wave-spinner,.load-orbit{display:none;}
   .load-bounce{display:flex;align-items:flex-end;justify-content:center;gap:8px;height:36px;margin-bottom:8px;}
   .load-bounce i{width:11px;height:11px;border-radius:50%;display:block;animation:loadBounce .72s ease-in-out infinite;}
@@ -754,24 +749,56 @@
     background:var(--glass-2);border:1px solid var(--glass-brd);font-size:13px;color:var(--text-soft);
   }
   .storage-box b{color:var(--c-sky);font-size:16px;}
-  .loading-bar{width:160px;height:5px;border-radius:99px;margin-top:10px;overflow:hidden;background:rgba(148,163,184,.28);}
-  .loading-bar i{
-    display:block;height:100%;width:38%;border-radius:99px;
-    background:linear-gradient(90deg,#38bdf8,#8b5cf6,#34d399);
-    background-size:200% 100%;
-    animation:loadSlide 1s ease-in-out infinite;
+  
+  /* ===== สไตล์สำหรับหน้าต่าง View (รูปแบบสลิปมินิมอล) ===== */
+  .receipt-box { background: #fff; padding: 22px 18px; border-radius: 12px; color: #1e293b; text-align: left; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+  .receipt-head { text-align: center; font-weight: 700; font-size: 16px; margin-bottom: 12px; color: #0f172a; }
+  .receipt-divider { border-top: 2px dashed #cbd5e1; margin: 14px 0; }
+  .receipt-row { display: flex; justify-content: space-between; font-size: 13.5px; margin-bottom: 8px; }
+  .receipt-row span:first-child { color: #64748b; }
+  .receipt-row span:last-child { font-weight: 600; text-align: right; word-break: break-word; max-width: 60%; }
+  .receipt-amount-box { text-align: center; margin: 18px 0; }
+  .receipt-amount-box .lbl { font-size: 13px; color: #64748b; margin-bottom: 4px; }
+  .receipt-amount-box .val { font-size: 36px; font-weight: 800; color: #0ea5e9; line-height: 1.1; }
+  .receipt-member-box { text-align: center; margin: 18px 0; background: #f8fafc; padding: 18px 12px; border-radius: 12px; border: 2px solid #e2e8f0; }
+  .receipt-member-box .lbl { font-size: 13px; color: #64748b; margin-bottom: 8px; font-weight: 600; }
+  
+  /* บังคับไม่ให้ตัดบรรทัด และให้ตัวเลขพอดีช่อง */
+  .receipt-member-box .val-member { font-size: 19px; font-weight: 800; color: #dc2626; letter-spacing: 0.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; }
+
+  /* Edit Banner */
+  .edit-banner {
+    display: none;
+    background: linear-gradient(150deg, #f59e0b, #d97706);
+    color: #fff;
+    padding: 12px 18px;
+    border-radius: var(--radius);
+    margin-bottom: 12px;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+    font-size: 14px;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+    animation: fadeUp .3s ease-out;
   }
-  @keyframes loadSlide{
-    0%{transform:translateX(-70%)}
-    100%{transform:translateX(280%)}
+  .edit-banner button {
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.4);
+    color: #fff;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
   }
+  .edit-banner button:active { background: rgba(255,255,255,0.4); transform: scale(.94); }
 </style>
 </head>
 <body>
 
 <div class="aurora"><i></i><i></i><i></i></div>
 
-<!-- ===== แจ้งเตือนบันทึกสำเร็จ (ไอคอนถูก + อนิเมชันวาดเส้น) ===== -->
+<!-- ===== แจ้งเตือนบันทึกสำเร็จ ===== -->
 <div id="successOverlay" class="success-overlay">
   <div class="success-check">
     <span></span>
@@ -801,6 +828,12 @@
         </button>
         <button class="btn-theme" onclick="toggleTheme()" id="themeBtn" title="สลับโหมดกลางวัน/กลางคืน"></button>
       </div>
+    </div>
+
+    <!-- ป้ายแจ้งเตือนเมื่ออยู่ในโหมดแก้ไขรายการ -->
+    <div id="editBanner" class="edit-banner">
+      <span>✏️ กำลังแก้ไขรายการ</span>
+      <button type="button" onclick="cancelEdit()">ยกเลิก</button>
     </div>
 
     <div class="card glass">
@@ -861,11 +894,11 @@
         </div>
 
         <div class="action-btn-row">
-          <button type="button" class="btn-qr-show" onclick="triggerQR()">
+          <button type="button" class="btn-qr-show" id="btnQrCreate" onclick="triggerQR()">
             <svg width="21" height="21" viewBox="0 0 24 24"><rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/><path d="M3 12h.01"/><path d="M12 3h.01"/><path d="M12 16v.01"/><path d="M16 12h1"/><path d="M21 12v.01"/><path d="M12 21v-1"/></svg>
             <span>สร้าง QR</span>
           </button>
-          <button type="button" class="btn-submit" onclick="saveRecord()">
+          <button type="button" class="btn-submit" id="btnRecordSave" onclick="saveRecord()">
             <svg width="21" height="21" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
             <span>บันทึกรายการ</span>
           </button>
@@ -1017,34 +1050,63 @@
 <!-- ================= SETTINGS MODAL ================= -->
 <div id="settingsModal" class="modal-overlay">
   <div class="modal-card">
-    <div class="input-modal-body" style="text-align:left;">
+    <div class="input-modal-body" style="text-align:left; max-height:85vh; overflow-y:auto;">
       <div class="modal-icon sky" style="margin-left:0;">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9c.3.6.9 1 1.5 1.1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
       </div>
       <h3 style="text-align:left;">ตั้งค่า</h3>
-      <p class="hint" style="text-align:left;">เปิด-ปิดฟังก์ชันและจัดการพื้นที่เก็บข้อมูล</p>
+      <p class="hint" style="text-align:left;">เปิด-ปิดฟังก์ชันและปุ่มในหน้ารายการ</p>
 
-      <div class="settings-row">
-        <div>
-          <h4>ส่งไลน์ในหน้ารายการ</h4>
-          <p>ปิดแล้วปุ่ม LINE จะหายจากรายการ</p>
-        </div>
-        <button type="button" class="switch on" id="lineSwitch" onclick="toggleLineSetting()"></button>
-      </div>
       <div class="settings-row">
         <div>
           <h4>โอนเพิ่ม</h4>
-          <p>เก็บเบอร์ลูกค้าเดิมไว้จนบันทึกครั้งสุดท้าย แล้วค่อยปิดสวิตช์นี้</p>
+          <p>เก็บเบอร์ลูกค้าเดิมไว้จนบันทึกครั้งสุดท้าย</p>
         </div>
         <button type="button" class="switch" id="addMoreSwitch" onclick="toggleAddMoreSetting()"></button>
       </div>
+      
+      <div class="settings-row">
+        <div>
+          <h4>ปุ่มดูรายละเอียด (สลิป)</h4>
+          <p>แสดงปุ่ม View ในหน้ารายการ</p>
+        </div>
+        <button type="button" class="switch on" id="viewSwitch" onclick="toggleViewSetting()"></button>
+      </div>
+      <div class="settings-row">
+        <div>
+          <h4>ปุ่มแก้ไขรายการ</h4>
+          <p>แสดงปุ่มแก้ไขเพื่อแก้ข้อมูลย้อนหลัง</p>
+        </div>
+        <button type="button" class="switch on" id="editSwitch" onclick="toggleEditSetting()"></button>
+      </div>
+      <div class="settings-row">
+        <div>
+          <h4>ปุ่มโหลดสลิป</h4>
+          <p>แสดงปุ่มดาวน์โหลดรูปสลิปลงเครื่อง</p>
+        </div>
+        <button type="button" class="switch on" id="slipSwitch" onclick="toggleSlipSetting()"></button>
+      </div>
+      <div class="settings-row">
+        <div>
+          <h4>ปุ่มลบรายการ</h4>
+          <p>แสดงปุ่มถังขยะ ในหน้ารายการ</p>
+        </div>
+        <button type="button" class="switch on" id="deleteSwitch" onclick="toggleDeleteSetting()"></button>
+      </div>
+      <div class="settings-row">
+        <div>
+          <h4>ส่งไลน์</h4>
+          <p>แสดงปุ่มส่ง LINE ในหน้ารายการ</p>
+        </div>
+        <button type="button" class="switch on" id="lineSwitch" onclick="toggleLineSetting()"></button>
+      </div>
 
-      <div class="settings-row" style="align-items:flex-start;flex-direction:column;">
+      <div class="settings-row" style="align-items:flex-start;flex-direction:column; margin-top: 10px;">
         <div>
           <h4>พื้นที่ใช้งาน</h4>
           <p>ข้อมูลรายการและรูปสลิปในเครื่องนี้</p>
         </div>
-        <div class="storage-box" id="storageBox">กำลังคำนวณ...</div>
+        <div class="storage-box" id="storageBox" style="width:100%;">กำลังคำนวณ...</div>
         <button type="button" class="btn-modal-save" style="width:100%;background:linear-gradient(150deg,#94a3b8,#475569);" onclick="closeSettingsModal();openCleanupModal();">
           ลบข้อมูลเก่า
         </button>
@@ -1149,12 +1211,49 @@
   </div>
 </div>
 
+<!-- ================= VIEW RECORD MODAL (แบบสลิป มินิมอล โชว์ข้อมูลชัดเจน) ================= -->
+<div id="viewRecordModal" class="modal-overlay">
+  <div class="modal-card" style="background: #f8fafc;">
+    <div class="input-modal-body" style="padding:22px 18px;">
+      
+      <div class="receipt-box">
+        <div class="receipt-head">รายละเอียดการโอน</div>
+        <div class="receipt-divider"></div>
+        <div class="receipt-row"><span>วันที่-เวลา</span><span id="vd-datetime"></span></div>
+        <div class="receipt-row"><span>หน้าจ่าย</span><span id="vd-pump"></span></div>
+        <div class="receipt-row"><span>ชนิดน้ำมัน</span><span id="vd-oil"></span></div>
+        <div class="receipt-row"><span>สถานะ</span><span id="vd-status"></span></div>
+        <div class="receipt-divider"></div>
+        <div class="receipt-amount-box">
+           <div class="lbl">ยอดโอน (บาท)</div>
+           <div class="val" id="vd-amount"></div>
+        </div>
+        <div class="receipt-divider"></div>
+        <div class="receipt-member-box">
+           <div class="lbl" id="vd-member-label">ข้อมูลลูกค้า</div>
+           <div class="val-member" id="vd-member"></div>
+        </div>
+        <div class="receipt-divider"></div>
+        <div class="receipt-row" style="margin-top:12px;"><span>หมายเหตุ</span><span id="vd-note" style="color:#0f172a;"></span></div>
+        <div class="receipt-row" id="vd-extra-row" style="display:none; flex-direction:column; align-items:flex-start;">
+           <span style="margin-bottom:6px;">รายการเติมย่อย</span>
+           <span id="vd-extra" style="font-weight:500; font-size:13px; color:#475569; text-align:left;"></span>
+        </div>
+      </div>
+
+      <div class="action-btn-row" style="margin-top:16px;">
+        <button type="button" class="btn-modal-close" style="grid-column:1/-1; background:#e2e8f0; color:#334155; border:none; box-shadow:none;" onclick="closeRecordView()">ปิดหน้าต่าง</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="toast" class="toast"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<!-- นำเข้าไลบรารีเพื่อแต่งสี Excel สำหรับ LibreOffice / Excel -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.min.js"></script>
 <script>
-/* ตัวช่วยเก็บข้อมูลในเครื่อง (กันกรณีเบราว์เซอร์ปิดการใช้งาน) */
 function safeGet(k){ try { return localStorage.getItem(k); } catch(e){ return null; } }
 function safeSet(k,v){ try { localStorage.setItem(k,v); return true; } catch(e){ return false; } }
 
@@ -1198,7 +1297,7 @@ function playScanBeep(){
 document.addEventListener('pointerdown', ensureSfx, {once:true});
 
 /* ===================================================
-   0. ชุดไอคอน SVG (ใช้แทนอิโมจิทั้งหมด)
+   0. ชุดไอคอน SVG
    =================================================== */
 const ICONS = {
   sun:  '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.2 4.2l1.5 1.5M18.3 18.3l1.5 1.5M2 12h2M20 12h2M4.2 19.8l1.5-1.5M18.3 5.7l1.5-1.5"/></svg>',
@@ -1212,12 +1311,11 @@ const ICONS = {
   hour: '<svg width="17" height="17" viewBox="0 0 24 24"><path d="M5 22h14M5 2h14M17 22v-4.2a2 2 0 0 0-.6-1.4L12 12l-4.4 4.4a2 2 0 0 0-.6 1.4V22M7 2v4.2a2 2 0 0 0 .6 1.4L12 12l4.4-4.4A2 2 0 0 0 17 6.2V2"/></svg>',
   trash:'<svg width="17" height="17" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>',
   send: '<svg width="15" height="15" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>',
-  empty:'<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>'
+  empty:'<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>',
+  eye:  '<svg width="17" height="17" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
+  edit: '<svg width="17" height="17" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>'
 };
 
-/* ===================================================
-   1. ระบบธีม กลางวัน / กลางคืน
-   =================================================== */
 const themeBtn = document.getElementById('themeBtn');
 function paintThemeBtn(isLight){
   themeBtn.innerHTML = isLight ? ICONS.moon : ICONS.sun;
@@ -1235,9 +1333,6 @@ function toggleTheme(){
   paintThemeBtn(isLight);
 }
 
-/* ===================================================
-   2. ตัวแปรระบบ
-   =================================================== */
 let records = [];
 let dbReady = false;
 let idbDB = null;
@@ -1245,11 +1340,9 @@ const DB_NAME = 'pumpTransferDB';
 const DB_VERSION = 1;
 const STORE = 'records';
 
-/* ===================================================
-   2.1 IndexedDB — เก็บได้มากกว่า localStorage มาก
-        ไม่มีเพดานตายตัวที่ 5-10MB จึงเก็บรูปสลิปคมชัดได้
-        (ถ้าเบราว์เซอร์เก่าไม่รองรับ จะสำรองไป localStorage อัตโนมัติ)
-   =================================================== */
+let editingRecordId = null; 
+let amountEditable = true; 
+
 function openDB(){
   return new Promise((resolve, reject) => {
     if(!('indexedDB' in window)){ reject(new Error('no-idb')); return; }
@@ -1299,8 +1392,6 @@ function idbClearAll(){
   });
 }
 
-/* บันทึก/ลบจริงลงเครื่อง เลือกใช้ IndexedDB ก่อน ถ้าใช้ไม่ได้ค่อยสำรองเป็น localStorage
-   (การเรียกเหล่านี้ไม่บล็อก UI — แก้หน้าจอให้เสร็จก่อน แล้วค่อยเขียนลงดิสก์ตามหลัง) */
 function persistPut(record){
   if(dbReady){ idbPut(record).catch(()=>{}); return; }
   safeSet('gas_station_transfers', JSON.stringify(records));
@@ -1353,9 +1444,6 @@ const qrLoadingText = document.getElementById('qrLoadingText');
 
 const allowedE20Pumps = [3,4,7,8];
 
-/* ===================================================
-   3. สลับหน้าจอ
-   =================================================== */
 function switchView(viewName){
   playTap();
   document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
@@ -1364,17 +1452,17 @@ function switchView(viewName){
   view.classList.add('active');
   document.getElementById('navBtn'+viewName).classList.add('active');
   document.body.classList.toggle('history-mode', viewName === 'History');
-  view.scrollTop = 0;   /* ให้ข้อมูลบนสุดอยู่ครบ ไม่เลยขอบจอ */
+  view.scrollTop = 0;   
 }
 
-/* ===================================================
-   4. เลือกหน้าจ่าย / ชนิดน้ำมัน
-   =================================================== */
 function selectPump(num){
+  if(!num) return;
   playTap();
   selectedPumpNum = num;
   document.querySelectorAll('.grid-pump-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('p'+num).classList.add('active');
+  const target = document.getElementById('p'+num);
+  if(target) target.classList.add('active');
+  
   const btnE20 = document.getElementById('oilE20');
   if(!allowedE20Pumps.includes(num)){
     btnE20.classList.add('disabled');
@@ -1386,14 +1474,13 @@ function selectOil(type){
   if(type) playTap();
   selectedOil = type;
   document.querySelectorAll('.grid-oil-btn').forEach(b => b.classList.remove('active'));
-  if(type) document.getElementById('oil'+type).classList.add('active');
+  if(type) {
+    const target = document.getElementById('oil'+type);
+    if(target) target.classList.add('active');
+  }
 }
 
-/* ===================================================
-   5. คีย์แพดเต็มจอในตัวแอป (ราคา / เบอร์ / บัตร)
-      ไม่มี <input> ให้โฟกัส จึงไม่มีคีย์บอร์ดเครื่องขึ้นมา
-   =================================================== */
-let padTarget = null;   // 'phone' | 'card' | 'amount'
+let padTarget = null;
 let padValue  = "";
 const PAD_MAXLEN = { phone:10, card:16, amount:10 };
 const PAD_ICONS = {
@@ -1426,6 +1513,12 @@ let padVoice = (function(){ try { return localStorage.getItem('edc_pad_voice') |
 let padSoundOn = (function(){ try { return (safeGet('edc_pad_sound') || '1') !== '0'; } catch(e){ return true; } })();
 let lineEnabled = (function(){ try { return (safeGet('edc_line_enabled') || '1') !== '0'; } catch(e){ return true; } })();
 let addMoreEnabled = (function(){ try { return (safeGet('edc_add_more') || '0') === '1'; } catch(e){ return false; } })();
+
+let showDeleteBtn = (function(){ try { return (safeGet('edc_show_delete') || '1') !== '0'; } catch(e){ return true; } })();
+let showEditBtn = (function(){ try { return (safeGet('edc_show_edit') || '1') !== '0'; } catch(e){ return true; } })();
+let showViewBtn = (function(){ try { return (safeGet('edc_show_view') || '1') !== '0'; } catch(e){ return true; } })();
+let showSlipBtn = (function(){ try { return (safeGet('edc_show_slip') || '1') !== '0'; } catch(e){ return true; } })();
+
 let qrEditOn = false;
 let needContact = false;
 
@@ -1466,8 +1559,6 @@ function toggleLineSetting(){
   safeSet('edc_line_enabled', lineEnabled ? '1' : '0');
   const sw = document.getElementById('lineSwitch');
   if(sw) sw.classList.toggle('on', lineEnabled);
-  const am = document.getElementById('addMoreSwitch');
-  if(am) am.classList.toggle('on', addMoreEnabled);
   renderList();
 }
 function toggleAddMoreSetting(){
@@ -1477,6 +1568,35 @@ function toggleAddMoreSetting(){
   if(sw) sw.classList.toggle('on', addMoreEnabled);
   showToast(addMoreEnabled ? 'โอนเพิ่ม: เก็บเบอร์เดิมไว้' : 'ปิดโอนเพิ่ม: ครั้งถัดไปจะล้างเบอร์หลังบันทึก');
 }
+function toggleDeleteSetting(){
+  showDeleteBtn = !showDeleteBtn;
+  safeSet('edc_show_delete', showDeleteBtn ? '1' : '0');
+  const sw = document.getElementById('deleteSwitch');
+  if(sw) sw.classList.toggle('on', showDeleteBtn);
+  renderList();
+}
+function toggleEditSetting(){
+  showEditBtn = !showEditBtn;
+  safeSet('edc_show_edit', showEditBtn ? '1' : '0');
+  const sw = document.getElementById('editSwitch');
+  if(sw) sw.classList.toggle('on', showEditBtn);
+  renderList();
+}
+function toggleViewSetting(){
+  showViewBtn = !showViewBtn;
+  safeSet('edc_show_view', showViewBtn ? '1' : '0');
+  const sw = document.getElementById('viewSwitch');
+  if(sw) sw.classList.toggle('on', showViewBtn);
+  renderList();
+}
+function toggleSlipSetting(){
+  showSlipBtn = !showSlipBtn;
+  safeSet('edc_show_slip', showSlipBtn ? '1' : '0');
+  const sw = document.getElementById('slipSwitch');
+  if(sw) sw.classList.toggle('on', showSlipBtn);
+  renderList();
+}
+
 function toggleQrEdit(){
   qrEditOn = !qrEditOn;
   const sw = document.getElementById('qrEditSwitch');
@@ -1546,10 +1666,19 @@ function estimateStorage(){
   return bytes;
 }
 function openSettingsModal(){
-  const sw = document.getElementById('lineSwitch');
-  if(sw) sw.classList.toggle('on', lineEnabled);
-  const am = document.getElementById('addMoreSwitch');
-  if(am) am.classList.toggle('on', addMoreEnabled);
+  const sw1 = document.getElementById('lineSwitch');
+  if(sw1) sw1.classList.toggle('on', lineEnabled);
+  const sw2 = document.getElementById('addMoreSwitch');
+  if(sw2) sw2.classList.toggle('on', addMoreEnabled);
+  const sw3 = document.getElementById('deleteSwitch');
+  if(sw3) sw3.classList.toggle('on', showDeleteBtn);
+  const sw4 = document.getElementById('editSwitch');
+  if(sw4) sw4.classList.toggle('on', showEditBtn);
+  const sw5 = document.getElementById('viewSwitch');
+  if(sw5) sw5.classList.toggle('on', showViewBtn);
+  const sw6 = document.getElementById('slipSwitch');
+  if(sw6) sw6.classList.toggle('on', showSlipBtn);
+
   const box = document.getElementById('storageBox');
   if(box){
     const n = estimateStorage();
@@ -1558,6 +1687,7 @@ function openSettingsModal(){
   document.getElementById('settingsModal').classList.add('active');
 }
 function closeSettingsModal(){ document.getElementById('settingsModal').classList.remove('active'); }
+
 function groupCardDigits(v){
   let out = '';
   for(let i=0;i<v.length;i++){ out += v[i]; if(i%4===3 && i!==v.length-1) out += ' '; }
@@ -1700,7 +1830,15 @@ function openPhoneModal(){ openPadModal('phone'); }
 function closePhoneModal(){ closePadModal(); }
 function openCardModal(){ openPadModal('card'); }
 function closeCardModal(){ closePadModal(); }
-function openAmountModal(){ openPadModal('amount'); }
+
+/* เพิ่มการบล็อกแก้ราคาตอนแก้ไข ถ้ามีสลิปแนบอยู่ */
+function openAmountModal(){ 
+  if(!amountEditable) {
+    showToast('ล็อคราคา เนื่องจากมีการแนบสลิปแล้ว');
+    return;
+  }
+  openPadModal('amount'); 
+}
 
 function savePadData(){
   if(padTarget === 'phone'){
@@ -1747,7 +1885,6 @@ let zxingReader = null, scanCanvas = null, zxingBusy = false;
 const scanStatusEl = () => document.getElementById('scannerStatus');
 function setScanStatus(msg){ const el = scanStatusEl(); if(el) el.textContent = msg; }
 
-/* โหลด ZXing แบบ lazy ไว้ใช้กับเครื่องที่ไม่มี BarcodeDetector (เช่น iPhone / Firefox) */
 function loadZXing(){
   return new Promise((resolve, reject) => {
     if(window.ZXing) return resolve(window.ZXing);
@@ -1760,7 +1897,6 @@ function loadZXing(){
 }
 
 async function openLiveScanner(){
-  /* ตรวจเงื่อนไขทีละข้อ เพื่อบอกสาเหตุได้ชัดว่าทำไมกล้องไม่ขึ้น */
   if(!window.isSecureContext){
     showToast('กล้องใช้ได้เฉพาะเมื่อเปิดผ่าน https:// หรือ localhost'); return;
   }
@@ -1876,7 +2012,7 @@ function handleSuccessfulLiveScan(val){
 }
 
 /* ===================================================
-   9. ช่องจำนวนเงิน + ปุ่มลัด (คีย์บอร์ดไม่หด)
+   9. ช่องจำนวนเงิน + ปุ่มลัด
    =================================================== */
 function toggleClearBtn(){
   if(getAmountValue()) clearBtn.classList.add('show');
@@ -1884,6 +2020,7 @@ function toggleClearBtn(){
 }
 document.querySelectorAll('.quick-btn').forEach(btn => {
   btn.addEventListener('click', () => {
+    if(!amountEditable) { showToast('ล็อคราคาเนื่องจากมีสลิปแนบอยู่ (กดยกเลิกสลิปได้หากต้องการแก้)'); return; }
     const add = parseFloat(btn.dataset.add);
     const next = +((parseFloat(getAmountValue()) || 0) + add).toFixed(2);
     setAmountValue(String(next));
@@ -1891,6 +2028,7 @@ document.querySelectorAll('.quick-btn').forEach(btn => {
 });
 clearBtn.addEventListener('click', ev => {
   ev.stopPropagation();
+  if(!amountEditable) { showToast('ล็อคราคา (มีสลิปแนบอยู่)'); return; }
   setAmountValue('');
 });
 
@@ -1933,16 +2071,27 @@ function triggerQR(){
   paintOilCell();
   modalPrice.textContent = `฿${amount.toLocaleString()}`;
 
-  currentSlipBase64 = null; currentNote = ''; extraFills = [];
+  if(!editingRecordId) {
+    currentSlipBase64 = null; currentNote = ''; extraFills = [];
+  }
   setPostSlipTools(false);
   qrImage.style.display = 'block';
   modalPrice.style.display = 'block';
-  document.getElementById('slipPreviewContainer').style.display = 'none';
-  document.getElementById('slipPreviewImg').src = '';
-  const noteEl = document.getElementById('slipNote'); if(noteEl) noteEl.value = '';
+  
+  const noteEl = document.getElementById('slipNote'); 
+  if(noteEl) noteEl.value = currentNote || '';
+
+  if (currentSlipBase64) {
+    document.getElementById('slipPreviewContainer').style.display = 'block';
+    document.getElementById('slipPreviewImg').src = currentSlipBase64;
+    slipPriceDisplay.textContent = `฿${amount.toLocaleString()}`;
+  } else {
+    document.getElementById('slipPreviewContainer').style.display = 'none';
+    document.getElementById('slipPreviewImg').src = '';
+  }
+
   renderSlipEditors();
 
-  /* หน่วงขึ้นเล็กน้อย + มีข้อความบอกขั้นตอน ดูมีระบบมากขึ้น */
   qrLoadingText.textContent = 'กำลังเตรียมข้อมูลร้านค้า...';
   qrLoadTimers.push(setTimeout(() => { qrLoadingText.textContent = 'กำลังเข้ารหัสยอดเงิน...'; }, 260));
   qrLoadTimers.push(setTimeout(() => { qrLoadingText.textContent = 'กำลังสร้าง QR Code...'; }, 520));
@@ -1977,7 +2126,7 @@ function showSuccessAnimation(){
   if(navigator.vibrate) navigator.vibrate(35);
   setTimeout(() => ov.classList.remove('active'), 1400);
 }
-function saveToStorage(){ renderList(); }  /* คงชื่อฟังก์ชันไว้เพื่อความเข้ากันได้ — แค่รีเฟรชหน้าจอ ตัวบันทึกจริงอยู่ที่ persist* */
+function saveToStorage(){ renderList(); }
 
 /* ===================================================
    11. สลิป
@@ -2061,6 +2210,10 @@ function handleSlipUpload(event){
     document.getElementById('slipPreviewContainer').style.display = 'block';
     document.getElementById('slipPreviewImg').src = currentSlipBase64;
     slipPriceDisplay.textContent = `฿${(parseFloat(getAmountValue())||0).toLocaleString()}`;
+    
+    amountEditable = false;
+    document.getElementById('amountInput').classList.add('locked');
+
     renderSlipEditors();
     setPostSlipTools(true);
     paintOilCell();
@@ -2081,7 +2234,7 @@ function handleSlipUpload(event){
 }
 
 /* ===================================================
-   12. บันทึกรายการ
+   12. บันทึกรายการ / อัปเดตรายการ
    =================================================== */
 function saveRecord(){
   const amount = parseFloat(getAmountValue());
@@ -2094,6 +2247,32 @@ function saveRecord(){
     ? extraFills.map(x => `ตู้${x.pump} ${x.oil} ${x.amount}`).join(' + ')
     : '';
   const now = new Date();
+  
+  if (editingRecordId) {
+    const idx = records.findIndex(r => r.id === editingRecordId);
+    if(idx !== -1) {
+      records[idx].pump = 'หน้าจ่าย ' + selectedPumpNum;
+      records[idx].oilType = selectedOil;
+      records[idx].amount = amount;
+      records[idx].phone = currentMember;
+      records[idx].note = currentNote;
+      records[idx].extras = extraFills.slice();
+      records[idx].extraText = extraText;
+      records[idx].needContact = !!needContact;
+      
+      if(currentSlipBase64) {
+         records[idx].slipImage = currentSlipBase64;
+         records[idx].slipFilename = currentSlipFilename;
+      }
+      saveToStorage();
+      persistPut(records[idx]);
+      showToast('อัปเดตรายการเรียบร้อย');
+    }
+    cancelEdit();
+    switchView('History');
+    return;
+  }
+
   const newRecord = {
     id: Date.now(),
     pump: 'หน้าจ่าย ' + selectedPumpNum,
@@ -2116,10 +2295,59 @@ function saveRecord(){
 
   setAmountValue('');
   currentSlipBase64 = null; currentSlipFilename = ""; currentNote=''; extraFills=[]; needContact=false;
+  amountEditable = true;
+  document.getElementById('amountInput').classList.remove('locked');
+
   if(!addMoreEnabled) currentMember = "";
   updateMainButtonsUI();
   playSuccess();
   showSuccessAnimation();
+}
+
+function openEditMode(id) {
+  const item = records.find(r => r.id === id);
+  if(!item) return;
+  editingRecordId = id;
+
+  selectPump(parseInt(item.pump.replace(/\D/g,'')) || 1);
+  selectOil(item.oilType);
+  setAmountValue(String(item.amount));
+  currentMember = item.phone || '';
+  updateMainButtonsUI();
+  currentNote = item.note || '';
+  extraFills = item.extras ? JSON.parse(JSON.stringify(item.extras)) : [];
+
+  currentSlipBase64 = item.slipImage || null;
+  currentSlipFilename = item.slipFilename || '';
+  needContact = item.needContact || false;
+
+  if(currentSlipBase64) {
+      amountEditable = false;
+      document.getElementById('amountInput').classList.add('locked');
+  } else {
+      amountEditable = true;
+      document.getElementById('amountInput').classList.remove('locked');
+  }
+
+  document.getElementById('editBanner').style.display = 'flex';
+  switchView('Home');
+}
+
+function cancelEdit() {
+  editingRecordId = null;
+  document.getElementById('editBanner').style.display = 'none';
+  setAmountValue('');
+  currentMember = '';
+  currentNote = '';
+  extraFills = [];
+  currentSlipBase64 = null;
+  currentSlipFilename = '';
+  needContact = false;
+  amountEditable = true;
+  document.getElementById('amountInput').classList.remove('locked');
+  
+  if (selectedPumpNum) selectPump(selectedPumpNum); 
+  updateMainButtonsUI();
 }
 
 function toggleStatus(id){
@@ -2135,7 +2363,7 @@ function shareToLine(id){
   saveToStorage();
   const updated = records.find(r => r.id === id);
   if(updated) persistPut(updated);
-  const memberText = item.phone ? `\nข้อมูลสมาชิก: ${item.phone}` : '';
+  const memberText = item.phone ? `\nข้อมูลลูกค้า: ${item.phone}` : '';
   const noteText = item.note ? `\nหมายเหตุ: ${item.note}` : '';
   const extraText = item.extraText ? `\nรายการเติม: ${item.extraText}` : '';
   const contactText = item.needContact ? '\nต้องติดต่อลูกค้า' : '';
@@ -2167,7 +2395,7 @@ function resetDayRecords(){
 }
 
 /* ===================================================
-   12.1 ลบข้อมูลเก่า (ตามช่วงวัน) — ไม่กระทบรายการล่าสุด
+   12.1 ลบข้อมูลเก่า
    =================================================== */
 function openCleanupModal(){
   document.getElementById('cleanupCustomDate').value = '';
@@ -2210,7 +2438,7 @@ function confirmCleanup(){
 }
 
 /* ===================================================
-   13. Export CSV
+   13. Export CSV / Excel (Auto-Fit & Centered)
    =================================================== */
 function buildAnalysis(){
   const n = records.length;
@@ -2240,104 +2468,135 @@ function buildAnalysis(){
            byOil, byPump, byHour, cleared, lineSent, withSlip, withCard, withPhone, pct };
 }
 
-/* สร้างสมุดงาน Excel (2 ชีต) คืนเป็น workbook object — ใช้ร่วมกันทั้งปุ่ม Excel เดี่ยวๆ และปุ่ม ZIP รวม */
+/* ฟังก์ชันคำนวณความกว้างคอลัมน์ให้อัตโนมัติ (Auto-Fit) */
+function getColWidths(dataRows) {
+  let widths = [];
+  for (let row of dataRows) {
+    if (!row) continue;
+    for (let i = 0; i < row.length; i++) {
+      let cell = row[i];
+      let val = cell && cell.v !== undefined ? cell.v : cell;
+      if (val === null || val === undefined) val = '';
+      let str = String(val);
+      let lines = str.split('\n');
+      let maxLineLen = 0;
+      for (let line of lines) {
+         if (line.length > maxLineLen) maxLineLen = line.length;
+      }
+      // เผื่อความกว้างไว้เล็กน้อย (ขั้นต่ำ 10 สูงสุดไม่เกิน 60 ป้องกันล้นจอเกินความจำเป็น)
+      let w = Math.min(Math.max(maxLineLen + 4, 10), 60);
+      if (!widths[i]) widths[i] = { wch: w };
+      else if (w > widths[i].wch) widths[i].wch = w;
+    }
+  }
+  return widths;
+}
+
 function buildWorkbook(){
   const a = buildAnalysis();
   const dateStr = getLocalDateString(new Date());
 
+  // ตั้งค่า Style สำหรับ Excel (LibreOffice Calc รองรับได้สมบูรณ์)
+  const HDR = {
+      fill: { fgColor: { rgb: "1E3A8A" } },
+      font: { color: { rgb: "FFFFFF" }, bold: true },
+      alignment: { horizontal: "center", vertical: "center" }
+  };
+  const CTR = { alignment: { horizontal: "center", vertical: "center" } };
+  const CTR_NUM = { alignment: { horizontal: "center", vertical: "center" }, numFmt: "#,##0.00" };
+  const SUM_HDR = {
+      fill: { fgColor: { rgb: "0EA5E9" } },
+      font: { color: { rgb: "FFFFFF" }, bold: true },
+      alignment: { horizontal: "center", vertical: "center" }
+  };
+  const SUM_NUM = { font: { bold: true }, alignment: { horizontal: "center", vertical: "center" }, numFmt: "#,##0.00" };
+
+  function C(val, style) { return { v: val, s: style }; }
+
   /* ---------- SHEET 1 : สรุปยอดตามปกติ ---------- */
-  const s1 = [['วันที่','เวลา','หน้าจ่าย','ชนิดน้ำมัน','จำนวนเงิน (บาท)','ข้อมูลสมาชิก','หมายเหตุ','ต้องติดต่อลูกค้า','รายการเติมรวม','สถานะการแจ้ง','การส่ง LINE','รูปสลิป']];
+  const s1 = [[
+    C('วันที่', HDR), C('เวลา', HDR), C('หน้าจ่าย', HDR), C('ชนิดน้ำมัน', HDR),
+    C('จำนวนเงิน (บาท)', HDR), C('ข้อมูลสมาชิก', HDR), C('หมายเหตุ', HDR),
+    C('ต้องติดต่อลูกค้า', HDR), C('รายการเติมรวม', HDR), C('สถานะการแจ้ง', HDR),
+    C('การส่ง LINE', HDR), C('รูปสลิป', HDR)
+  ]];
+
   records.forEach(r => s1.push([
-    r.date, r.time, r.pump, r.oilType, r.amount,
-    r.phone ? String(r.phone) : '-',
-    r.note || '-',
-    r.needContact ? 'ต้องติดต่อลูกค้า' : '-',
-    r.extraText || '-',
-    r.cleared ? 'เคลียร์แล้ว' : 'รอเคลียร์',
-    r.lineSent ? 'ส่งแล้ว' : 'ยังไม่ส่ง',
-    r.slipFilename || '-'
+    C(r.date, CTR), C(r.time, CTR), C(r.pump, CTR), C(r.oilType, CTR),
+    C(r.amount, CTR_NUM),
+    C(r.phone ? String(r.phone) : '-', CTR),
+    C(r.note || '-', CTR),
+    C(r.needContact ? 'ต้องติดต่อลูกค้า' : '-', CTR),
+    C(r.extraText || '-', CTR),
+    C(r.cleared ? 'เคลียร์แล้ว' : 'รอเคลียร์', CTR),
+    C(r.lineSent ? 'ส่งแล้ว' : 'ยังไม่ส่ง', CTR),
+    C(r.slipFilename || '-', CTR)
   ]));
-  s1.push([], ['สรุปยอดขายรวม (บาท)']);
-  s1.push(['รวมทุกชนิดน้ำมัน', a.total]);
-  ['G95','E20','B7'].forEach(o => s1.push(['รวม ' + o, a.byOil[o] ? a.byOil[o].s : 0]));
-  s1.push(['จำนวนรายการทั้งหมด', a.n]);
+
+  s1.push([]);
+  s1.push([C('สรุปยอดขายรวม', SUM_HDR)]);
+  s1.push([C('รวมทุกชนิดน้ำมัน', {font:{bold:true}}), C(a.total, SUM_NUM)]);
+  ['G95','E20','B7'].forEach(o => s1.push([C('รวม ' + o, CTR), C(a.byOil[o] ? a.byOil[o].s : 0, CTR_NUM)]));
+  s1.push([C('จำนวนรายการทั้งหมด', CTR), C(a.n, {alignment:{horizontal:"right"}})]);
 
   const ws1 = XLSX.utils.aoa_to_sheet(s1);
-  ws1['!cols'] = [{wch:16},{wch:11},{wch:12},{wch:12},{wch:16},{wch:20},{wch:14},{wch:12},{wch:34}];
+  // ประมวลผลความกว้างคอลัมน์อัตโนมัติ
+  ws1['!cols'] = getColWidths(s1);
 
   /* ---------- SHEET 2 : วิเคราะห์เชิงลึก ---------- */
   const s2 = [];
-  s2.push(['รายงานวิเคราะห์เชิงลึก — บันทึกยอดโอน']);
-  s2.push(['ออกรายงานวันที่', dateStr]);
+  s2.push([C('รายงานวิเคราะห์เชิงลึก — บันทึกยอดโอน', {font:{bold:true, sz: 14}})]);
+  s2.push([C('ออกรายงานวันที่', CTR), C(dateStr, CTR)]);
   s2.push([]);
-  s2.push(['1) ภาพรวม']);
-  s2.push(['ตัวชี้วัด','ค่า','หน่วย']);
-  s2.push(['จำนวนรายการทั้งหมด', a.n, 'รายการ']);
-  s2.push(['ยอดโอนรวม', a.total, 'บาท']);
-  s2.push(['ยอดเฉลี่ยต่อรายการ', +a.avg.toFixed(2), 'บาท']);
-  s2.push(['ค่ามัธยฐาน (Median)', +a.median.toFixed(2), 'บาท']);
-  s2.push(['รายการสูงสุด', a.max, 'บาท']);
-  s2.push(['รายการต่ำสุด', a.min, 'บาท']);
+  
+  s2.push([C('1) ภาพรวม', SUM_HDR), C('', SUM_HDR), C('', SUM_HDR)]);
+  s2.push([C('ตัวชี้วัด', HDR), C('ค่า', HDR), C('หน่วย', HDR)]);
+  s2.push([C('จำนวนรายการทั้งหมด', CTR), C(a.n, CTR), C('รายการ', CTR)]);
+  s2.push([C('ยอดโอนรวม', CTR), C(a.total, CTR_NUM), C('บาท', CTR)]);
+  s2.push([C('ยอดเฉลี่ยต่อรายการ', CTR), C(+a.avg.toFixed(2), CTR_NUM), C('บาท', CTR)]);
+  s2.push([C('ค่ามัธยฐาน (Median)', CTR), C(+a.median.toFixed(2), CTR_NUM), C('บาท', CTR)]);
+  s2.push([C('รายการสูงสุด', CTR), C(a.max, CTR_NUM), C('บาท', CTR)]);
+  s2.push([C('รายการต่ำสุด', CTR), C(a.min, CTR_NUM), C('บาท', CTR)]);
   s2.push([]);
 
-  s2.push(['2) แยกตามชนิดน้ำมัน']);
-  s2.push(['ชนิดน้ำมัน','จำนวนรายการ','สัดส่วนรายการ (%)','ยอดรวม (บาท)','สัดส่วนยอด (%)','เฉลี่ยต่อรายการ']);
+  s2.push([C('2) แยกตามชนิดน้ำมัน', SUM_HDR), C('', SUM_HDR), C('', SUM_HDR), C('', SUM_HDR), C('', SUM_HDR), C('', SUM_HDR)]);
+  s2.push([C('ชนิดน้ำมัน', HDR), C('จำนวนรายการ', HDR), C('สัดส่วนรายการ (%)', HDR), C('ยอดรวม (บาท)', HDR), C('สัดส่วนยอด (%)', HDR), C('เฉลี่ยต่อรายการ', HDR)]);
   Object.keys(a.byOil).sort().forEach(k => {
     const o = a.byOil[k];
-    s2.push([k, o.c, a.pct(o.c), o.s, a.total ? +(o.s/a.total*100).toFixed(1) : 0, +(o.s/o.c).toFixed(2)]);
+    s2.push([C(k, CTR), C(o.c, CTR), C(a.pct(o.c), CTR), C(o.s, CTR_NUM), C(a.total ? +(o.s/a.total*100).toFixed(1) : 0, CTR), C(+(o.s/o.c).toFixed(2), CTR_NUM)]);
   });
   s2.push([]);
 
-  s2.push(['3) แยกตามหน้าจ่าย']);
-  s2.push(['หน้าจ่าย','จำนวนรายการ','ยอดรวม (บาท)','สัดส่วนยอด (%)','เฉลี่ยต่อรายการ']);
+  s2.push([C('3) แยกตามหน้าจ่าย', SUM_HDR), C('', SUM_HDR), C('', SUM_HDR), C('', SUM_HDR), C('', SUM_HDR)]);
+  s2.push([C('หน้าจ่าย', HDR), C('จำนวนรายการ', HDR), C('ยอดรวม (บาท)', HDR), C('สัดส่วนยอด (%)', HDR), C('เฉลี่ยต่อรายการ', HDR)]);
   Object.keys(a.byPump).sort().forEach(k => {
     const o = a.byPump[k];
-    s2.push([k, o.c, o.s, a.total ? +(o.s/a.total*100).toFixed(1) : 0, +(o.s/o.c).toFixed(2)]);
+    s2.push([C(k, CTR), C(o.c, CTR), C(o.s, CTR_NUM), C(a.total ? +(o.s/a.total*100).toFixed(1) : 0, CTR), C(+(o.s/o.c).toFixed(2), CTR_NUM)]);
   });
   s2.push([]);
 
-  s2.push(['4) การกระจายตามช่วงเวลา (รายชั่วโมง)']);
-  s2.push(['ช่วงเวลา','จำนวนรายการ','ยอดรวม (บาท)','สัดส่วนยอด (%)']);
+  s2.push([C('4) การกระจายตามช่วงเวลา (รายชั่วโมง)', SUM_HDR), C('', SUM_HDR), C('', SUM_HDR), C('', SUM_HDR)]);
+  s2.push([C('ช่วงเวลา', HDR), C('จำนวนรายการ', HDR), C('ยอดรวม (บาท)', HDR), C('สัดส่วนยอด (%)', HDR)]);
   const hours = Object.keys(a.byHour).sort();
   hours.forEach(h => {
     const o = a.byHour[h];
-    s2.push([h + ':00 - ' + h + ':59', o.c, o.s, a.total ? +(o.s/a.total*100).toFixed(1) : 0]);
+    s2.push([C(h + ':00 - ' + h + ':59', CTR), C(o.c, CTR), C(o.s, CTR_NUM), C(a.total ? +(o.s/a.total*100).toFixed(1) : 0, CTR)]);
   });
   s2.push([]);
 
-  s2.push(['5) คุณภาพการทำงาน / ความครบถ้วนของข้อมูล']);
-  s2.push(['หัวข้อ','จำนวน','คิดเป็น (%)']);
-  s2.push(['แจ้งแคชเชียร์แล้ว (เคลียร์)', a.cleared, a.pct(a.cleared)]);
-  s2.push(['ยังค้างแจ้งแคชเชียร์', a.n - a.cleared, a.pct(a.n - a.cleared)]);
-  s2.push(['ส่งแจ้งทาง LINE แล้ว', a.lineSent, a.pct(a.lineSent)]);
-  s2.push(['มีรูปสลิปแนบ', a.withSlip, a.pct(a.withSlip)]);
-  s2.push(['ผูกบัตรสมาชิก 16 หลัก', a.withCard, a.pct(a.withCard)]);
-  s2.push(['ผูกเบอร์โทร 10 หลัก', a.withPhone, a.pct(a.withPhone)]);
-  s2.push(['ไม่ระบุข้อมูลลูกค้า', a.n - a.withCard - a.withPhone, a.pct(a.n - a.withCard - a.withPhone)]);
+  s2.push([C('5) คุณภาพการทำงาน / ความครบถ้วนของข้อมูล', SUM_HDR), C('', SUM_HDR), C('', SUM_HDR)]);
+  s2.push([C('หัวข้อ', HDR), C('จำนวน', HDR), C('คิดเป็น (%)', HDR)]);
+  s2.push([C('แจ้งแคชเชียร์แล้ว (เคลียร์)', CTR), C(a.cleared, CTR), C(a.pct(a.cleared), CTR)]);
+  s2.push([C('ยังค้างแจ้งแคชเชียร์', CTR), C(a.n - a.cleared, CTR), C(a.pct(a.n - a.cleared), CTR)]);
+  s2.push([C('ส่งแจ้งทาง LINE แล้ว', CTR), C(a.lineSent, CTR), C(a.pct(a.lineSent), CTR)]);
+  s2.push([C('มีรูปสลิปแนบ', CTR), C(a.withSlip, CTR), C(a.pct(a.withSlip), CTR)]);
+  s2.push([C('ผูกบัตรสมาชิก 16 หลัก', CTR), C(a.withCard, CTR), C(a.pct(a.withCard), CTR)]);
+  s2.push([C('ผูกเบอร์โทร 10 หลัก', CTR), C(a.withPhone, CTR), C(a.pct(a.withPhone), CTR)]);
+  s2.push([C('ไม่ระบุข้อมูลลูกค้า', CTR), C(a.n - a.withCard - a.withPhone, CTR), C(a.pct(a.n - a.withCard - a.withPhone), CTR)]);
   s2.push([]);
 
-  /* ---------- ข้อสรุปเชิงลึกอัตโนมัติ ---------- */
-  const topOil = Object.keys(a.byOil).sort((x,y) => a.byOil[y].s - a.byOil[x].s)[0];
-  const topPump = Object.keys(a.byPump).sort((x,y) => a.byPump[y].s - a.byPump[x].s)[0];
-  const peakHour = hours.sort((x,y) => a.byHour[y].s - a.byHour[x].s)[0];
-  const lowPump = Object.keys(a.byPump).sort((x,y) => a.byPump[x].s - a.byPump[y].s)[0];
-
-  s2.push(['6) ข้อสรุปเชิงลึก']);
-  s2.push(['ลำดับ','ข้อสังเกต']);
-  let i = 1;
-  if(topOil) s2.push([i++, `น้ำมัน ${topOil} ทำยอดสูงสุด ${a.byOil[topOil].s.toLocaleString()} บาท คิดเป็น ${(a.byOil[topOil].s/a.total*100).toFixed(1)}% ของยอดรวม`]);
-  if(topPump) s2.push([i++, `${topPump} เป็นหน้าจ่ายที่ทำยอดสูงสุด ${a.byPump[topPump].s.toLocaleString()} บาท จาก ${a.byPump[topPump].c} รายการ`]);
-  if(lowPump && lowPump !== topPump) s2.push([i++, `${lowPump} มียอดต่ำสุดที่ ${a.byPump[lowPump].s.toLocaleString()} บาท อาจตรวจสอบตำแหน่งหรือช่วงเวลาให้บริการ`]);
-  if(peakHour) s2.push([i++, `ช่วงเวลา ${peakHour}:00-${peakHour}:59 คือชั่วโมงเร่งด่วน มี ${a.byHour[peakHour].c} รายการ รวม ${a.byHour[peakHour].s.toLocaleString()} บาท`]);
-  s2.push([i++, `ยอดเฉลี่ยต่อรายการ ${a.avg.toFixed(2)} บาท เทียบกับมัธยฐาน ${a.median.toFixed(2)} บาท` +
-    (a.avg > a.median * 1.2 ? ' — มีรายการยอดสูงผิดปกติดึงค่าเฉลี่ยขึ้น' : ' — การกระจายยอดค่อนข้างสม่ำเสมอ')]);
-  if(a.n - a.cleared > 0) s2.push([i++, `ยังค้างแจ้งแคชเชียร์ ${a.n - a.cleared} รายการ รวม ${records.filter(r => !r.cleared).reduce((t,r) => t+r.amount,0).toLocaleString()} บาท ควรเคลียร์ก่อนปิดกะ`]);
-  else s2.push([i++, 'แจ้งแคชเชียร์ครบทุกรายการแล้ว ไม่มียอดค้าง']);
-  s2.push([i++, `แนบสลิปเป็นหลักฐาน ${a.pct(a.withSlip)}% ของรายการ` + (a.pct(a.withSlip) < 50 ? ' — แนะนำถ่ายสลิปให้มากขึ้นเพื่อกันข้อโต้แย้ง' : ' — อยู่ในเกณฑ์ดี')]);
-  s2.push([i++, `เก็บข้อมูลลูกค้าได้ ${a.pct(a.withCard + a.withPhone)}% ของรายการ` + (a.pct(a.withCard + a.withPhone) < 40 ? ' — ยังเก็บได้น้อย' : ' — อยู่ในเกณฑ์ดี')]);
-
   const ws2 = XLSX.utils.aoa_to_sheet(s2);
-  ws2['!cols'] = [{wch:30},{wch:78},{wch:20},{wch:18},{wch:18},{wch:18}];
+  ws2['!cols'] = getColWidths(s2);
 
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws1, 'สรุปยอดโอน');
@@ -2345,7 +2604,6 @@ function buildWorkbook(){
   return wb;
 }
 
-/* ปุ่ม Excel เดี่ยว — ดาวน์โหลดเฉพาะไฟล์ .xlsx (ไม่รวมรูป) */
 function exportExcel(){
   if(records.length === 0){ showToast('ไม่มีข้อมูลให้ Export'); return; }
   if(typeof XLSX === 'undefined'){ exportCSVFallback(); return; }
@@ -2354,7 +2612,6 @@ function exportExcel(){
   showToast('ดาวน์โหลด Excel 2 ชีตสำเร็จ');
 }
 
-/* โหลด JSZip แบบ lazy ตอนกดใช้งานจริงเท่านั้น */
 function loadJSZip(){
   return new Promise((resolve, reject) => {
     if(window.JSZip) return resolve(window.JSZip);
@@ -2366,7 +2623,6 @@ function loadJSZip(){
   });
 }
 
-/* ปุ่ม ZIP รวม — ไฟล์เดียวมีทั้ง Excel (2 ชีต) และรูปสลิปทุกใบ จัดโฟลเดอร์ slips/ ให้ */
 async function exportZipAll(){
   if(records.length === 0){ showToast('ไม่มีข้อมูลให้ Export'); return; }
   if(typeof XLSX === 'undefined'){ showToast('โหลดระบบ Excel ไม่สำเร็จ ลองรีเฟรชหน้าแล้วลองใหม่'); return; }
@@ -2381,12 +2637,10 @@ async function exportZipAll(){
     const zip = new JSZipLib();
     const dateStr = getLocalDateString(new Date());
 
-    /* 1) ไฟล์ Excel */
     const wb = buildWorkbook();
     const xlsxBinary = XLSX.write(wb, { bookType:'xlsx', type:'array' });
     zip.file(`สรุปยอดโอน_${dateStr}.xlsx`, xlsxBinary);
 
-    /* 2) รูปสลิปทั้งหมด ใส่โฟลเดอร์ slips/ */
     const imgFolder = zip.folder('slips');
     let imgCount = 0;
     records.forEach((r, idx) => {
@@ -2418,7 +2672,6 @@ async function exportZipAll(){
   }
 }
 
-/* สำรอง: ถ้าโหลดไลบรารีไม่ได้ ให้ออกเป็น CSV แทน */
 function exportCSVFallback(){
   let csv = "\uFEFFวันที่,เวลา,หน้าจ่าย,ชนิดน้ำมัน,จำนวนเงิน (บาท),ข้อมูลสมาชิก,สถานะการแจ้ง,การส่งLINE,รูปสลิป\n";
   let totalAmt = 0;
@@ -2436,7 +2689,7 @@ function exportCSVFallback(){
 }
 
 /* ===================================================
-   14. แสดงรายการ (ไอคอน SVG ทั้งหมด)
+   14. แสดงรายการ
    =================================================== */
 function renderList(){
   recordList.innerHTML = '';
@@ -2454,8 +2707,14 @@ function renderList(){
     total += item.amount;
 
     const oilClass = item.oilType === 'E20' ? 'tag-e20' : item.oilType === 'B7' ? 'tag-b7' : 'tag-gas95';
+    
+    // ปุ่มต่างๆ ซ่อนแสดงตามตั้งค่า
+    const slipBtn  = (item.slipImage && showSlipBtn) ? `<button class="r-btn slip" onclick="downloadSlip(${item.id})" title="โหลดสลิป">${ICONS.down}</button>` : '';
+    const viewBtn  = showViewBtn ? `<button class="r-btn view" onclick="openRecordView(${item.id})" title="ดูรายละเอียด">${ICONS.eye}</button>` : '';
+    const editBtn  = showEditBtn ? `<button class="r-btn edit" onclick="openEditMode(${item.id})" title="แก้ไขรายการ">${ICONS.edit}</button>` : '';
+    const delBtn   = showDeleteBtn ? `<button class="r-btn del" onclick="deleteRecord(${item.id})" title="ลบรายการ">${ICONS.trash}</button>` : '';
+
     const slipTag  = item.slipImage ? `<span class="tag tag-slip">${ICONS.clip} สลิป</span>` : '';
-    const slipBtn  = item.slipImage ? `<button class="r-btn slip" onclick="downloadSlip(${item.id})" title="โหลดสลิป">${ICONS.down}</button>` : '';
     let memberTag = '';
     if(item.phone){
       memberTag = item.phone.length === 16
@@ -2481,10 +2740,12 @@ function renderList(){
       <div class="record-bottom">
         <div class="record-time">${ICONS.clock} ${item.time}</div>
         <div class="record-actions">
+          ${viewBtn}
+          ${editBtn}
           ${slipBtn}
-          ${lineEnabled ? `<button class="r-btn line ${item.lineSent ? 'sent' : ''}" onclick="shareToLine(${item.id})">${ICONS.send} ${item.lineSent ? 'ส่งแล้ว' : 'LINE'}</button>` : ''}
+          ${lineEnabled ? `<button class="r-btn line ${item.lineSent ? 'sent' : ''}" onclick="shareToLine(${item.id})">${ICONS.send}${item.lineSent ? 'ส่งแล้ว' : 'LINE'}</button>` : ''}
           <button class="r-btn status ${item.cleared ? 'cleared' : 'pending'}" onclick="toggleStatus(${item.id})" title="${item.cleared ? 'เคลียร์แล้ว' : 'รอเคลียร์'}">${item.cleared ? ICONS.check : ICONS.hour}</button>
-          <button class="r-btn del" onclick="deleteRecord(${item.id})" title="ลบ">${ICONS.trash}</button>
+          ${delBtn}
         </div>
       </div>`;
     recordList.appendChild(el);
@@ -2517,10 +2778,53 @@ function renderList(){
   }, {passive:false});
 })();
 
+/* ===================================================
+   15. ฟังก์ชันเปิดหน้าต่าง Dashboard (สไตล์ใบเสร็จเน้นตัวเลข)
+   =================================================== */
+function openRecordView(id) {
+  const item = records.find(r => r.id === id);
+  if(!item) return;
+
+  // เอาทศนิยมออกแบบ UI หลัก
+  document.getElementById('vd-amount').textContent = item.amount.toLocaleString();
+  document.getElementById('vd-pump').textContent = item.pump;
+  document.getElementById('vd-oil').textContent = item.oilType;
+  
+  let memberText = 'ไม่ได้ระบุ';
+  if(item.phone) {
+    memberText = item.phone.length === 16 ? groupCardDigits(item.phone) : groupPhoneDigits(item.phone);
+    document.getElementById('vd-member-label').textContent = item.phone.length === 16 ? 'บัตรสมาชิก (Blue Card)' : 'เบอร์โทรศัพท์ลูกค้า';
+  } else {
+    document.getElementById('vd-member-label').textContent = 'ข้อมูลลูกค้า';
+  }
+  document.getElementById('vd-member').textContent = memberText;
+  
+  document.getElementById('vd-datetime').textContent = `${item.date} ${item.time}`;
+  document.getElementById('vd-note').textContent = item.note || '-';
+  
+  const st = document.getElementById('vd-status');
+  st.textContent = item.cleared ? 'แจ้งแคชเชียร์แล้ว' : 'รอแจ้งแคชเชียร์';
+  st.style.color = item.cleared ? '#10b981' : '#f59e0b';
+
+  const extraRow = document.getElementById('vd-extra-row');
+  if(item.extraText && item.extraText !== '-') {
+    extraRow.style.display = 'flex';
+    document.getElementById('vd-extra').textContent = item.extraText;
+  } else {
+    extraRow.style.display = 'none';
+  }
+
+  document.getElementById('viewRecordModal').classList.add('active');
+}
+
+function closeRecordView() {
+  document.getElementById('viewRecordModal').classList.remove('active');
+}
+
 initStorage();
 toggleClearBtn();
 
-/* ลงทะเบียน Service Worker (ทำงานเฉพาะเมื่อโฮสต์บน https เช่น GitHub Pages) */
+/* ลงทะเบียน Service Worker */
 if('serviceWorker' in navigator && location.protocol === 'https:'){
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js').catch(() => {});
