@@ -602,8 +602,6 @@
   .extra-item{background:#f1f5f9;border-radius:10px;padding:8px 10px;font-size:12px;color:#334155;display:flex;justify-content:space-between;gap:8px;}
   .extra-item button{border:0;background:transparent;color:#ef4444;font-weight:700;cursor:pointer;}
   .slip-ok svg{stroke:currentColor;fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;}
-  .slip-qr-result{margin:0 0 8px;font-size:12.5px;font-weight:650;color:#047857;line-height:1.45;}
-  .slip-qr-result.miss{color:#b45309;}
 
   /* Success overlay */
   .success-overlay{position:fixed;inset:0;background:rgba(3,7,18,.86);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:3000;opacity:0;visibility:hidden;transition:.3s;}
@@ -1188,7 +1186,6 @@
           <span class="slip-ok">
             <svg width="19" height="19" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> ถ่ายสลิปเรียบร้อย
           </span>
-          <div id="slipQrResult" class="slip-qr-result" style="display:none;"></div>
           <img id="slipPreviewImg" class="slip-preview-img" src="">
           <div id="slipPriceDisplay" class="slip-price-display">฿0.00</div>
           <textarea id="slipNote" class="note-box compact" placeholder="หมายเหตุ เช่น โอน 100 จ่ายสด 100" rows="2"></textarea>
@@ -1202,7 +1199,7 @@
     <div class="qr-card-footer">
       <button type="button" class="btn-modal-close" style="flex:.8;" onclick="closeQRModal()">ปิด</button>
       <input type="file" id="slipInput" accept="image/*" capture="environment" style="display:none;" onchange="handleSlipUpload(event)">
-      <button type="button" class="btn-modal-camera" style="flex:1.2;" onclick="openSlipCamera()">
+      <button type="button" class="btn-modal-camera" style="flex:1.2;" onclick="document.getElementById('slipInput').click()">
         <svg width="19" height="19" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
         สลิป
       </button>
@@ -1210,26 +1207,6 @@
         <svg width="19" height="19" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
         บันทึก
       </button>
-    </div>
-  </div>
-</div>
-
-
-<!-- ================= SLIP CAMERA (live QR follow) ================= -->
-<div id="slipCameraModal" class="modal-overlay" style="z-index:2600;">
-  <div class="modal-card" style="max-width:440px;background:#05080f;border-color:rgba(16,185,129,.45);">
-    <div style="padding:14px 16px;color:#fff;display:flex;justify-content:space-between;align-items:center;font-weight:700;">
-      <span>ถ่ายสลิป</span>
-      <button type="button" onclick="closeSlipCamera()" style="background:none;border:0;color:#fff;font-size:22px;cursor:pointer;line-height:1;">×</button>
-    </div>
-    <div id="slipCamStage" style="position:relative;background:#000;aspect-ratio:3/4;overflow:hidden;">
-      <video id="slipCameraVideo" autoplay playsinline muted style="width:100%;height:100%;object-fit:cover;"></video>
-      <div id="slipFocusBox" style="position:absolute;width:210px;height:210px;left:50%;top:46%;transform:translate(-50%,-50%);border:3px solid rgba(255,255,255,.85);border-radius:14px;box-shadow:0 0 0 9999px rgba(0,0,0,.42);pointer-events:none;transition:left .12s linear,top .12s linear,width .12s linear,height .12s linear,border-color .2s;"></div>
-      <div id="slipCamStatus" style="position:absolute;left:50%;bottom:14px;transform:translateX(-50%);background:rgba(0,0,0,.62);color:#fff;padding:7px 14px;border-radius:999px;font-size:13px;font-weight:650;white-space:nowrap;">เล็ง QR บนสลิปให้อยู่ในกรอบ</div>
-    </div>
-    <div style="display:flex;gap:10px;padding:12px;">
-      <button type="button" class="btn-modal-close" style="flex:1;" onclick="closeSlipCamera()">ยกเลิก</button>
-      <button type="button" class="btn-modal-save" style="flex:1.4;" onclick="captureSlipPhoto()">ถ่ายรูป</button>
     </div>
   </div>
 </div>
@@ -1257,7 +1234,6 @@
            <div class="val-member" id="vd-member"></div>
         </div>
         <div class="receipt-divider"></div>
-        <div class="receipt-row" id="vd-qr-row" style="display:none;"><span>QR สลิป</span><span id="vd-qr" style="color:#0f172a;font-weight:700;"></span></div>
         <div class="receipt-row" style="margin-top:12px;"><span>หมายเหตุ</span><span id="vd-note" style="color:#0f172a;"></span></div>
         <div class="receipt-row" id="vd-extra-row" style="display:none; flex-direction:column; align-items:flex-start;">
            <span style="margin-bottom:6px;">รายการเติมย่อย</span>
@@ -1447,7 +1423,6 @@ async function initStorage(){
 }
 let selectedPumpNum = null, selectedOil = null, currentMember = "";
 let currentSlipBase64 = null, currentSlipFilename = "";
-let currentSlipQR = null;
 let currentNote = "";
 let extraFills = [];
 
@@ -2098,7 +2073,6 @@ function triggerQR(){
 
   if(!editingRecordId) {
     currentSlipBase64 = null; currentNote = ''; extraFills = [];
-    currentSlipQR = null;
   }
   setPostSlipTools(false);
   qrImage.style.display = 'block';
@@ -2111,7 +2085,6 @@ function triggerQR(){
     document.getElementById('slipPreviewContainer').style.display = 'block';
     document.getElementById('slipPreviewImg').src = currentSlipBase64;
     slipPriceDisplay.textContent = `฿${amount.toLocaleString()}`;
-    paintSlipQrResult(currentSlipQR);
   } else {
     document.getElementById('slipPreviewContainer').style.display = 'none';
     document.getElementById('slipPreviewImg').src = '';
@@ -2212,271 +2185,6 @@ function renderExtraFills(){
     + `<div class="extra-item"><span>รวมรายการเติม ฿${sum.toLocaleString()} (ยอดโอนหลักยังเป็นตาม QR)</span><span></span></div>`;
 }
 
-
-const SLIP_BANKS = {
-  "002":"ธนาคารกรุงเทพ","004":"กสิกรไทย","006":"กรุงไทย","011":"ทหารไทยธนชาต",
-  "014":"ไทยพาณิชย์","025":"กรุงศรีอยุธยา","030":"ออมสิน","033":"อาคารสงเคราะห์",
-  "034":"ธ.ก.ส.","069":"เกียรตินาคินภัทร","022":"ซีไอเอ็มบีไทย","024":"ยูโอบี",
-  "073":"แลนด์ แอนด์ เฮ้าส์","067":"ทิสโก้"
-};
-function parseTLV(str){
-  const out = [];
-  let i = 0;
-  while(i + 4 <= str.length){
-    const tag = str.substr(i, 2);
-    const len = parseInt(str.substr(i + 2, 2), 10);
-    if(isNaN(len) || len < 0 || i + 4 + len > str.length) break;
-    out.push({ tag, value: str.substr(i + 4, len) });
-    i += 4 + len;
-  }
-  return out;
-}
-function parseSlipMiniQR(payload){
-  if(!payload || payload.length < 16) return null;
-  try{
-    const tags = parseTLV(payload);
-    let root = null;
-    for(const t of tags){ if(t.tag === '00') root = t.value; }
-    if(!root) return null;
-    const sub = parseTLV(root);
-    const m = {};
-    sub.forEach(t => { m[t.tag] = t.value; });
-    if(m['00'] === '01' && m['01'] === '01' && m['03']){
-      return { kind:'truemoney', bankName:'TrueMoney', sendingBank:'', transRef:m['03'], date:m['04']||'', raw:payload };
-    }
-    if(!m['01'] || !m['02']) return null;
-    const code = m['01'];
-    return { kind:'bank', sendingBank:code, bankName: SLIP_BANKS[code] || ('ธนาคาร '+code), transRef:m['02'], raw:payload };
-  }catch(e){ return null; }
-}
-function paintSlipQrResult(slip){
-  const el = document.getElementById('slipQrResult');
-  if(!el) return;
-  if(slip && slip.transRef){
-    el.style.display = 'block';
-    el.classList.remove('miss');
-    el.textContent = (slip.bankName || 'สลิป') + ' · ' + slip.transRef;
-  }else if(slip === false){
-    el.style.display = 'block';
-    el.classList.add('miss');
-    el.textContent = 'ไม่พบ QR สลิปในรูป (บันทึกรูปได้ตามปกติ)';
-  }else{
-    el.style.display = 'none';
-    el.textContent = '';
-  }
-}
-function acceptSlipPayload(raw){
-  const slip = parseSlipMiniQR(raw);
-  if(!slip) return null;
-  currentSlipQR = slip;
-  paintSlipQrResult(slip);
-  return slip;
-}
-let jsQrPromise = null;
-function loadJsQR(){
-  if(window.jsQR) return Promise.resolve(window.jsQR);
-  if(jsQrPromise) return jsQrPromise;
-  jsQrPromise = new Promise((resolve, reject) => {
-    const sc = document.createElement('script');
-    sc.src = 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js';
-    sc.onload = () => window.jsQR ? resolve(window.jsQR) : reject(new Error('no jsqr'));
-    sc.onerror = () => reject(new Error('jsqr load'));
-    document.head.appendChild(sc);
-  });
-  return jsQrPromise;
-}
-async function scanCanvasForSlip(canvas){
-  try{
-    if('BarcodeDetector' in window){
-      const det = new BarcodeDetector({ formats:['qr_code'] });
-      const codes = await det.detect(canvas);
-      for(const c of codes){ if(acceptSlipPayload(c.rawValue)) return currentSlipQR; }
-    }
-  }catch(e){}
-  try{
-    const jsQR = await loadJsQR();
-    const ctx = canvas.getContext('2d', { willReadFrequently:true });
-    const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const hit = jsQR(img.data, img.width, img.height, { inversionAttempts:'attemptBoth' });
-    if(hit && acceptSlipPayload(hit.data)) return currentSlipQR;
-  }catch(e){}
-  if(!currentSlipQR) paintSlipQrResult(false);
-  return currentSlipQR;
-}
-
-let slipCamStream = null, slipCamTimer = null, slipCamBusy = false;
-function openSlipCamera(){
-  const modal = document.getElementById('slipCameraModal');
-  const video = document.getElementById('slipCameraVideo');
-  const status = document.getElementById('slipCamStatus');
-  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
-    document.getElementById('slipInput').click();
-    return;
-  }
-  modal.classList.add('active');
-  status.textContent = 'เล็ง QR บนสลิปให้อยู่ในกรอบ';
-  status.style.background = 'rgba(0,0,0,.62)';
-  resetFocusBox();
-  navigator.mediaDevices.getUserMedia({
-    video:{ facingMode:{ ideal:'environment' }, width:{ ideal:1280 }, height:{ ideal:720 } },
-    audio:false
-  }).then(async stream => {
-    slipCamStream = stream;
-    video.srcObject = stream;
-    video.setAttribute('playsinline','');
-    try{ await video.play(); }catch(e){}
-    startSlipFollow(video);
-  }).catch(() => {
-    closeSlipCamera();
-    showToast('เปิดกล้องในแอปไม่ได้ ใช้กล้องเครื่องแทน');
-    document.getElementById('slipInput').click();
-  });
-}
-function resetFocusBox(){
-  const box = document.getElementById('slipFocusBox');
-  if(!box) return;
-  box.style.left = '50%';
-  box.style.top = '46%';
-  box.style.width = '210px';
-  box.style.height = '210px';
-  box.style.transform = 'translate(-50%,-50%)';
-  box.style.borderColor = 'rgba(255,255,255,.85)';
-}
-function mapVideoPoint(video, x, y){
-  const stage = document.getElementById('slipCamStage').getBoundingClientRect();
-  const vr = video.getBoundingClientRect();
-  const vw = video.videoWidth || 1, vh = video.videoHeight || 1;
-  const scale = Math.max(vr.width / vw, vr.height / vh);
-  const dispW = vw * scale, dispH = vh * scale;
-  const offX = vr.left + (vr.width - dispW) / 2;
-  const offY = vr.top + (vr.height - dispH) / 2;
-  return { x: offX + x * scale - stage.left, y: offY + y * scale - stage.top };
-}
-function placeFocusOnQr(video, loc){
-  const pts = [loc.topLeftCorner, loc.topRightCorner, loc.bottomRightCorner, loc.bottomLeftCorner];
-  const mapped = pts.map(p => mapVideoPoint(video, p.x, p.y));
-  const xs = mapped.map(p => p.x), ys = mapped.map(p => p.y);
-  const pad = 18;
-  const box = document.getElementById('slipFocusBox');
-  box.style.transform = 'none';
-  box.style.left = Math.max(0, Math.min(...xs) - pad) + 'px';
-  box.style.top = Math.max(0, Math.min(...ys) - pad) + 'px';
-  box.style.width = (Math.max(...xs) - Math.min(...xs) + pad * 2) + 'px';
-  box.style.height = (Math.max(...ys) - Math.min(...ys) + pad * 2) + 'px';
-  box.style.borderColor = '#34d399';
-}
-function startSlipFollow(video){
-  if(slipCamTimer) clearInterval(slipCamTimer);
-  const scratch = document.createElement('canvas');
-  slipCamTimer = setInterval(async () => {
-    if(slipCamBusy || !video.videoWidth) return;
-    slipCamBusy = true;
-    try{
-      const w = 640;
-      const h = Math.round(video.videoHeight * (w / video.videoWidth));
-      scratch.width = w; scratch.height = h;
-      const ctx = scratch.getContext('2d', { willReadFrequently:true });
-      ctx.drawImage(video, 0, 0, w, h);
-      const sx = video.videoWidth / w, sy = video.videoHeight / h;
-      let found = null;
-      if('BarcodeDetector' in window){
-        try{
-          const det = new BarcodeDetector({ formats:['qr_code'] });
-          const codes = await det.detect(scratch);
-          if(codes[0]){
-            found = { raw: codes[0].rawValue, box: codes[0].boundingBox };
-          }
-        }catch(e){}
-      }
-      if(!found){
-        try{
-          const jsQR = await loadJsQR();
-          const img = ctx.getImageData(0, 0, w, h);
-          const hit = jsQR(img.data, w, h, { inversionAttempts:'dontInvert' });
-          if(hit) found = { raw: hit.data, loc: hit.location };
-        }catch(e){}
-      }
-      const status = document.getElementById('slipCamStatus');
-      if(found){
-        const slip = parseSlipMiniQR(found.raw);
-        if(slip){
-          currentSlipQR = slip;
-          status.textContent = 'จับ QR ได้ · ' + slip.bankName;
-          status.style.background = 'rgba(5,150,105,.92)';
-        }else{
-          status.textContent = 'เห็น QR แล้ว กำลังอ่าน...';
-          status.style.background = 'rgba(180,83,9,.9)';
-        }
-        if(found.loc){
-          const loc = {
-            topLeftCorner:{ x:found.loc.topLeftCorner.x * sx, y:found.loc.topLeftCorner.y * sy },
-            topRightCorner:{ x:found.loc.topRightCorner.x * sx, y:found.loc.topRightCorner.y * sy },
-            bottomRightCorner:{ x:found.loc.bottomRightCorner.x * sx, y:found.loc.bottomRightCorner.y * sy },
-            bottomLeftCorner:{ x:found.loc.bottomLeftCorner.x * sx, y:found.loc.bottomLeftCorner.y * sy }
-          };
-          placeFocusOnQr(video, loc);
-        }else if(found.box){
-          placeFocusOnQr(video, {
-            topLeftCorner:{ x:found.box.x * sx, y:found.box.y * sy },
-            topRightCorner:{ x:(found.box.x + found.box.width) * sx, y:found.box.y * sy },
-            bottomRightCorner:{ x:(found.box.x + found.box.width) * sx, y:(found.box.y + found.box.height) * sy },
-            bottomLeftCorner:{ x:found.box.x * sx, y:(found.box.y + found.box.height) * sy }
-          });
-        }
-      }
-    }catch(e){}
-    slipCamBusy = false;
-  }, 280);
-}
-function captureSlipPhoto(){
-  const video = document.getElementById('slipCameraVideo');
-  if(!video || !video.videoWidth){ showToast('กล้องยังไม่พร้อม'); return; }
-  const pump = selectedPumpNum || '0', amount = getAmountValue() || '0';
-  const now = new Date();
-  const timeTag = now.toTimeString().split(' ')[0].replace(/:/g,'-');
-  currentSlipFilename = `slip_P${pump}_${amount}THB_${getLocalDateString(now)}_${timeTag}.jpg`;
-  const canvas = document.createElement('canvas');
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
-  const ctx = canvas.getContext('2d', { alpha:false });
-  ctx.drawImage(video, 0, 0);
-  const MAX = 2200;
-  const scale = Math.min(1, MAX / Math.max(canvas.width, canvas.height));
-  let out = canvas;
-  if(scale < 1){
-    out = document.createElement('canvas');
-    out.width = Math.round(canvas.width * scale);
-    out.height = Math.round(canvas.height * scale);
-    const octx = out.getContext('2d', { alpha:false });
-    octx.imageSmoothingEnabled = true;
-    octx.imageSmoothingQuality = 'high';
-    octx.drawImage(canvas, 0, 0, out.width, out.height);
-  }
-  currentSlipBase64 = out.toDataURL('image/jpeg', 0.93);
-  qrImage.style.display = 'none'; modalPrice.style.display = 'none';
-  document.getElementById('slipPreviewContainer').style.display = 'block';
-  document.getElementById('slipPreviewImg').src = currentSlipBase64;
-  slipPriceDisplay.textContent = `฿${(parseFloat(getAmountValue())||0).toLocaleString()}`;
-  amountEditable = false;
-  document.getElementById('amountInput').classList.add('locked');
-  renderSlipEditors();
-  setPostSlipTools(true);
-  paintOilCell();
-  if(currentSlipQR) paintSlipQrResult(currentSlipQR);
-  scanCanvasForSlip(out);
-  closeSlipCamera();
-  showToast('ถ่ายสลิปเรียบร้อย กดบันทึกได้เลย');
-}
-function closeSlipCamera(){
-  const modal = document.getElementById('slipCameraModal');
-  if(modal) modal.classList.remove('active');
-  if(slipCamTimer){ clearInterval(slipCamTimer); slipCamTimer = null; }
-  if(slipCamStream){ slipCamStream.getTracks().forEach(t => t.stop()); slipCamStream = null; }
-  const video = document.getElementById('slipCameraVideo');
-  if(video) video.srcObject = null;
-  resetFocusBox();
-}
-
 function handleSlipUpload(event){
   const file = event.target.files[0];
   event.target.value = '';
@@ -2509,7 +2217,6 @@ function handleSlipUpload(event){
     renderSlipEditors();
     setPostSlipTools(true);
     paintOilCell();
-    scanCanvasForSlip(canvas);
     showToast('ถ่ายสลิปเรียบร้อย');
   };
 
@@ -2557,7 +2264,6 @@ function saveRecord(){
          records[idx].slipImage = currentSlipBase64;
          records[idx].slipFilename = currentSlipFilename;
       }
-      if(currentSlipQR) records[idx].slipQR = currentSlipQR;
       saveToStorage();
       persistPut(records[idx]);
       showToast('อัปเดตรายการเรียบร้อย');
@@ -2580,8 +2286,7 @@ function saveRecord(){
     date: now.toLocaleDateString('th-TH', { year:'numeric', month:'short', day:'numeric' }),
     time: now.toLocaleTimeString('th-TH', { hour:'2-digit', minute:'2-digit', second:'2-digit' }),
     cleared:false, lineSent:false,
-    slipImage: currentSlipBase64, slipFilename: currentSlipFilename,
-    slipQR: currentSlipQR || null
+    slipImage: currentSlipBase64, slipFilename: currentSlipFilename
   };
 
   records.unshift(newRecord);
@@ -2589,7 +2294,7 @@ function saveRecord(){
   persistPut(newRecord);
 
   setAmountValue('');
-  currentSlipBase64 = null; currentSlipFilename = ""; currentSlipQR = null; currentNote=''; extraFills=[]; needContact=false;
+  currentSlipBase64 = null; currentSlipFilename = ""; currentNote=''; extraFills=[]; needContact=false;
   amountEditable = true;
   document.getElementById('amountInput').classList.remove('locked');
 
@@ -2614,7 +2319,6 @@ function openEditMode(id) {
 
   currentSlipBase64 = item.slipImage || null;
   currentSlipFilename = item.slipFilename || '';
-  currentSlipQR = item.slipQR || null;
   needContact = item.needContact || false;
 
   if(currentSlipBase64) {
@@ -2638,7 +2342,6 @@ function cancelEdit() {
   extraFills = [];
   currentSlipBase64 = null;
   currentSlipFilename = '';
-  currentSlipQR = null;
   needContact = false;
   amountEditable = true;
   document.getElementById('amountInput').classList.remove('locked');
@@ -2664,9 +2367,8 @@ function shareToLine(id){
   const noteText = item.note ? `\nหมายเหตุ: ${item.note}` : '';
   const extraText = item.extraText ? `\nรายการเติม: ${item.extraText}` : '';
   const contactText = item.needContact ? '\nต้องติดต่อลูกค้า' : '';
-  const qrText = (item.slipQR && item.slipQR.transRef) ? `\nธนาคาร: ${item.slipQR.bankName}\nเลขอ้างอิง: ${item.slipQR.transRef}` : '';
 
-  const msg = `แจ้งยอดโอน\n${item.pump}\nน้ำมัน: ${item.oilType}\nยอดเงิน: ${item.amount.toLocaleString()} บาท${memberText}${extraText}${noteText}${contactText}${qrText}\nวันที่: ${item.date}\nเวลา: ${item.time}`;
+  const msg = `แจ้งยอดโอน\n${item.pump}\nน้ำมัน: ${item.oilType}\nยอดเงิน: ${item.amount.toLocaleString()} บาท${memberText}${extraText}${noteText}${contactText}\nวันที่: ${item.date}\nเวลา: ${item.time}`;
   window.open(`https://line.me/R/msg/text/?${encodeURIComponent(msg)}`, '_blank');
 }
 function downloadSlip(id){
@@ -2816,7 +2518,7 @@ function buildWorkbook(){
     C('วันที่', HDR), C('เวลา', HDR), C('หน้าจ่าย', HDR), C('ชนิดน้ำมัน', HDR),
     C('จำนวนเงิน (บาท)', HDR), C('ข้อมูลสมาชิก', HDR), C('หมายเหตุ', HDR),
     C('ต้องติดต่อลูกค้า', HDR), C('รายการเติมรวม', HDR), C('สถานะการแจ้ง', HDR),
-    C('การส่ง LINE', HDR), C('รูปสลิป', HDR), C('ธนาคารผู้โอน', HDR), C('เลขอ้างอิง', HDR)
+    C('การส่ง LINE', HDR), C('รูปสลิป', HDR)
   ]];
 
   records.forEach(r => s1.push([
@@ -2828,9 +2530,7 @@ function buildWorkbook(){
     C(r.extraText || '-', CTR),
     C(r.cleared ? 'เคลียร์แล้ว' : 'รอเคลียร์', CTR),
     C(r.lineSent ? 'ส่งแล้ว' : 'ยังไม่ส่ง', CTR),
-    C(r.slipFilename || '-', CTR),
-    C(r.slipQR && r.slipQR.bankName ? r.slipQR.bankName : '-', CTR),
-    C(r.slipQR && r.slipQR.transRef ? String(r.slipQR.transRef) : '-', CTR)
+    C(r.slipFilename || '-', CTR)
   ]));
 
   s1.push([]);
@@ -2973,11 +2673,11 @@ async function exportZipAll(){
 }
 
 function exportCSVFallback(){
-  let csv = "\uFEFFวันที่,เวลา,หน้าจ่าย,ชนิดน้ำมัน,จำนวนเงิน (บาท),ข้อมูลสมาชิก,สถานะการแจ้ง,การส่งLINE,รูปสลิป,ธนาคารผู้โอน,เลขอ้างอิง\n";
+  let csv = "\uFEFFวันที่,เวลา,หน้าจ่าย,ชนิดน้ำมัน,จำนวนเงิน (บาท),ข้อมูลสมาชิก,สถานะการแจ้ง,การส่งLINE,รูปสลิป\n";
   let totalAmt = 0;
   records.forEach(item => {
     totalAmt += item.amount;
-    csv += `"${item.date}","${item.time}","${item.pump}","${item.oilType}","${item.amount}","${item.phone||'-'}","${item.cleared?'เคลียร์แล้ว':'รอเคลียร์'}","${item.lineSent?'ส่งแล้ว':'ยังไม่ส่ง'}","${item.slipFilename||'-'}","${item.slipQR&&item.slipQR.bankName?item.slipQR.bankName:'-'}","${item.slipQR&&item.slipQR.transRef?item.slipQR.transRef:'-'}"\n`;
+    csv += `"${item.date}","${item.time}","${item.pump}","${item.oilType}","${item.amount}","${item.phone||'-'}","${item.cleared?'เคลียร์แล้ว':'รอเคลียร์'}","${item.lineSent?'ส่งแล้ว':'ยังไม่ส่ง'}","${item.slipFilename||'-'}"\n`;
   });
   csv += `\n,,,รวมทั้งหมด,${totalAmt},,,,\n`;
   const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
@@ -3024,7 +2724,6 @@ function renderList(){
     if(item.note) memberTag += `<span class="tag tag-slip">หมายเหตุ</span>`;
     if(item.extraText) memberTag += `<span class="tag tag-pump">หลายรายการ</span>`;
     if(item.needContact) memberTag += `<span class="tag tag-slip">ต้องติดต่อ</span>`;
-    if(item.slipQR && item.slipQR.transRef) memberTag += `<span class="tag tag-slip">QR ${String(item.slipQR.transRef).slice(-8)}</span>`;
 
 
     const el = document.createElement('div');
@@ -3102,13 +2801,6 @@ function openRecordView(id) {
   
   document.getElementById('vd-datetime').textContent = `${item.date} ${item.time}`;
   document.getElementById('vd-note').textContent = item.note || '-';
-  const qrRow = document.getElementById('vd-qr-row');
-  if(qrRow){
-    if(item.slipQR && item.slipQR.transRef){
-      qrRow.style.display = 'flex';
-      document.getElementById('vd-qr').textContent = (item.slipQR.bankName || '') + ' · ' + item.slipQR.transRef;
-    }else qrRow.style.display = 'none';
-  }
   
   const st = document.getElementById('vd-status');
   st.textContent = item.cleared ? 'แจ้งแคชเชียร์แล้ว' : 'รอแจ้งแคชเชียร์';
