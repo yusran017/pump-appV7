@@ -616,47 +616,33 @@
   
   
   
-  .qr-loading-hud{
-    position:relative;width:min(68vw,190px);padding:10px 12px 9px;margin:0 auto 8px;
-    overflow:hidden;border:1px solid rgba(56,189,248,.55);border-radius:10px;
-    background:
-      linear-gradient(rgba(56,189,248,.07) 1px,transparent 1px),
-      linear-gradient(90deg,rgba(56,189,248,.07) 1px,transparent 1px),
-      linear-gradient(145deg,#10243a,#071321 72%);
-    background-size:12px 12px,12px 12px,100% 100%;
-    box-shadow:inset 0 0 18px rgba(14,165,233,.12),0 8px 24px rgba(2,132,199,.2);
+  .qr-loading-spinner{
+    position:relative;width:76px;height:76px;margin:0 auto 8px;
+    animation:qrSpinnerTurn 2.3s linear infinite;
   }
-  .qr-loading-hud::before,.qr-loading-hud::after{
-    position:absolute;width:9px;height:9px;content:"";pointer-events:none;
-    border-color:#67e8f9;border-style:solid;
+  .qr-loading-spinner i{
+    position:absolute;top:0;left:calc(50% - 4.5px);width:9px;height:20px;
+    border-radius:999px;background:#16bfd5;transform-origin:center 38px;
   }
-  .qr-loading-hud::before{top:3px;left:3px;border-width:1px 0 0 1px;}
-  .qr-loading-hud::after{right:3px;bottom:3px;border-width:0 1px 1px 0;}
-  .qr-hud-heading,.qr-hud-status{
-    display:flex;align-items:center;justify-content:space-between;
-    color:#a5f3fc;font:600 8px/1.2 ui-monospace,SFMono-Regular,Consolas,monospace;
-    letter-spacing:1px;
-  }
-  .qr-hud-status{margin-top:6px;color:#7dd3fc;letter-spacing:.7px;}
-  .qr-hud-indicator{
-    width:5px;height:5px;border-radius:50%;background:#67e8f9;
-    box-shadow:0 0 8px #22d3ee;animation:qrHudPulse 1.4s ease-in-out infinite;
-  }
-  .qr-hud-track{
-    height:8px;margin-top:8px;overflow:hidden;border:1px solid rgba(125,211,252,.28);
-    background:repeating-linear-gradient(90deg,rgba(125,211,252,.1) 0 2px,transparent 2px 5px);
-  }
-  .qr-hud-track i{
-    display:block;width:100%;height:100%;transform:scaleX(0);transform-origin:left;
-    background:linear-gradient(90deg,#0891b2,#22d3ee 65%,#d9fbff);
-    box-shadow:0 0 12px rgba(34,211,238,.8);
-    animation:qrLoadingProgress 2.3s cubic-bezier(.22,.61,.36,1) forwards;
-  }
-  @keyframes qrLoadingProgress{to{transform:scaleX(1)}}
-  @keyframes qrHudPulse{50%{opacity:.35;box-shadow:0 0 2px #22d3ee}}
+  .qr-loading-spinner i:nth-child(1){transform:rotate(0deg);opacity:1}
+  .qr-loading-spinner i:nth-child(2){transform:rotate(22.5deg);opacity:.92}
+  .qr-loading-spinner i:nth-child(3){transform:rotate(45deg);opacity:.84}
+  .qr-loading-spinner i:nth-child(4){transform:rotate(67.5deg);opacity:.76}
+  .qr-loading-spinner i:nth-child(5){transform:rotate(90deg);opacity:.68}
+  .qr-loading-spinner i:nth-child(6){transform:rotate(112.5deg);opacity:.6}
+  .qr-loading-spinner i:nth-child(7){transform:rotate(135deg);opacity:.52}
+  .qr-loading-spinner i:nth-child(8){transform:rotate(157.5deg);opacity:.44}
+  .qr-loading-spinner i:nth-child(9){transform:rotate(180deg);opacity:.36}
+  .qr-loading-spinner i:nth-child(10){transform:rotate(202.5deg);opacity:.3}
+  .qr-loading-spinner i:nth-child(11){transform:rotate(225deg);opacity:.25}
+  .qr-loading-spinner i:nth-child(12){transform:rotate(247.5deg);opacity:.21}
+  .qr-loading-spinner i:nth-child(13){transform:rotate(270deg);opacity:.18}
+  .qr-loading-spinner i:nth-child(14){transform:rotate(292.5deg);opacity:.15}
+  .qr-loading-spinner i:nth-child(15){transform:rotate(315deg);opacity:.13}
+  .qr-loading-spinner i:nth-child(16){transform:rotate(337.5deg);opacity:.11}
+  @keyframes qrSpinnerTurn{to{transform:rotate(360deg)}}
   @media(prefers-reduced-motion:reduce){
-    .qr-hud-track i{transform:scaleX(1);animation:none;}
-    .qr-hud-indicator{animation:none;}
+    .qr-loading-spinner{animation:none;}
   }
 
   .fuel-tank{
@@ -1457,10 +1443,9 @@
     </div>
     <div class="qr-code-box">
       <div id="loadingWrapper" class="loading-wrapper">
-        <div class="qr-loading-hud" aria-hidden="true">
-          <div class="qr-hud-heading"><span>PUMP-APP // PAY</span><span class="qr-hud-indicator"></span></div>
-          <div class="qr-hud-track"><i></i></div>
-          <div class="qr-hud-status"><span>SECURE LINK</span><span>LOADING</span></div>
+        <div class="qr-loading-spinner" aria-hidden="true">
+          <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+          <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
         </div>
         <div class="loading-text" id="qrLoadingText">กำลังเตรียมข้อมูลร้านค้า...</div>
         </div>
