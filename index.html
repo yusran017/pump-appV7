@@ -571,7 +571,7 @@
   }
   .btn-call-cust svg{stroke:#fff;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;}
   .qr-code-box{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#fff;padding:14px;overflow-y:auto;}
-  .qr-img{width:94%;max-width:380px;aspect-ratio:1/1;border-radius:18px;border:5px solid #eef4fb;padding:8px;box-shadow:0 12px 30px rgba(30,58,110,.22);}
+  .qr-img{width:62%;max-width:210px;aspect-ratio:1/1;border-radius:16px;border:4px solid #eef4fb;padding:6px;box-shadow:0 10px 24px rgba(30,58,110,.18);}
   .qr-img.pop-in{animation:qrPopIn .55s cubic-bezier(.2,.85,.3,1.3);}
   @keyframes qrPopIn{
     0%{opacity:0;transform:scale(.15) rotate(-8deg);}
@@ -656,26 +656,16 @@
   }
   .phone-confirm.active{opacity:1;visibility:visible;}
   .phone-card{
-    width:min(92vw,400px);position:relative;overflow:hidden;
-    background:linear-gradient(165deg,rgba(15,23,42,.55),rgba(8,15,30,.72));
-    border:1px solid rgba(255,255,255,.22);
+    width:min(92vw,380px);position:relative;overflow:hidden;
+    background:linear-gradient(165deg,rgba(255,255,255,.18),rgba(255,255,255,.08));
+    border:1px solid rgba(255,255,255,.32);
     border-radius:28px;
-    padding:26px 20px 18px;
+    padding:24px 18px 16px;
     text-align:center;
-    box-shadow:0 24px 60px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.28);
-    -webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);
+    box-shadow:0 20px 50px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.4);
+    -webkit-backdrop-filter:blur(28px) saturate(180%);backdrop-filter:blur(28px) saturate(180%);
     transform:translateY(16px) scale(.97);
     transition:.35s cubic-bezier(.2,.9,.3,1.2);
-  }
-  .phone-card::before{
-    content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
-    background:url('liquid-bg.jpg') center/cover no-repeat;
-    filter:blur(0px);opacity:.55;
-  }
-  .phone-card::after{
-    content:'';position:absolute;inset:0;z-index:1;pointer-events:none;
-    background:linear-gradient(180deg,rgba(255,255,255,.18),rgba(15,23,42,.35) 40%,rgba(8,15,30,.55));
-    -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
   }
   .phone-card > *{position:relative;z-index:2;}
   .phone-confirm.active .phone-card{transform:translateY(0) scale(1);}
@@ -717,12 +707,13 @@
     color:#e0f2fe;font-size:12px;margin:0 0 12px;min-height:18px;
   }
   .phone-loading.show{display:flex;}
-  .phone-spin{
-    width:16px;height:16px;border-radius:50%;
-    border:2px solid rgba(255,255,255,.25);border-top-color:#7dd3fc;
-    animation:phoneSpin .7s linear infinite;
-  }
-  @keyframes phoneSpin{to{transform:rotate(360deg)}}
+  .phone-bars{display:flex;align-items:flex-end;gap:4px;height:18px;}
+  .phone-bars i{width:5px;border-radius:3px;display:block;animation:fuelBar .8s ease-in-out infinite;}
+  .phone-bars i:nth-child(1){height:8px;background:#38bdf8;animation-delay:0s}
+  .phone-bars i:nth-child(2){height:14px;background:#ef4444;animation-delay:.12s}
+  .phone-bars i:nth-child(3){height:11px;background:#f59e0b;animation-delay:.24s}
+  .phone-bars i:nth-child(4){height:16px;background:#22c55e;animation-delay:.36s}
+  @keyframes fuelBar{0%,100%{transform:scaleY(.45);opacity:.55}50%{transform:scaleY(1);opacity:1}}
   .phone-confirm.busy .phone-actions{pointer-events:none;opacity:.7;}
 
   /* Toast */
@@ -766,16 +757,27 @@
   .pad-sheet-head{margin-top:4px;}
 
   .pad-sheet .numpad-display.edc-phone{
-    font-size:clamp(28px,8.6vw,42px);
-    letter-spacing:.18em;
-    justify-content:space-between;
-    padding:0 10px;
-    font-variant-numeric:tabular-nums;
+    height:auto;min-height:78px;padding:10px 4px 12px;
+    display:grid;grid-template-columns:repeat(10,1fr);gap:0;
+    container-type:inline-size;
   }
-  .pad-sheet .numpad-display.edc-phone span{
-    flex:1;text-align:center;min-width:0;
+  .pad-sheet .numpad-display.edc-phone .slot{
+    text-align:center;font-weight:800;font-size:11.5cqw;line-height:1.15;
+    color:rgba(148,163,184,.7);position:relative;padding-bottom:8px;
   }
-  .pad-sheet .numpad-display.edc-phone.empty{letter-spacing:0;justify-content:center;}
+  .pad-sheet .numpad-display.edc-phone .slot::after{
+    content:'';position:absolute;left:16%;right:16%;bottom:0;height:3px;border-radius:3px;
+    background:rgba(148,163,184,.45);
+  }
+  .pad-sheet .numpad-display.edc-phone .slot.on{color:#e0f2fe;}
+  .pad-sheet .numpad-display.edc-phone .slot.on::after{background:#38bdf8;}
+  .pad-sheet .numpad-display.edc-phone .slot.in{animation:slotIn .22s cubic-bezier(.2,.8,.3,1);}
+  .pad-sheet .numpad-display.edc-phone .slot.out{animation:slotOut .22s cubic-bezier(.2,.8,.3,1);}
+  @keyframes slotIn{from{transform:translateX(80%);opacity:0}to{transform:none;opacity:1}}
+  @keyframes slotOut{from{transform:translateX(-80%);opacity:0}to{transform:none;opacity:1}}
+  .pad-progress{height:5px;margin:0 8px 8px;border-radius:5px;background:rgba(255,255,255,.1);overflow:hidden;}
+  .pad-progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,#38bdf8,#22c55e);border-radius:5px;transition:width .2s;}
+  body.light-mode .pad-sheet .numpad-display.edc-phone .slot.on{color:#0f172a;}
 
   .pad-sheet .numpad-display{
     min-height:86px;height:86px;font-size:clamp(34px,8.5vw,46px);letter-spacing:1.6px;margin:6px 0 8px;
@@ -838,12 +840,12 @@
   .qr-content{animation:none;}
 
   .wave-spinner,.load-orbit{display:none;}
-  .load-bounce{display:flex;align-items:flex-end;justify-content:center;gap:8px;height:36px;margin-bottom:8px;}
-  .load-bounce i{width:11px;height:11px;border-radius:50%;display:block;animation:loadBounce .72s ease-in-out infinite;}
-  .load-bounce i:nth-child(1){background:#38bdf8;animation-delay:0s}
-  .load-bounce i:nth-child(2){background:#8b5cf6;animation-delay:.12s}
-  .load-bounce i:nth-child(3){background:#34d399;animation-delay:.24s}
-  .load-bounce i:nth-child(4){background:#f59e0b;animation-delay:.36s}
+  .load-bounce{display:flex;align-items:flex-end;justify-content:center;gap:7px;height:42px;margin-bottom:10px;}
+  .load-bounce i{width:10px;border-radius:5px;display:block;animation:fuelBar 1s ease-in-out infinite;}
+  .load-bounce i:nth-child(1){height:18px;background:#2563eb;animation-delay:0s}
+  .load-bounce i:nth-child(2){height:32px;background:#dc2626;animation-delay:.14s}
+  .load-bounce i:nth-child(3){height:24px;background:#f59e0b;animation-delay:.28s}
+  .load-bounce i:nth-child(4){height:36px;background:#16a34a;animation-delay:.42s}
   @keyframes loadBounce{
     0%,80%,100%{transform:translateY(0) scale(.9);opacity:.35}
     40%{transform:translateY(-12px) scale(1.15);opacity:1}
@@ -925,12 +927,12 @@
 <div id="phoneConfirm" class="phone-confirm">
   <div class="phone-card">
     <div class="phone-icon" aria-hidden="true">
-      <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8l1.2 2.4 2.6.4-1.9 1.8.5 2.6L19 13.9 16.6 15.2l.5-2.6-1.9-1.8 2.6-.4z"/></svg>
     </div>
     <h3>เบอร์สมาชิก</h3>
     <p class="hint">ยืนยันให้ลูกค้าเห็น</p>
     <div class="phone-number" id="phoneConfirmNumber">000-000-0000</div>
-    <div class="phone-loading" id="phoneLoading"><span class="phone-spin"></span><span id="phoneLoadingText">กำลังเตรียม...</span></div>
+    <div class="phone-loading" id="phoneLoading"><span class="phone-bars"><i></i><i></i><i></i><i></i></span><span id="phoneLoadingText">กำลังเตรียม...</span></div>
     <div class="phone-actions">
       <button type="button" class="btn-phone-qr" onclick="confirmPhoneAndCreateQR()">
         <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3"/><path d="M21 14v7h-7"/><path d="M14 21h.01"/></svg>
@@ -993,7 +995,7 @@
               <div class="status-dot"></div>
             </button>
             <button type="button" class="btn-chip btn-phone" id="btnPhoneIcon" onclick="openPhoneModal()" title="เบอร์สมาชิก (10 หลัก)">
-              <svg width="20" height="20" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              <svg width="20" height="20" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8l1.2 2.4 2.6.4-1.9 1.8.5 2.6L19 13.9 16.6 15.2l.5-2.6-1.9-1.8 2.6-.4z"/></svg>
               <div class="status-dot"></div>
             </button>
           </div>
@@ -1140,6 +1142,7 @@
         <p class="hint" id="padHint">แตะตัวเลขด้านล่าง — ไม่ใช้คีย์บอร์ดเครื่อง</p>
       </div>
       <div class="numpad-display" id="padDisplay">0</div>
+      <div class="pad-progress" id="padProgress" style="display:none;"><i></i></div>
       <div class="numpad-counter" id="padCounter">0 บาท</div>
       <div class="voice-row" id="voiceRow">
         <button type="button" class="voice-ico active" id="voiceMale" onclick="setPadVoice('male')" title="เสียงผู้ชาย">
@@ -1447,7 +1450,7 @@ const ICONS = {
   sun:  '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.2 4.2l1.5 1.5M18.3 18.3l1.5 1.5M2 12h2M20 12h2M4.2 19.8l1.5-1.5M18.3 5.7l1.5-1.5"/></svg>',
   moon: '<svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>',
   clock:'<svg width="13" height="13" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>',
-  phone:'<svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>',
+  phone:'<svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8l1.2 2.4 2.6.4-1.9 1.8.5 2.6L19 13.9 16.6 15.2l.5-2.6-1.9-1.8 2.6-.4z"/></svg>',
   card: '<svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>',
   clip: '<svg viewBox="0 0 24 24"><path d="M21.4 11.05 12.2 20.2a5.5 5.5 0 0 1-7.8-7.8l9.2-9.1a3.7 3.7 0 1 1 5.2 5.2l-9.2 9.1a1.8 1.8 0 1 1-2.6-2.6l8.5-8.4"/></svg>',
   down: '<svg width="17" height="17" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
@@ -1628,7 +1631,7 @@ let padTarget = null;
 let padValue  = "";
 const PAD_MAXLEN = { phone:10, card:16, amount:10 };
 const PAD_ICONS = {
-  phone:  '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>',
+  phone:  '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8l1.2 2.4 2.6.4-1.9 1.8.5 2.6L19 13.9 16.6 15.2l.5-2.6-1.9-1.8 2.6-.4z"/>',
   card:   '<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M7 9v6"/><path d="M11 9v6"/><path d="M15 9v6"/><path d="M18 9v6"/>',
   amount: '<rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/>'
 };
@@ -1869,20 +1872,23 @@ function configurePadChrome(){
   setPadVoice(padVoice);
   paintMuteBtn();
   if(padTarget === 'phone'){
-    title.textContent = 'เบอร์โทรศัพท์ลูกค้า';
-    hint.textContent  = 'กรอก 10 หลัก — ไม่ใช้คีย์บอร์ดเครื่อง';
+    title.textContent = 'เบอร์สมาชิก';
+    hint.textContent  = '';
+    if(hint) hint.style.display = 'none';
     scan.style.display = 'none';
     quick.style.display = 'none';
     bl.textContent = 'ล้าง';
   } else if(padTarget === 'card'){
     title.textContent = 'บัตรสมาชิก Blue Card';
     hint.textContent  = 'กรอก 16 หลัก หรือสแกนบาร์โค้ด';
+    if(hint) hint.style.display = '';
     scan.style.display = '';
     quick.style.display = 'none';
     bl.textContent = 'ล้าง';
   } else {
     title.textContent = 'จำนวนเงิน (บาท)';
     hint.textContent  = 'กรอกยอดโอน — จุดทศนิยมกดได้ที่มุมล่างซ้าย';
+    if(hint) hint.style.display = '';
     scan.style.display = 'none';
     quick.style.display = 'flex';
     bl.textContent = '.';
@@ -1907,17 +1913,26 @@ function renderPad(){
   }
   if(padTarget === 'phone'){
     display.classList.add('edc-phone');
-    display.classList.toggle('empty', padValue.length === 0);
-    display.classList.toggle('placeholder', padValue.length === 0);
+    display.classList.remove('placeholder');
+    const dir = window.__padDir || '';
+    window.__padDir = '';
+    const off = 10 - padValue.length;
     const slots = [];
     for(let i = 0; i < 10; i++){
-      const ch = padValue[i] || '·';
-      const dim = i >= padValue.length ? ' style="opacity:.28"' : '';
-      slots.push(`<span${dim}>${ch}</span>`);
+      if(i >= off){
+        const ch = padValue[i - off];
+        slots.push('<span class="slot on' + (dir ? ' '+dir : '') + '">' + ch + '</span>');
+      } else {
+        slots.push('<span class="slot">–</span>');
+      }
     }
     display.innerHTML = slots.join('');
+    const bar = document.getElementById('padProgress');
+    if(bar){ bar.style.display = 'block'; const bi = bar.querySelector('i'); if(bi) bi.style.width = (padValue.length * 10) + '%'; }
   } else {
     display.classList.remove('edc-phone','empty');
+    const bar = document.getElementById('padProgress');
+    if(bar) bar.style.display = 'none';
     if(padValue.length === 0){
       display.textContent = 'XXXX XXXX XXXX XXXX';
       display.classList.add('placeholder');
@@ -1953,10 +1968,11 @@ function padPress(d){
   padValue += d;
   if(navigator.vibrate) navigator.vibrate(8);
   playPadDigit(d);
+  window.__padDir = 'in';
   renderPad();
 }
-function padBackspace(){ padValue = padValue.slice(0,-1); renderPad(); }
-function padClear(){ padValue = ''; renderPad(); }
+function padBackspace(){ padValue = padValue.slice(0,-1); window.__padDir = 'out'; renderPad(); }
+function padClear(){ padValue = ''; window.__padDir = ''; renderPad(); }
 function padBottomLeft(){
   if(padTarget !== 'amount'){ padClear(); return; }
   if(padValue.includes('.')){ padShake(); return; }
@@ -2233,7 +2249,7 @@ function showPhoneConfirm(phone){
   setTimeout(() => {
     el.classList.remove('busy');
     if(load) load.classList.remove('show');
-  }, 700);
+  }, 1100);
 }
 function closePhoneConfirm(){
   const el = document.getElementById('phoneConfirm');
@@ -2250,7 +2266,7 @@ function confirmPhoneAndCreateQR(){
   setTimeout(() => {
     closePhoneConfirm();
     triggerQR();
-  }, 650);
+  }, 1400);
 }
 
 function triggerQR(){
@@ -2290,8 +2306,8 @@ function triggerQR(){
   renderSlipEditors();
 
   qrLoadingText.textContent = 'กำลังเตรียมข้อมูลร้านค้า...';
-  qrLoadTimers.push(setTimeout(() => { qrLoadingText.textContent = 'กำลังเข้ารหัสยอดเงิน...'; }, 260));
-  qrLoadTimers.push(setTimeout(() => { qrLoadingText.textContent = 'กำลังสร้าง QR Code...'; }, 520));
+  qrLoadTimers.push(setTimeout(() => { qrLoadingText.textContent = 'กำลังเข้ารหัสยอดเงิน...'; }, 700));
+  qrLoadTimers.push(setTimeout(() => { qrLoadingText.textContent = 'กำลังสร้าง QR Code...'; }, 1400));
   qrLoadTimers.push(setTimeout(() => {
     const finish = () => {
       document.getElementById('loadingWrapper').style.display = 'none';
@@ -2306,7 +2322,7 @@ function triggerQR(){
       showToast('สร้าง QR ไม่สำเร็จ ลองใหม่อีกครั้ง');
     }
     finish();
-  }, 820));
+  }, 2100));
 }
 
 function closeQRModal(){ qrLoadTimers.forEach(clearTimeout); qrLoadTimers = []; qrModal.classList.remove('active'); }
