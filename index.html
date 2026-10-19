@@ -616,23 +616,27 @@
   
   
   
-  .blue-spin{width:72px;height:72px;position:relative;margin:0 auto 8px;animation:shutterSpin .9s linear infinite;}
-  .blue-spin i{
-    position:absolute;left:50%;top:6px;width:8px;height:18px;margin-left:-4px;
-    border-radius:6px;transform-origin:4px 30px;opacity:.95;
+  .qr-loading-bar{
+    width:min(68vw,190px);height:14px;padding:2px;margin:0 auto 8px;
+    overflow:hidden;border:1px solid rgba(255,255,255,.82);border-radius:999px;
+    background:linear-gradient(135deg,rgba(255,255,255,.62),rgba(186,230,253,.28));
+    box-shadow:inset 0 1px 2px rgba(255,255,255,.85),0 8px 24px rgba(56,189,248,.2);
+    -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
   }
-  .blue-spin i:nth-child(1){transform:rotate(0deg);background:#e0f2fe}
-  .blue-spin i:nth-child(2){transform:rotate(30deg);background:#bae6fd}
-  .blue-spin i:nth-child(3){transform:rotate(60deg);background:#7dd3fc}
-  .blue-spin i:nth-child(4){transform:rotate(90deg);background:#38bdf8}
-  .blue-spin i:nth-child(5){transform:rotate(120deg);background:#0ea5e9}
-  .blue-spin i:nth-child(6){transform:rotate(150deg);background:#0284c7}
-  .blue-spin i:nth-child(7){transform:rotate(180deg);background:#0369a1}
-  .blue-spin i:nth-child(8){transform:rotate(210deg);background:#075985}
-  .blue-spin i:nth-child(9){transform:rotate(240deg);background:#0c4a6e}
-  .blue-spin i:nth-child(10){transform:rotate(270deg);background:#38bdf8}
-  .blue-spin i:nth-child(11){transform:rotate(300deg);background:#7dd3fc}
-  .blue-spin i:nth-child(12){transform:rotate(330deg);background:#bae6fd}
+  .qr-loading-bar i{
+    display:block;width:100%;height:100%;transform:scaleX(0);transform-origin:left;
+    border-radius:inherit;
+    background:linear-gradient(90deg,#7dd3fc 0%,#38bdf8 34%,#a5f3fc 68%,#c4b5fd 100%);
+    background-size:200% 100%;
+    box-shadow:0 0 12px rgba(56,189,248,.45);
+    animation:qrLoadingProgress 2.3s cubic-bezier(.22,.61,.36,1) forwards,
+      qrLoadingShimmer 1.8s ease-in-out infinite;
+  }
+  @keyframes qrLoadingProgress{to{transform:scaleX(1)}}
+  @keyframes qrLoadingShimmer{to{background-position:100% 0}}
+  @media(prefers-reduced-motion:reduce){
+    .qr-loading-bar i{transform:scaleX(1);animation:none;}
+  }
 
   .fuel-tank{
     width:86px;height:110px;position:relative;margin:0 auto 8px;
@@ -1432,7 +1436,9 @@
     </div>
     <div class="qr-code-box">
       <div id="loadingWrapper" class="loading-wrapper">
-        <div class="blue-spin" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="qr-loading-bar" aria-hidden="true">
+          <i aria-hidden="true"></i>
+        </div>
         <div class="loading-text" id="qrLoadingText">กำลังเตรียมข้อมูลร้านค้า...</div>
         </div>
       <div id="qrContentWrapper" class="qr-content">
