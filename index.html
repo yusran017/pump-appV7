@@ -115,6 +115,23 @@
   }
   .glass::before{content:'';position:absolute;inset:0;background:var(--sheen);pointer-events:none;}
 
+
+  /* Liquid glass header background */
+  .header.liquid-bg{
+    background:
+      linear-gradient(180deg,rgba(14,165,233,.35),rgba(59,130,246,.28) 45%,rgba(124,58,237,.32)),
+      url('liquid-bg.jpg') center/cover no-repeat;
+    -webkit-backdrop-filter:blur(6px) saturate(160%);
+    backdrop-filter:blur(6px) saturate(160%);
+  }
+  .header.liquid-bg::after{
+    content:'';position:absolute;inset:0;pointer-events:none;z-index:0;
+    background:linear-gradient(180deg,rgba(255,255,255,.22),rgba(255,255,255,.04) 50%,rgba(0,0,0,.18));
+    -webkit-backdrop-filter:blur(10px) saturate(180%);
+    backdrop-filter:blur(10px) saturate(180%);
+  }
+  .header.liquid-bg > *{position:relative;z-index:2;}
+
   /* HEADER */
   .header{
     background:linear-gradient(135deg,#0ea5e9 0%,#3b82f6 45%,#7c3aed 100%);
@@ -597,6 +614,18 @@
     width:100%;min-height:64px;border-radius:12px;border:1px solid #cbd5e1;
     padding:10px 12px;font-size:13px;font-family:inherit;resize:vertical;color:#0f172a;
   }
+
+  .receipt-member-hero{
+    text-align:center;padding:8px 4px 14px;
+  }
+  .receipt-member-hero .kicker{
+    font-size:11px;font-weight:600;letter-spacing:.6px;color:#64748b;text-transform:uppercase;
+  }
+  .receipt-member-hero .big-phone{
+    margin-top:4px;font-size:clamp(26px,7vw,34px);font-weight:800;letter-spacing:1px;color:#0f172a;
+  }
+  .receipt-member-hero .big-phone.muted{font-size:18px;font-weight:600;color:#94a3b8;letter-spacing:0;}
+
   .extra-row{display:flex;gap:6px;align-items:center;margin-top:6px;flex-wrap:wrap;}
   .extra-list{display:flex;flex-direction:column;gap:6px;margin-top:8px;}
   .extra-item{background:#f1f5f9;border-radius:10px;padding:8px 10px;font-size:12px;color:#334155;display:flex;justify-content:space-between;gap:8px;}
@@ -617,52 +646,84 @@
   .success-overlay p{color:#94a3b8;font-size:13px;margin-top:5px;}
 
 
-  /* Phone confirm popup */
+  /* Phone confirm popup — member */
   .phone-confirm{
     position:fixed;inset:0;z-index:3100;
-    background:rgba(3,7,18,.82);
-    -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+    background:rgba(3,7,18,.72);
+    -webkit-backdrop-filter:blur(16px) saturate(160%);backdrop-filter:blur(16px) saturate(160%);
     display:flex;align-items:center;justify-content:center;
-    padding:20px;opacity:0;visibility:hidden;transition:.28s;
+    padding:18px;opacity:0;visibility:hidden;transition:.28s;
   }
   .phone-confirm.active{opacity:1;visibility:visible;}
   .phone-card{
-    width:min(92vw,380px);
-    background:linear-gradient(180deg,rgba(30,41,59,.96),rgba(15,23,42,.98));
-    border:1px solid rgba(255,255,255,.16);
+    width:min(92vw,400px);position:relative;overflow:hidden;
+    background:linear-gradient(165deg,rgba(15,23,42,.55),rgba(8,15,30,.72));
+    border:1px solid rgba(255,255,255,.22);
     border-radius:28px;
-    padding:28px 22px 22px;
+    padding:26px 20px 18px;
     text-align:center;
-    box-shadow:0 24px 60px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.18);
-    transform:translateY(18px) scale(.96);
+    box-shadow:0 24px 60px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.28);
+    -webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);
+    transform:translateY(16px) scale(.97);
     transition:.35s cubic-bezier(.2,.9,.3,1.2);
   }
+  .phone-card::before{
+    content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
+    background:url('liquid-bg.jpg') center/cover no-repeat;
+    filter:blur(0px);opacity:.55;
+  }
+  .phone-card::after{
+    content:'';position:absolute;inset:0;z-index:1;pointer-events:none;
+    background:linear-gradient(180deg,rgba(255,255,255,.18),rgba(15,23,42,.35) 40%,rgba(8,15,30,.55));
+    -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  }
+  .phone-card > *{position:relative;z-index:2;}
   .phone-confirm.active .phone-card{transform:translateY(0) scale(1);}
   .phone-icon{
-    width:72px;height:72px;margin:0 auto 14px;border-radius:50%;
-    background:linear-gradient(150deg,#38bdf8,#0284c7 55%,#0c4a6e);
+    width:64px;height:64px;margin:0 auto 10px;border-radius:50%;
+    background:linear-gradient(150deg,rgba(56,189,248,.85),rgba(2,132,199,.9));
     display:flex;align-items:center;justify-content:center;color:#fff;
-    box-shadow:0 0 36px rgba(56,189,248,.45), inset 0 2px 0 rgba(255,255,255,.5);
+    box-shadow:0 0 28px rgba(56,189,248,.4), inset 0 2px 0 rgba(255,255,255,.45);
+    border:1px solid rgba(255,255,255,.3);
   }
-  .phone-icon svg{width:34px;height:34px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
-  .phone-card h3{color:#f8fafc;font-size:18px;font-weight:700;margin:0;}
-  .phone-card .hint{color:#94a3b8;font-size:13px;margin:6px 0 14px;}
+  .phone-icon svg{width:30px;height:30px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+  .phone-card h3{color:#f8fafc;font-size:15px;font-weight:600;margin:0;letter-spacing:.4px;}
+  .phone-card .hint{color:rgba(226,232,240,.8);font-size:12px;margin:4px 0 12px;}
   .phone-number{
-    font-size:28px;font-weight:700;letter-spacing:1px;color:#e0f2fe;
-    background:rgba(15,23,42,.6);border:1px solid rgba(125,211,252,.25);
-    border-radius:16px;padding:14px 10px;margin:0 0 18px;
+    font-size:clamp(26px,7.2vw,34px);font-weight:800;letter-spacing:1.5px;color:#f0f9ff;
+    background:rgba(2,8,20,.45);border:1px solid rgba(125,211,252,.35);
+    border-radius:16px;padding:14px 8px;margin:0 0 14px;
+    text-shadow:0 2px 12px rgba(56,189,248,.35);
   }
-  .phone-actions{display:flex;flex-direction:column;gap:10px;}
+  .phone-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .btn-phone-qr, .btn-phone-later{
+    height:64px;border-radius:16px;cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+    font-size:12px;font-weight:600;letter-spacing:.2px;
+  }
   .btn-phone-qr{
-    height:52px;border:0;border-radius:16px;cursor:pointer;
-    background:linear-gradient(150deg,#38bdf8,#0284c7);
-    color:#fff;font-size:16px;font-weight:700;
+    border:0;background:linear-gradient(160deg,#38bdf8,#0284c7);
+    color:#fff;
     box-shadow:0 10px 22px rgba(2,132,199,.4), inset 0 1px 0 rgba(255,255,255,.35);
   }
+  .btn-phone-qr svg, .btn-phone-later svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
   .btn-phone-later{
-    height:44px;border:1px solid rgba(255,255,255,.16);border-radius:14px;
-    background:transparent;color:#cbd5e1;font-size:14px;font-weight:600;cursor:pointer;
+    border:1px solid rgba(255,255,255,.22);
+    background:rgba(255,255,255,.08);color:#e2e8f0;
+    -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
   }
+  .phone-loading{
+    display:none;align-items:center;justify-content:center;gap:8px;
+    color:#e0f2fe;font-size:12px;margin:0 0 12px;min-height:18px;
+  }
+  .phone-loading.show{display:flex;}
+  .phone-spin{
+    width:16px;height:16px;border-radius:50%;
+    border:2px solid rgba(255,255,255,.25);border-top-color:#7dd3fc;
+    animation:phoneSpin .7s linear infinite;
+  }
+  @keyframes phoneSpin{to{transform:rotate(360deg)}}
+  .phone-confirm.busy .phone-actions{pointer-events:none;opacity:.7;}
 
   /* Toast */
   .toast{position:fixed;bottom:86px;left:50%;transform:translateX(-50%) translateY(90px);background:rgba(30,41,59,.92);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);color:#fff;padding:13px 22px;border-radius:30px;font-size:13.5px;font-weight:500;opacity:0;transition:.42s cubic-bezier(.2,.9,.3,1.3);z-index:9999;box-shadow:0 14px 32px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.28);border:1px solid rgba(255,255,255,.18);pointer-events:none;max-width:88%;text-align:center;}
@@ -703,6 +764,19 @@
   .pad-sheet-head .hint{margin-bottom:8px;font-size:12px;}
   .pad-sheet{justify-content:flex-start;}
   .pad-sheet-head{margin-top:4px;}
+
+  .pad-sheet .numpad-display.edc-phone{
+    font-size:clamp(28px,8.6vw,42px);
+    letter-spacing:.18em;
+    justify-content:space-between;
+    padding:0 10px;
+    font-variant-numeric:tabular-nums;
+  }
+  .pad-sheet .numpad-display.edc-phone span{
+    flex:1;text-align:center;min-width:0;
+  }
+  .pad-sheet .numpad-display.edc-phone.empty{letter-spacing:0;justify-content:center;}
+
   .pad-sheet .numpad-display{
     min-height:86px;height:86px;font-size:clamp(34px,8.5vw,46px);letter-spacing:1.6px;margin:6px 0 8px;
     display:flex;align-items:center;justify-content:center;line-height:1;
@@ -847,18 +921,25 @@
 <div class="aurora"><i></i><i></i><i></i></div>
 
 
-<!-- ===== ยืนยันเบอร์โทร ===== -->
+<!-- ===== ยืนยันเบอร์สมาชิก ===== -->
 <div id="phoneConfirm" class="phone-confirm">
   <div class="phone-card">
-    <div class="phone-icon">
-      <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+    <div class="phone-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
     </div>
-    <h3>บันทึกเบอร์โทรแล้ว</h3>
-    <p class="hint">ลูกค้าคนนี้</p>
+    <h3>เบอร์สมาชิก</h3>
+    <p class="hint">ยืนยันให้ลูกค้าเห็น</p>
     <div class="phone-number" id="phoneConfirmNumber">000-000-0000</div>
+    <div class="phone-loading" id="phoneLoading"><span class="phone-spin"></span><span id="phoneLoadingText">กำลังเตรียม...</span></div>
     <div class="phone-actions">
-      <button type="button" class="btn-phone-qr" onclick="confirmPhoneAndCreateQR()">สร้าง QR Code</button>
-      <button type="button" class="btn-phone-later" onclick="closePhoneConfirm()">ทำต่อทีหลัง</button>
+      <button type="button" class="btn-phone-qr" onclick="confirmPhoneAndCreateQR()">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3"/><path d="M21 14v7h-7"/><path d="M14 21h.01"/></svg>
+        สร้าง QR Code
+      </button>
+      <button type="button" class="btn-phone-later" onclick="closePhoneConfirm()">
+        <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        บันทึก
+      </button>
     </div>
   </div>
 </div>
@@ -878,7 +959,7 @@
   <!-- ================= VIEW 1 : บันทึกยอด ================= -->
   <div id="viewHome" class="view-section active">
 
-    <div class="header">
+    <div class="header liquid-bg">
       <div class="header-info">
         <div class="header-badge">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2"/><path d="M12 18h.01"/></svg>
@@ -911,7 +992,7 @@
               <svg width="22" height="22" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M7 9v6"/><path d="M11 9v6"/><path d="M15 9v6"/><path d="M18 9v6"/></svg>
               <div class="status-dot"></div>
             </button>
-            <button type="button" class="btn-chip btn-phone" id="btnPhoneIcon" onclick="openPhoneModal()" title="เบอร์โทรศัพท์ (10 หลัก)">
+            <button type="button" class="btn-chip btn-phone" id="btnPhoneIcon" onclick="openPhoneModal()" title="เบอร์สมาชิก (10 หลัก)">
               <svg width="20" height="20" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
               <div class="status-dot"></div>
             </button>
@@ -1282,22 +1363,20 @@
     <div class="input-modal-body" style="padding:22px 18px;">
       
       <div class="receipt-box">
-        <div class="receipt-head">รายละเอียดการโอน</div>
-        <div class="receipt-divider"></div>
-        <div class="receipt-row"><span>วันที่-เวลา</span><span id="vd-datetime"></span></div>
-        <div class="receipt-row"><span>หน้าจ่าย</span><span id="vd-pump"></span></div>
-        <div class="receipt-row"><span>ชนิดน้ำมัน</span><span id="vd-oil"></span></div>
-        <div class="receipt-row"><span>สถานะ</span><span id="vd-status"></span></div>
+        <div class="receipt-member-hero">
+          <div class="kicker" id="vd-member-label">เบอร์สมาชิก</div>
+          <div class="big-phone" id="vd-member">—</div>
+        </div>
         <div class="receipt-divider"></div>
         <div class="receipt-amount-box">
            <div class="lbl">ยอดโอน (บาท)</div>
            <div class="val" id="vd-amount"></div>
         </div>
         <div class="receipt-divider"></div>
-        <div class="receipt-member-box">
-           <div class="lbl" id="vd-member-label">ข้อมูลลูกค้า</div>
-           <div class="val-member" id="vd-member"></div>
-        </div>
+        <div class="receipt-row"><span>วันที่-เวลา</span><span id="vd-datetime"></span></div>
+        <div class="receipt-row"><span>หน้าจ่าย</span><span id="vd-pump"></span></div>
+        <div class="receipt-row"><span>ชนิดน้ำมัน</span><span id="vd-oil"></span></div>
+        <div class="receipt-row"><span>สถานะ</span><span id="vd-status"></span></div>
         <div class="receipt-divider"></div>
         <div class="receipt-row" style="margin-top:12px;"><span>หมายเหตุ</span><span id="vd-note" style="color:#0f172a;"></span></div>
         <div class="receipt-row" id="vd-extra-row" style="display:none; flex-direction:column; align-items:flex-start;">
@@ -1826,12 +1905,26 @@ function renderPad(){
     counter.textContent = n > 0 ? `฿${n.toLocaleString('en-US', { minimumFractionDigits: padValue.includes('.') ? Math.min(2,(padValue.split('.')[1]||'').length) : 0, maximumFractionDigits: 2 })}` : 'กรอกยอดเงิน';
     return;
   }
-  if(padValue.length === 0){
-    display.textContent = padTarget === 'phone' ? '0000000000' : 'XXXX XXXX XXXX XXXX';
-    display.classList.add('placeholder');
+  if(padTarget === 'phone'){
+    display.classList.add('edc-phone');
+    display.classList.toggle('empty', padValue.length === 0);
+    display.classList.toggle('placeholder', padValue.length === 0);
+    const slots = [];
+    for(let i = 0; i < 10; i++){
+      const ch = padValue[i] || '·';
+      const dim = i >= padValue.length ? ' style="opacity:.28"' : '';
+      slots.push(`<span${dim}>${ch}</span>`);
+    }
+    display.innerHTML = slots.join('');
   } else {
-    display.classList.remove('placeholder');
-    display.textContent = padTarget === 'phone' ? groupPhoneDigits(padValue) : groupCardDigits(padValue);
+    display.classList.remove('edc-phone','empty');
+    if(padValue.length === 0){
+      display.textContent = 'XXXX XXXX XXXX XXXX';
+      display.classList.add('placeholder');
+    } else {
+      display.classList.remove('placeholder');
+      display.textContent = groupCardDigits(padValue);
+    }
   }
   counter.textContent = `${padValue.length}/${maxLen} หลัก`;
 }
@@ -2130,18 +2223,34 @@ let qrLoadTimers = [];
 function showPhoneConfirm(phone){
   const el = document.getElementById('phoneConfirm');
   const num = document.getElementById('phoneConfirmNumber');
+  const load = document.getElementById('phoneLoading');
+  const loadText = document.getElementById('phoneLoadingText');
   if(!el || !num) return;
   num.textContent = groupPhoneDigits(phone);
-  el.classList.add('active');
+  el.classList.add('active','busy');
+  if(load){ load.classList.add('show'); if(loadText) loadText.textContent = 'กำลังยืนยันเบอร์สมาชิก...'; }
   playScanBeep();
+  setTimeout(() => {
+    el.classList.remove('busy');
+    if(load) load.classList.remove('show');
+  }, 700);
 }
 function closePhoneConfirm(){
   const el = document.getElementById('phoneConfirm');
-  if(el) el.classList.remove('active');
+  if(el) el.classList.remove('active','busy');
+  const load = document.getElementById('phoneLoading');
+  if(load) load.classList.remove('show');
 }
 function confirmPhoneAndCreateQR(){
-  closePhoneConfirm();
-  setTimeout(() => triggerQR(), 180);
+  const el = document.getElementById('phoneConfirm');
+  const load = document.getElementById('phoneLoading');
+  const loadText = document.getElementById('phoneLoadingText');
+  if(el) el.classList.add('busy');
+  if(load){ load.classList.add('show'); if(loadText) loadText.textContent = 'กำลังสร้าง QR Code...'; }
+  setTimeout(() => {
+    closePhoneConfirm();
+    triggerQR();
+  }, 650);
 }
 
 function triggerQR(){
@@ -2878,14 +2987,18 @@ function openRecordView(id) {
   document.getElementById('vd-pump').textContent = item.pump;
   document.getElementById('vd-oil').textContent = item.oilType;
   
-  let memberText = 'ไม่ได้ระบุ';
+  const memberEl = document.getElementById('vd-member');
+  const memberLbl = document.getElementById('vd-member-label');
   if(item.phone) {
-    memberText = item.phone.length === 16 ? groupCardDigits(item.phone) : groupPhoneDigits(item.phone);
-    document.getElementById('vd-member-label').textContent = item.phone.length === 16 ? 'บัตรสมาชิก (Blue Card)' : 'เบอร์โทรศัพท์ลูกค้า';
+    const isCard = item.phone.length === 16;
+    memberLbl.textContent = isCard ? 'บัตรสมาชิก' : 'เบอร์สมาชิก';
+    memberEl.textContent = isCard ? groupCardDigits(item.phone) : groupPhoneDigits(item.phone);
+    memberEl.classList.remove('muted');
   } else {
-    document.getElementById('vd-member-label').textContent = 'ข้อมูลลูกค้า';
+    memberLbl.textContent = 'เบอร์สมาชิก';
+    memberEl.textContent = 'ไม่ได้ระบุ';
+    memberEl.classList.add('muted');
   }
-  document.getElementById('vd-member').textContent = memberText;
   
   document.getElementById('vd-datetime').textContent = `${item.date} ${item.time}`;
   document.getElementById('vd-note').textContent = item.note || '-';
