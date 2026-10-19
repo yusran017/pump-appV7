@@ -524,7 +524,7 @@
   .btn-close-scanner{width:100%;padding:14px 0;border-radius:16px;border:1px solid rgba(255,255,255,.25);background:linear-gradient(150deg,#475569,#1e293b);color:#fff;font-size:15px;font-weight:700;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.3);}
 
   /* QR Modal */
-  #qrModal .modal-card{max-width:500px;height:94dvh;max-height:860px;display:flex;flex-direction:column;}
+  #qrModal .modal-card{max-width:420px;width:min(92vw,420px);height:auto;max-height:94dvh;display:flex;flex-direction:column;margin:auto;}
   .qr-card-header{background:linear-gradient(135deg,#0ea5e9,#2563eb 50%,#7c3aed);color:#fff;padding:18px 20px;font-size:17px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:9px;text-shadow:0 1px 4px rgba(0,0,0,.3);}
   .qr-card-header svg{stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;}
   .store-details{padding:12px 16px;border-top:1px solid var(--glass-brd);font-size:12.5px;color:var(--text-muted);text-align:center;}
@@ -570,15 +570,25 @@
     box-shadow:0 0 0 3px rgba(34,197,94,.25);
   }
   .btn-call-cust svg{stroke:#fff;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;}
-  .qr-code-box{flex:0 1 auto;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#fff;padding:18px 16px;overflow-y:auto;margin:8px 12px;border-radius:20px;border:1px solid #e8eef6;}
-  .qr-img{width:min(58vw,200px);max-width:200px;aspect-ratio:1/1;border-radius:14px;border:3px solid #eef4fb;padding:5px;box-shadow:0 8px 18px rgba(30,58,110,.14);}
+  .qr-code-box{width:min(78vw,280px);height:min(78vw,280px);flex:0 0 auto;align-self:center;display:flex;align-items:center;justify-content:center;background:#fff;padding:12px;margin:14px auto 0;border-radius:18px;border:1px solid #e8eef6;position:relative;overflow:hidden;}
+  .qr-img{width:100%;height:100%;object-fit:contain;border-radius:10px;border:0;padding:0;box-shadow:none;}
   .qr-img.pop-in{animation:qrPopIn .55s cubic-bezier(.2,.85,.3,1.3);}
   @keyframes qrPopIn{
     0%{opacity:0;transform:scale(.15) rotate(-8deg);}
     60%{opacity:1;transform:scale(1.06) rotate(1deg);}
     100%{opacity:1;transform:scale(1) rotate(0);}
   }
-  .qr-price-display{margin-top:14px;font-size:36px;font-weight:700;color:#0284c7;}
+
+  .qr-price-bar{
+    width:min(78vw,280px);align-self:center;
+    background:#111;color:#fff;text-align:center;
+    border-radius:0 0 14px 14px;margin:-1px auto 0;
+    padding:10px 8px;font-size:20px;font-weight:700;letter-spacing:.3px;
+  }
+  .store-details{padding:10px 16px 6px;border-top:0;font-size:12px;}
+  .qr-card-footer{padding:10px 12px 14px;gap:8px;border-top:0;background:transparent;}
+
+  .qr-price-display{display:none;}
   .qr-card-footer{padding:14px;display:flex;gap:10px;border-top:1px solid var(--glass-brd);background:var(--glass);}
 
   /* Loading */
@@ -725,6 +735,14 @@
   @keyframes shutterSpin{to{transform:rotate(360deg)}}
   .shutter.lg{width:72px;height:72px;}
   .phone-loading .shutter{width:28px;height:28px;}
+
+  .spin-ok{width:28px;height:28px;border-radius:50%;border:3px solid rgba(56,189,248,.25);border-top-color:#38bdf8;animation:shutterSpin .7s linear infinite;}
+  .spin-member{display:flex;gap:5px;align-items:center;height:18px;}
+  .spin-member i{width:7px;height:7px;border-radius:50%;background:#7dd3fc;animation:memberDot 1s ease-in-out infinite;}
+  .spin-member i:nth-child(2){animation-delay:.15s;background:#f472b6}
+  .spin-member i:nth-child(3){animation-delay:.3s;background:#34d399}
+  @keyframes memberDot{0%,100%{transform:translateY(0);opacity:.4}50%{transform:translateY(-6px);opacity:1}}
+
 
   .phone-confirm.busy .phone-actions{pointer-events:none;opacity:.7;}
 
@@ -946,17 +964,7 @@
     <p class="hint">ยืนยันให้ลูกค้าเห็น</p>
     <div class="phone-number" id="phoneConfirmNumber">000-000-0000</div>
     <div class="phone-loading" id="phoneLoading">
-        <span class="shutter" aria-hidden="true">
-          <svg viewBox="0 0 64 64">
-            <circle cx="32" cy="32" r="30" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="2"/>
-            <path d="M32 6 A26 26 0 0 1 54.5 19 L32 32 Z" fill="#2563eb"/>
-            <path d="M54.5 19 A26 26 0 0 1 54.5 45 L32 32 Z" fill="#dc2626"/>
-            <path d="M54.5 45 A26 26 0 0 1 32 58 L32 32 Z" fill="#fff"/>
-            <path d="M32 58 A26 26 0 0 1 9.5 45 L32 32 Z" fill="#1e3a8a"/>
-            <path d="M9.5 45 A26 26 0 0 1 9.5 19 L32 32 Z" fill="#93c5fd"/>
-            <path d="M9.5 19 A26 26 0 0 1 32 6 L32 32 Z" fill="#ef4444"/>
-          </svg>
-        </span>
+        <span class="spin-member" aria-hidden="true"><i></i><i></i><i></i></span>
         <span id="phoneLoadingText">กำลังเตรียม...</span>
       </div>
     <div class="phone-actions">
@@ -1216,7 +1224,7 @@
       </div>
     </div>
     <div id="padLoadingWrapper" class="loading-wrapper" style="display:none;padding:44px 20px;">
-      <div class="load-bounce"><i></i><i></i><i></i><i></i></div>
+      <span class="spin-ok" aria-hidden="true"></span>
       <div class="loading-text" id="padLoadingText" style="color:var(--text);">กำลังบันทึก...</div>
     </div>
   </div>
@@ -1366,7 +1374,6 @@
       </div>
       <div id="qrContentWrapper" class="qr-content">
         <img id="qrImage" class="qr-img" src="" alt="QR">
-        <div class="qr-price-display" id="modalPrice">฿0.00</div>
         <div id="slipPreviewContainer" class="slip-preview-container">
           <span class="slip-ok">
             <svg width="19" height="19" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> ถ่ายสลิปเรียบร้อย
@@ -1377,6 +1384,7 @@
         </div>
       </div>
     </div>
+    <div class="qr-price-bar" id="modalPrice">0 บาท</div>
     <div class="store-details" id="storeDetails">
       <div class="store-name">ชื่อบัญชี : หจก. ทุ่งยางแดงเอ็นเตอร์ไพรส์</div>
       <div>รหัสร้านค้า : BG094353WQ20000939H</div>
@@ -2307,6 +2315,26 @@ function confirmPhoneAndCreateQR(){
   }, 1400);
 }
 
+
+function formatThaiBaht(amount){
+  const n = Number(amount) || 0;
+  const baht = Math.floor(n);
+  const satang = Math.round((n - baht) * 100);
+  if(satang <= 0) return baht.toLocaleString('th-TH') + ' บาท';
+  return baht.toLocaleString('th-TH') + ' บาท ' + satang + ' สตางค์';
+}
+function majorityDate(){
+  const counts = {};
+  records.forEach(r => {
+    const d = r.date || '';
+    if(!d) return;
+    counts[d] = (counts[d] || 0) + 1;
+  });
+  let best = '', bestN = -1;
+  Object.keys(counts).forEach(d => { if(counts[d] > bestN){ best = d; bestN = counts[d]; } });
+  return best || getLocalDateString(new Date());
+}
+
 function triggerQR(){
   const amount = parseFloat(getAmountValue()) || 0;
   if(!selectedPumpNum || !selectedOil || amount <= 0){
@@ -2320,7 +2348,7 @@ function triggerQR(){
 
   document.getElementById('modalPump').textContent = selectedPumpNum || '-';
   paintOilCell();
-  modalPrice.textContent = `฿${amount.toLocaleString()}`;
+  modalPrice.textContent = formatThaiBaht(amount);
 
   if(!editingRecordId) {
     currentSlipBase64 = null; currentNote = ''; extraFills = [];
@@ -2335,7 +2363,7 @@ function triggerQR(){
   if (currentSlipBase64) {
     document.getElementById('slipPreviewContainer').style.display = 'block';
     document.getElementById('slipPreviewImg').src = currentSlipBase64;
-    slipPriceDisplay.textContent = `฿${amount.toLocaleString()}`;
+    slipPriceDisplay.textContent = formatThaiBaht(amount);
   } else {
     document.getElementById('slipPreviewContainer').style.display = 'none';
     document.getElementById('slipPreviewImg').src = '';
@@ -2460,7 +2488,7 @@ function handleSlipUpload(event){
     qrImage.style.display = 'none'; modalPrice.style.display = 'none';
     document.getElementById('slipPreviewContainer').style.display = 'block';
     document.getElementById('slipPreviewImg').src = currentSlipBase64;
-    slipPriceDisplay.textContent = `฿${(parseFloat(getAmountValue())||0).toLocaleString()}`;
+    slipPriceDisplay.textContent = formatThaiBaht(parseFloat(getAmountValue())||0);
     
     amountEditable = false;
     document.getElementById('amountInput').classList.add('locked');
@@ -2745,7 +2773,7 @@ function getColWidths(dataRows) {
 
 function buildWorkbook(){
   const a = buildAnalysis();
-  const dateStr = getLocalDateString(new Date());
+  const dateStr = majorityDate();
 
   // ตั้งค่า Style สำหรับ Excel (LibreOffice Calc รองรับได้สมบูรณ์)
   const HDR = {
@@ -2859,7 +2887,7 @@ function exportExcel(){
   if(records.length === 0){ showToast('ไม่มีข้อมูลให้ Export'); return; }
   if(typeof XLSX === 'undefined'){ exportCSVFallback(); return; }
   const wb = buildWorkbook();
-  XLSX.writeFile(wb, `สรุปยอดโอน_${getLocalDateString(new Date())}.xlsx`);
+  XLSX.writeFile(wb, `สรุปยอดโอน_${majorityDate()}.xlsx`);
   showToast('ดาวน์โหลด Excel 2 ชีตสำเร็จ');
 }
 
@@ -2886,7 +2914,7 @@ async function exportZipAll(){
   try{
     const JSZipLib = await loadJSZip();
     const zip = new JSZipLib();
-    const dateStr = getLocalDateString(new Date());
+    const dateStr = majorityDate();
 
     const wb = buildWorkbook();
     const xlsxBinary = XLSX.write(wb, { bookType:'xlsx', type:'array' });
@@ -2934,7 +2962,7 @@ function exportCSVFallback(){
   const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = `สรุปยอดโอน_${getLocalDateString(new Date())}.csv`;
+  a.download = `สรุปยอดโอน_${majorityDate()}.csv`;
   document.body.appendChild(a); a.click(); a.remove();
   showToast('ออกไฟล์ CSV แทน (โหลดไลบรารี Excel ไม่สำเร็จ)');
 }
