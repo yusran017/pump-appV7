@@ -571,6 +571,14 @@
   }
   .btn-call-cust svg{stroke:#fff;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;}
   .qr-code-box{width:min(78vw,280px);height:min(78vw,280px);flex:0 0 auto;align-self:center;display:flex;align-items:center;justify-content:center;background:#fff;padding:12px;margin:14px auto 0;border-radius:18px;border:1px solid #e8eef6;position:relative;overflow:hidden;}
+  
+  .qr-code-box.has-slip{
+    width:min(92vw,440px);height:auto;min-height:min(62dvh,520px);
+    padding:12px;align-items:stretch;
+  }
+  .qr-code-box.has-slip .slip-preview-img{max-height:min(58dvh,480px);}
+  .slip-ok{color:#059669;font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center;gap:6px;margin:6px 0;}
+
   .qr-img{width:100%;height:100%;object-fit:contain;border-radius:10px;border:0;padding:0;box-shadow:none;}
   .qr-img.pop-in{animation:qrPopIn .55s cubic-bezier(.2,.85,.3,1.3);}
   @keyframes qrPopIn{
@@ -601,6 +609,14 @@
   .wave-spinner div:nth-child(4){animation-delay:0s;background:linear-gradient(180deg,#fcd34d,#f59e0b);}
   @keyframes wavePulse{0%,100%{transform:scaleY(.45);opacity:.45}50%{transform:scaleY(1.35);opacity:1}}
   .loading-text{font-size:15px;font-weight:600;color:#64748b;letter-spacing:.3px;}
+
+  .fuel-spin{position:relative;width:64px;height:64px;margin-bottom:8px;}
+  .fuel-spin i{position:absolute;left:50%;top:50%;width:14px;height:18px;margin:-18px 0 0 -7px;border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;transform-origin:7px 32px;animation:fuelOrbit 1.2s linear infinite;}
+  .fuel-spin .d1{background:#2563eb;}
+  .fuel-spin .d2{background:#dc2626;animation-delay:-.4s;}
+  .fuel-spin .d3{background:#f59e0b;animation-delay:-.8s;}
+  @keyframes fuelOrbit{to{transform:rotate(360deg)}}
+
   .loading-bar{width:150px;height:6px;border-radius:4px;margin-top:14px;overflow:hidden;background:rgba(148,163,184,.3);}
   .loading-bar i{display:block;height:100%;width:40%;border-radius:4px;background:linear-gradient(90deg,#38bdf8,#8b5cf6,#38bdf8);background-size:200% 100%;animation:shimmer 1.1s linear infinite;}
 
@@ -1358,20 +1374,11 @@
     </div>
     <div class="qr-code-box">
       <div id="loadingWrapper" class="loading-wrapper">
-        <span class="shutter lg" aria-hidden="true">
-          <svg viewBox="0 0 64 64">
-            <circle cx="32" cy="32" r="30" fill="none" stroke="#e2e8f0" stroke-width="2"/>
-            <path d="M32 6 A26 26 0 0 1 54.5 19 L32 32 Z" fill="#2563eb"/>
-            <path d="M54.5 19 A26 26 0 0 1 54.5 45 L32 32 Z" fill="#dc2626"/>
-            <path d="M54.5 45 A26 26 0 0 1 32 58 L32 32 Z" fill="#ffffff"/>
-            <path d="M32 58 A26 26 0 0 1 9.5 45 L32 32 Z" fill="#1e40af"/>
-            <path d="M9.5 45 A26 26 0 0 1 9.5 19 L32 32 Z" fill="#bfdbfe"/>
-            <path d="M9.5 19 A26 26 0 0 1 32 6 L32 32 Z" fill="#ef4444"/>
-          </svg>
+        <span class="fuel-spin" aria-hidden="true">
+          <i class="d1"></i><i class="d2"></i><i class="d3"></i>
         </span>
         <div class="loading-text" id="qrLoadingText">กำลังเตรียมข้อมูลร้านค้า...</div>
-        <div class="loading-bar"><i></i></div>
-      </div>
+        </div>
       <div id="qrContentWrapper" class="qr-content">
         <img id="qrImage" class="qr-img" src="" alt="QR">
         <div id="slipPreviewContainer" class="slip-preview-container">
@@ -2036,6 +2043,7 @@ function padAddQuick(n){
 
 function openPadModal(mode){
   padTarget = mode;
+  padModal.classList.toggle('pad-full', mode === 'phone' || mode === 'card');
   if(mode === 'phone') padValue = currentMember.length === 10 ? currentMember : '';
   else if(mode === 'card') padValue = currentMember.length === 16 ? currentMember : '';
   else padValue = getAmountValue();
@@ -2318,10 +2326,8 @@ function confirmPhoneAndCreateQR(){
 
 function formatThaiBaht(amount){
   const n = Number(amount) || 0;
-  const baht = Math.floor(n);
-  const satang = Math.round((n - baht) * 100);
-  if(satang <= 0) return baht.toLocaleString('th-TH') + ' บาท';
-  return baht.toLocaleString('th-TH') + ' บาท ' + satang + ' สตางค์';
+  const text = n.toLocaleString('th-TH', { minimumFractionDigits: n % 1 ? 1 : 0, maximumFractionDigits: 2 });
+  return text + ' บาท';
 }
 function majorityDate(){
   const counts = {};
@@ -2344,6 +2350,7 @@ function triggerQR(){
   qrLoadTimers.forEach(clearTimeout); qrLoadTimers = [];
   document.getElementById('loadingWrapper').style.display = 'flex';
   document.getElementById('qrContentWrapper').style.display = 'none';
+  const qb = document.querySelector('.qr-code-box'); if(qb) qb.classList.remove('has-slip');
   qrModal.classList.add('active');
 
   document.getElementById('modalPump').textContent = selectedPumpNum || '-';
@@ -2363,6 +2370,7 @@ function triggerQR(){
   if (currentSlipBase64) {
     document.getElementById('slipPreviewContainer').style.display = 'block';
     document.getElementById('slipPreviewImg').src = currentSlipBase64;
+    const box = document.querySelector('.qr-code-box'); if(box) box.classList.add('has-slip');
     slipPriceDisplay.textContent = formatThaiBaht(amount);
   } else {
     document.getElementById('slipPreviewContainer').style.display = 'none';
@@ -2488,6 +2496,7 @@ function handleSlipUpload(event){
     qrImage.style.display = 'none'; modalPrice.style.display = 'none';
     document.getElementById('slipPreviewContainer').style.display = 'block';
     document.getElementById('slipPreviewImg').src = currentSlipBase64;
+    const box = document.querySelector('.qr-code-box'); if(box) box.classList.add('has-slip');
     slipPriceDisplay.textContent = formatThaiBaht(parseFloat(getAmountValue())||0);
     
     amountEditable = false;
