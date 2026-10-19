@@ -617,29 +617,24 @@
   
   
   .qr-loading-spinner{
-    position:relative;width:76px;height:76px;margin:0 auto 8px;
+    position:relative;width:84px;height:84px;margin:0 auto 8px;
     animation:qrSpinnerTurn 2.3s linear infinite;
   }
   .qr-loading-spinner i{
-    position:absolute;top:0;left:calc(50% - 4.5px);width:9px;height:20px;
-    border-radius:999px;background:#16bfd5;transform-origin:center 38px;
+    position:absolute;top:0;left:calc(50% - 6px);width:12px;height:24px;
+    border:1px solid rgba(255,255,255,.72);border-radius:999px;
+    background:linear-gradient(110deg,rgba(255,255,255,.88),rgba(125,211,252,.78) 38%,rgba(34,211,238,.58) 72%,rgba(8,145,178,.72));
+    box-shadow:inset 1px 0 2px rgba(255,255,255,.8),inset -1px 0 2px rgba(8,145,178,.22),0 0 7px rgba(56,189,248,.25);
+    transform-origin:center 42px;
   }
   .qr-loading-spinner i:nth-child(1){transform:rotate(0deg);opacity:1}
-  .qr-loading-spinner i:nth-child(2){transform:rotate(22.5deg);opacity:.92}
-  .qr-loading-spinner i:nth-child(3){transform:rotate(45deg);opacity:.84}
-  .qr-loading-spinner i:nth-child(4){transform:rotate(67.5deg);opacity:.76}
-  .qr-loading-spinner i:nth-child(5){transform:rotate(90deg);opacity:.68}
-  .qr-loading-spinner i:nth-child(6){transform:rotate(112.5deg);opacity:.6}
-  .qr-loading-spinner i:nth-child(7){transform:rotate(135deg);opacity:.52}
-  .qr-loading-spinner i:nth-child(8){transform:rotate(157.5deg);opacity:.44}
-  .qr-loading-spinner i:nth-child(9){transform:rotate(180deg);opacity:.36}
-  .qr-loading-spinner i:nth-child(10){transform:rotate(202.5deg);opacity:.3}
-  .qr-loading-spinner i:nth-child(11){transform:rotate(225deg);opacity:.25}
-  .qr-loading-spinner i:nth-child(12){transform:rotate(247.5deg);opacity:.21}
-  .qr-loading-spinner i:nth-child(13){transform:rotate(270deg);opacity:.18}
-  .qr-loading-spinner i:nth-child(14){transform:rotate(292.5deg);opacity:.15}
-  .qr-loading-spinner i:nth-child(15){transform:rotate(315deg);opacity:.13}
-  .qr-loading-spinner i:nth-child(16){transform:rotate(337.5deg);opacity:.11}
+  .qr-loading-spinner i:nth-child(2){transform:rotate(45deg);opacity:.38}
+  .qr-loading-spinner i:nth-child(3){transform:rotate(90deg);opacity:.94}
+  .qr-loading-spinner i:nth-child(4){transform:rotate(135deg);opacity:.4}
+  .qr-loading-spinner i:nth-child(5){transform:rotate(180deg);opacity:1}
+  .qr-loading-spinner i:nth-child(6){transform:rotate(225deg);opacity:.38}
+  .qr-loading-spinner i:nth-child(7){transform:rotate(270deg);opacity:.94}
+  .qr-loading-spinner i:nth-child(8){transform:rotate(315deg);opacity:.4}
   @keyframes qrSpinnerTurn{to{transform:rotate(360deg)}}
   @media(prefers-reduced-motion:reduce){
     .qr-loading-spinner{animation:none;}
@@ -1444,7 +1439,6 @@
     <div class="qr-code-box">
       <div id="loadingWrapper" class="loading-wrapper">
         <div class="qr-loading-spinner" aria-hidden="true">
-          <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
           <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
         </div>
         <div class="loading-text" id="qrLoadingText">กำลังเตรียมข้อมูลร้านค้า...</div>
