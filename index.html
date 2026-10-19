@@ -570,8 +570,8 @@
     box-shadow:0 0 0 3px rgba(34,197,94,.25);
   }
   .btn-call-cust svg{stroke:#fff;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;}
-  .qr-code-box{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#fff;padding:14px;overflow-y:auto;}
-  .qr-img{width:62%;max-width:210px;aspect-ratio:1/1;border-radius:16px;border:4px solid #eef4fb;padding:6px;box-shadow:0 10px 24px rgba(30,58,110,.18);}
+  .qr-code-box{flex:0 1 auto;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#fff;padding:18px 16px;overflow-y:auto;margin:8px 12px;border-radius:20px;border:1px solid #e8eef6;}
+  .qr-img{width:min(58vw,200px);max-width:200px;aspect-ratio:1/1;border-radius:14px;border:3px solid #eef4fb;padding:5px;box-shadow:0 8px 18px rgba(30,58,110,.14);}
   .qr-img.pop-in{animation:qrPopIn .55s cubic-bezier(.2,.85,.3,1.3);}
   @keyframes qrPopIn{
     0%{opacity:0;transform:scale(.15) rotate(-8deg);}
@@ -714,6 +714,18 @@
   .phone-bars i:nth-child(3){height:11px;background:#f59e0b;animation-delay:.24s}
   .phone-bars i:nth-child(4){height:16px;background:#22c55e;animation-delay:.36s}
   @keyframes fuelBar{0%,100%{transform:scaleY(.45);opacity:.55}50%{transform:scaleY(1);opacity:1}}
+
+  /* Circular shutter spinner */
+  .shutter{
+    width:42px;height:42px;border-radius:50%;position:relative;
+    animation:shutterSpin 1.1s linear infinite;
+    filter:drop-shadow(0 4px 10px rgba(37,99,235,.25));
+  }
+  .shutter svg{width:100%;height:100%;display:block;}
+  @keyframes shutterSpin{to{transform:rotate(360deg)}}
+  .shutter.lg{width:72px;height:72px;}
+  .phone-loading .shutter{width:28px;height:28px;}
+
   .phone-confirm.busy .phone-actions{pointer-events:none;opacity:.7;}
 
   /* Toast */
@@ -753,7 +765,8 @@
   .pad-sheet-head .modal-icon{width:42px;height:42px;border-radius:14px;margin:0 auto 8px;}
   .pad-sheet-head h3{margin-bottom:2px;font-size:17px;}
   .pad-sheet-head .hint{margin-bottom:8px;font-size:12px;}
-  .pad-sheet{justify-content:flex-start;}
+  .pad-sheet{justify-content:flex-end;}
+  .pad-sheet.is-phone{justify-content:flex-start;}
   .pad-sheet-head{margin-top:4px;}
 
   .pad-sheet .numpad-display.edc-phone{
@@ -932,7 +945,20 @@
     <h3>เบอร์สมาชิก</h3>
     <p class="hint">ยืนยันให้ลูกค้าเห็น</p>
     <div class="phone-number" id="phoneConfirmNumber">000-000-0000</div>
-    <div class="phone-loading" id="phoneLoading"><span class="phone-bars"><i></i><i></i><i></i><i></i></span><span id="phoneLoadingText">กำลังเตรียม...</span></div>
+    <div class="phone-loading" id="phoneLoading">
+        <span class="shutter" aria-hidden="true">
+          <svg viewBox="0 0 64 64">
+            <circle cx="32" cy="32" r="30" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="2"/>
+            <path d="M32 6 A26 26 0 0 1 54.5 19 L32 32 Z" fill="#2563eb"/>
+            <path d="M54.5 19 A26 26 0 0 1 54.5 45 L32 32 Z" fill="#dc2626"/>
+            <path d="M54.5 45 A26 26 0 0 1 32 58 L32 32 Z" fill="#fff"/>
+            <path d="M32 58 A26 26 0 0 1 9.5 45 L32 32 Z" fill="#1e3a8a"/>
+            <path d="M9.5 45 A26 26 0 0 1 9.5 19 L32 32 Z" fill="#93c5fd"/>
+            <path d="M9.5 19 A26 26 0 0 1 32 6 L32 32 Z" fill="#ef4444"/>
+          </svg>
+        </span>
+        <span id="phoneLoadingText">กำลังเตรียม...</span>
+      </div>
     <div class="phone-actions">
       <button type="button" class="btn-phone-qr" onclick="confirmPhoneAndCreateQR()">
         <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3"/><path d="M21 14v7h-7"/><path d="M14 21h.01"/></svg>
@@ -1324,7 +1350,17 @@
     </div>
     <div class="qr-code-box">
       <div id="loadingWrapper" class="loading-wrapper">
-        <div class="load-bounce"><i></i><i></i><i></i><i></i></div>
+        <span class="shutter lg" aria-hidden="true">
+          <svg viewBox="0 0 64 64">
+            <circle cx="32" cy="32" r="30" fill="none" stroke="#e2e8f0" stroke-width="2"/>
+            <path d="M32 6 A26 26 0 0 1 54.5 19 L32 32 Z" fill="#2563eb"/>
+            <path d="M54.5 19 A26 26 0 0 1 54.5 45 L32 32 Z" fill="#dc2626"/>
+            <path d="M54.5 45 A26 26 0 0 1 32 58 L32 32 Z" fill="#ffffff"/>
+            <path d="M32 58 A26 26 0 0 1 9.5 45 L32 32 Z" fill="#1e40af"/>
+            <path d="M9.5 45 A26 26 0 0 1 9.5 19 L32 32 Z" fill="#bfdbfe"/>
+            <path d="M9.5 19 A26 26 0 0 1 32 6 L32 32 Z" fill="#ef4444"/>
+          </svg>
+        </span>
         <div class="loading-text" id="qrLoadingText">กำลังเตรียมข้อมูลร้านค้า...</div>
         <div class="loading-bar"><i></i></div>
       </div>
@@ -1864,6 +1900,8 @@ function configurePadChrome(){
   const quick= document.getElementById('padQuickRow');
   const bl   = document.getElementById('padKeyBL');
   const disp = document.getElementById('padDisplay');
+  const sheet = document.getElementById('padModalContent');
+  if(sheet) sheet.classList.toggle('is-phone', padTarget === 'phone');
   icon.className = 'modal-icon ' + (padTarget === 'card' ? 'violet' : padTarget === 'phone' ? 'sky' : 'amount');
   svg.innerHTML = PAD_ICONS[padTarget];
   disp.classList.toggle('numpad-display-card', padTarget === 'card');
