@@ -611,6 +611,38 @@
   .loading-text{font-size:15px;font-weight:600;color:#64748b;letter-spacing:.3px;}
 
   
+  
+  .fuel-tank{
+    width:86px;height:110px;position:relative;margin:0 auto 8px;
+    filter:drop-shadow(0 8px 16px rgba(15,23,42,.18));
+  }
+  .fuel-tank .body{
+    position:absolute;left:10px;right:10px;top:18px;bottom:8px;
+    border:3px solid #0f172a;border-radius:14px 14px 18px 18px;
+    background:#f8fafc;overflow:hidden;
+  }
+  .fuel-tank .cap{
+    position:absolute;left:28px;right:28px;top:6px;height:16px;
+    background:#0f172a;border-radius:6px 6px 0 0;
+  }
+  .fuel-tank .fill{
+    position:absolute;left:0;right:0;bottom:0;height:0;
+    background:linear-gradient(180deg,#fb923c,#ea580c);
+    animation:fuelFill 1.1s ease-in-out 2;
+  }
+  .fuel-tank .wave{
+    position:absolute;left:-20%;right:-20%;top:-8px;height:16px;border-radius:50%;
+    background:rgba(255,255,255,.35);
+  }
+  .fuel-tank.g95 .fill{background:linear-gradient(180deg,#fdba74,#ea580c);}
+  .fuel-tank.e20 .fill{background:linear-gradient(180deg,#6ee7b7,#059669);}
+  .fuel-tank.b7 .fill{background:linear-gradient(180deg,#93c5fd,#2563eb);}
+  @keyframes fuelFill{
+    0%{height:6%}
+    70%{height:100%}
+    100%{height:6%}
+  }
+
   .pump-gauge{width:64px;height:64px;display:block;animation:shutterSpin 1.1s linear infinite;margin-bottom:6px;}
   .pump-gauge svg{width:100%;height:100%;display:block;}
 
@@ -1378,14 +1410,10 @@
     </div>
     <div class="qr-code-box">
       <div id="loadingWrapper" class="loading-wrapper">
-        <span class="pump-gauge" aria-hidden="true">
-          <svg viewBox="0 0 64 64">
-            <circle cx="32" cy="32" r="26" fill="none" stroke="#e2e8f0" stroke-width="6"/>
-            <path d="M32 6 A26 26 0 0 1 58 32" fill="none" stroke="#2563eb" stroke-width="6" stroke-linecap="round"/>
-            <path d="M58 32 A26 26 0 0 1 32 58" fill="none" stroke="#dc2626" stroke-width="6" stroke-linecap="round"/>
-            <circle cx="32" cy="32" r="5" fill="#0f172a"/>
-          </svg>
-        </span>
+        <div class="fuel-tank" id="fuelTank" aria-hidden="true">
+          <div class="cap"></div>
+          <div class="body"><div class="fill"><div class="wave"></div></div></div>
+        </div>
         <div class="loading-text" id="qrLoadingText">กำลังเตรียมข้อมูลร้านค้า...</div>
         </div>
       <div id="qrContentWrapper" class="qr-content">
@@ -2388,9 +2416,15 @@ function triggerQR(){
 
   renderSlipEditors();
 
-  qrLoadingText.textContent = 'กำลังเตรียมข้อมูลร้านค้า...';
-  qrLoadTimers.push(setTimeout(() => { qrLoadingText.textContent = 'กำลังเข้ารหัสยอดเงิน...'; }, 700));
-  qrLoadTimers.push(setTimeout(() => { qrLoadingText.textContent = 'กำลังสร้าง QR Code...'; }, 1400));
+  const tank = document.getElementById('fuelTank');
+  if(tank){
+    tank.classList.remove('g95','e20','b7');
+    const key = oilKey(selectedOil);
+    tank.classList.add(key === 'E20' ? 'e20' : key === 'B7' ? 'b7' : 'g95');
+  }
+  const oilLabel = oilKey(selectedOil) || selectedOil || '';
+  qrLoadingText.textContent = 'กำลังเติม' + (oilLabel ? ' ' + oilLabel : '') + '...';
+  qrLoadTimers.push(setTimeout(() => { qrLoadingText.textContent = 'เกือบเต็มแล้ว...'; }, 1100));
   qrLoadTimers.push(setTimeout(() => {
     const finish = () => {
       document.getElementById('loadingWrapper').style.display = 'none';
@@ -2405,7 +2439,7 @@ function triggerQR(){
       showToast('สร้าง QR ไม่สำเร็จ ลองใหม่อีกครั้ง');
     }
     finish();
-  }, 2100));
+  }, 2300));
 }
 
 function closeQRModal(){ qrLoadTimers.forEach(clearTimeout); qrLoadTimers = []; qrModal.classList.remove('active'); }
