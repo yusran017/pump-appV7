@@ -525,6 +525,14 @@
 
   /* QR Modal */
   #qrModal .modal-card{max-width:420px;width:min(92vw,420px);height:auto;max-height:94dvh;display:flex;flex-direction:column;margin:auto;overflow-y:auto;}
+  #qrModal.has-slip{padding:0;align-items:stretch;justify-content:stretch;}
+  #qrModal.has-slip .modal-card{
+    width:100vw;max-width:none;height:100dvh;max-height:100dvh;margin:0;
+    border:0;border-radius:0;box-shadow:none;overflow:hidden;
+    transform:none;transition:none;
+  }
+  #qrModal.has-slip .qr-card-header{padding-top:calc(14px + env(safe-area-inset-top));}
+  #qrModal.has-slip .qr-card-footer{padding-bottom:calc(14px + env(safe-area-inset-bottom));}
   .qr-card-header{background:linear-gradient(135deg,#0ea5e9,#2563eb 50%,#7c3aed);color:#fff;padding:18px 20px;font-size:17px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:9px;text-shadow:0 1px 4px rgba(0,0,0,.3);}
   .qr-card-header svg{stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;}
   .store-details{padding:12px 16px;border-top:1px solid var(--glass-brd);font-size:12.5px;color:var(--text-muted);text-align:center;}
@@ -573,13 +581,20 @@
   .qr-code-box{width:min(78vw,280px);height:min(78vw,280px);flex:0 0 auto;align-self:center;display:flex;align-items:center;justify-content:center;background:#fff;padding:12px;margin:14px auto 0;border-radius:18px;border:1px solid #e8eef6;position:relative;overflow:hidden;}
   
   .qr-code-box.has-slip{
-    width:min(94vw,460px);height:auto;min-height:0;max-height:68dvh;
-    padding:10px 10px 8px;align-items:center;overflow:hidden;
+    flex:1 1 0;width:100%;height:auto;min-height:0;max-height:none;
+    margin:0;padding:2px;align-items:stretch;overflow:hidden;border:0;border-radius:0;
     display:flex;flex-direction:column;
   }
-  .qr-code-box.has-slip .slip-preview-container{display:flex;flex-direction:column;align-items:center;width:100%;max-height:100%;}
-  .qr-code-box.has-slip .slip-preview-img{max-height:calc(68dvh - 92px);width:100%;max-width:100%;object-fit:contain;}
-  .qr-code-box.has-slip .slip-ok{flex:0 0 auto;margin:4px 0 6px;}
+  #qrModal.has-slip .qr-content{display:flex!important;flex:1 1 0;min-height:0;}
+  .qr-code-box.has-slip .slip-preview-container{
+    display:flex;flex:1 1 0;flex-direction:column;align-items:center;
+    width:100%;min-height:0;max-height:100%;margin:0;overflow:hidden;
+  }
+  .qr-code-box.has-slip .slip-preview-img{
+    flex:1 1 0;width:100%;height:100%;min-height:0;max-width:100%;max-height:none;
+    object-fit:contain;border:0;border-radius:8px;box-shadow:none;
+  }
+  .qr-code-box.has-slip .slip-ok{flex:0 0 auto;margin:2px 0 4px;}
   .slip-ok{color:#059669;font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center;gap:6px;margin:6px 0;}
 
   .qr-img{width:100%;height:100%;object-fit:contain;border-radius:10px;border:0;padding:0;box-shadow:none;}
@@ -692,7 +707,14 @@
   .qr-content{display:none;flex-direction:column;align-items:center;width:100%;animation:fadeIn .45s ease-out;}
   .slip-preview-container{margin-top:6px;width:100%;display:none;text-align:center;}
   .slip-preview-img{width:auto;max-width:100%;max-height:34dvh;object-fit:contain;border-radius:12px;border:3px solid #10b981;box-shadow:0 8px 18px rgba(16,185,129,.25);}
-  .slip-price-display{margin-top:8px;font-size:27px;font-weight:700;color:#10b981;}
+  .slip-price-display{
+    flex:0 0 auto;margin:2px 0;padding:2px 12px;border:0;border-radius:8px;
+    background:transparent;box-shadow:none;color:#10b981;
+    font:inherit;font-size:27px;line-height:1.2;font-weight:700;
+    cursor:pointer;touch-action:manipulation;
+  }
+  .slip-price-display:focus-visible{outline:2px solid #10b981;outline-offset:2px;}
+  .qr-code-box.has-slip .note-box.compact{flex:0 0 auto;max-height:76px;resize:none;}
   .slip-ok{font-size:14px;color:#10b981;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:9px;}
   .slip-edit{width:100%;margin-top:10px;text-align:left;}
   .slip-edit label{display:block;font-size:11px;font-weight:600;color:#64748b;margin:8px 0 6px;}
@@ -1455,7 +1477,7 @@
             <svg width="19" height="19" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> ถ่ายสลิปเรียบร้อย
           </span>
           <img id="slipPreviewImg" class="slip-preview-img" src="">
-          <div id="slipPriceDisplay" class="slip-price-display">฿0.00</div>
+          <button type="button" id="slipPriceDisplay" class="slip-price-display" onclick="openSlipPriceModal()" aria-label="แตะเพื่อแก้ไขราคา" title="แตะเพื่อแก้ไขราคา">฿0.00</button>
           <textarea id="slipNote" class="note-box compact" placeholder="หมายเหตุ เช่น โอน 100 จ่ายสด 100" rows="2"></textarea>
         </div>
       </div>
@@ -2136,6 +2158,10 @@ function openAmountModal(){
   }
   openPadModal('amount'); 
 }
+function openSlipPriceModal(){
+  if(!currentSlipBase64) return;
+  openPadModal('amount');
+}
 
 function savePadData(){
   if(padTarget === 'phone'){
@@ -2153,6 +2179,16 @@ function savePadData(){
     const n = parseFloat(padValue) || 0;
     if(n <= 0){ showToast('กรุณากรอกจำนวนเงิน'); return; }
     setAmountValue(padValue.replace(/\.0+$/,'').replace(/\.$/,''));
+    if(currentSlipBase64){
+      slipPriceDisplay.textContent = formatThaiBaht(n);
+      currentSlipFilename = currentSlipFilename.replace(
+        /^(slip_P[^_]+_)[^_]+(THB_.*)$/,
+        (_, prefix, suffix) => `${prefix}${getAmountValue()}${suffix}`
+      );
+      amountEditable = false;
+      amountInput.classList.add('locked');
+      showToast('เปลี่ยนราคาแล้ว และล็อคราคาเรียบร้อย');
+    }
     closePadModal();
   }
 }
@@ -2437,14 +2473,19 @@ function triggerQR(){
   if(noteEl) noteEl.value = currentNote || '';
 
   if (currentSlipBase64) {
-    document.getElementById('slipPreviewContainer').style.display = 'block';
+    qrImage.style.display = 'none';
+    modalPrice.style.display = 'none';
+    document.getElementById('slipPreviewContainer').style.display = 'flex';
     document.getElementById('slipPreviewImg').src = currentSlipBase64;
     const box = document.querySelector('.qr-code-box'); if(box) box.classList.add('has-slip');
     slipPriceDisplay.textContent = formatThaiBaht(amount);
   } else {
+    qrImage.style.display = 'block';
+    modalPrice.style.display = 'block';
     document.getElementById('slipPreviewContainer').style.display = 'none';
     document.getElementById('slipPreviewImg').src = '';
   }
+  qrModal.classList.toggle('has-slip', !!currentSlipBase64);
 
   renderSlipEditors();
 
@@ -2524,7 +2565,7 @@ function updateModalMeta(){
 }
 function focusSlipNote(){
   const box = document.getElementById('slipPreviewContainer');
-  if(box) box.style.display = 'block';
+  if(box) box.style.display = 'flex';
   const el = document.getElementById('slipNote');
   if(el){ el.focus(); el.scrollIntoView({block:'center'}); }
 }
@@ -2569,9 +2610,10 @@ function handleSlipUpload(event){
     ctx.drawImage(bmp, 0, 0, canvas.width, canvas.height);
     currentSlipBase64 = canvas.toDataURL('image/jpeg', 0.93);
     qrImage.style.display = 'none'; modalPrice.style.display = 'none';
-    document.getElementById('slipPreviewContainer').style.display = 'block';
+    document.getElementById('slipPreviewContainer').style.display = 'flex';
     document.getElementById('slipPreviewImg').src = currentSlipBase64;
     const box = document.querySelector('.qr-code-box'); if(box) box.classList.add('has-slip');
+    qrModal.classList.add('has-slip');
     slipPriceDisplay.textContent = formatThaiBaht(parseFloat(getAmountValue())||0);
     
     amountEditable = false;
