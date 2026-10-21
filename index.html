@@ -632,32 +632,33 @@
   
   
   .qr-loading-spinner{
-    position:relative;width:84px;height:84px;margin:0 auto 8px;
-    perspective:180px;
+    position:relative;width:76px;height:76px;margin:0 auto 14px;
+    display:grid;place-items:center;border:1px solid rgba(125,211,252,.28);
+    border-radius:16px;background:rgba(15,23,42,.48);
+    box-shadow:0 10px 26px rgba(2,132,199,.16),inset 0 0 22px rgba(56,189,248,.08);
+    overflow:hidden;
   }
-  .qr-loading-spinner i{
-    position:absolute;top:0;left:calc(50% - 6px);width:12px;height:24px;
-    border:1px solid rgba(255,255,255,.76);border-radius:999px;
-    background:linear-gradient(105deg,rgba(255,255,255,.96) 0%,rgba(186,230,253,.9) 20%,rgba(56,189,248,.72) 52%,rgba(8,145,178,.82) 78%,rgba(224,242,254,.88) 100%);
-    box-shadow:inset 1px 0 3px rgba(255,255,255,.9),inset -2px 0 3px rgba(8,145,178,.3),0 0 8px rgba(56,189,248,.38);
-    transform-origin:center 42px;animation:qrCrystalPulse 2.8s ease-in-out infinite;
+  .qr-loader-corners{position:absolute;inset:10px;color:#7dd3fc;}
+  .qr-loader-corners i{position:absolute;width:16px;height:16px;border-color:currentColor;border-style:solid;opacity:.9;}
+  .qr-loader-corners i:nth-child(1){top:0;left:0;border-width:2px 0 0 2px;border-radius:4px 0 0}
+  .qr-loader-corners i:nth-child(2){top:0;right:0;border-width:2px 2px 0 0;border-radius:0 4px 0 0}
+  .qr-loader-corners i:nth-child(3){bottom:0;left:0;border-width:0 0 2px 2px;border-radius:0 0 0 4px}
+  .qr-loader-corners i:nth-child(4){bottom:0;right:0;border-width:0 2px 2px 0;border-radius:0 0 4px}
+  .qr-loader-grid{display:grid;grid-template-columns:repeat(3,7px);grid-template-rows:repeat(3,7px);gap:3px;opacity:.8}
+  .qr-loader-grid i{border-radius:1px;background:#38bdf8;animation:qrPixel .9s ease-in-out infinite alternate}
+  .qr-loader-grid i:nth-child(2),.qr-loader-grid i:nth-child(4),.qr-loader-grid i:nth-child(8){animation-delay:.18s}
+  .qr-loader-grid i:nth-child(3),.qr-loader-grid i:nth-child(7){animation-delay:.36s}
+  .qr-loader-grid i:nth-child(5){opacity:.35}
+  .qr-loading-spinner::after{
+    content:'';position:absolute;left:8px;right:8px;height:2px;top:12px;
+    background:linear-gradient(90deg,transparent,#67e8f9 35%,#fff 50%,#67e8f9 65%,transparent);
+    box-shadow:0 0 10px rgba(34,211,238,.9);animation:qrScanLine 1.15s ease-in-out infinite;
   }
-  .qr-loading-spinner i:nth-child(1){transform:rotate(0deg) rotateY(-18deg);animation-delay:0s}
-  .qr-loading-spinner i:nth-child(2){transform:rotate(45deg) rotateY(18deg);animation-delay:.28s}
-  .qr-loading-spinner i:nth-child(3){transform:rotate(90deg) rotateY(-18deg);animation-delay:.56s}
-  .qr-loading-spinner i:nth-child(4){transform:rotate(135deg) rotateY(18deg);animation-delay:.84s}
-  .qr-loading-spinner i:nth-child(5){transform:rotate(180deg) rotateY(-18deg);animation-delay:1.12s}
-  .qr-loading-spinner i:nth-child(6){transform:rotate(225deg) rotateY(18deg);animation-delay:1.4s}
-  .qr-loading-spinner i:nth-child(7){transform:rotate(270deg) rotateY(-18deg);animation-delay:1.68s}
-  .qr-loading-spinner i:nth-child(8){transform:rotate(315deg) rotateY(18deg);animation-delay:1.96s}
-  @keyframes qrCrystalPulse{
-    0%,100%{opacity:.16;filter:brightness(.78);box-shadow:inset 1px 0 2px rgba(255,255,255,.28),0 0 2px rgba(56,189,248,.12)}
-    10%{opacity:1;filter:brightness(1.35);box-shadow:inset 1px 0 4px rgba(255,255,255,1),0 0 14px rgba(56,189,248,.88),0 0 24px rgba(34,211,238,.48)}
-    30%{opacity:.72;filter:brightness(1.12);box-shadow:inset 1px 0 3px rgba(255,255,255,.8),0 0 9px rgba(56,189,248,.55)}
-    58%{opacity:.3;filter:brightness(.9);box-shadow:inset 1px 0 2px rgba(255,255,255,.42),0 0 4px rgba(56,189,248,.2)}
-  }
+  @keyframes qrScanLine{0%{transform:translateY(0);opacity:.45}50%{opacity:1}100%{transform:translateY(48px);opacity:.45}}
+  @keyframes qrPixel{from{opacity:.32;transform:scale(.72)}to{opacity:1;transform:scale(1)}}
   @media(prefers-reduced-motion:reduce){
-    .qr-loading-spinner i{animation:none;opacity:.72;filter:none;}
+    .qr-loading-spinner::after,.qr-loader-grid i{animation:none;}
+    .qr-loading-spinner::after{top:50%;opacity:.8;}
   }
 
   .fuel-tank{
@@ -1474,9 +1475,10 @@
     <div class="qr-code-box">
       <div id="loadingWrapper" class="loading-wrapper">
         <div class="qr-loading-spinner" aria-hidden="true">
-          <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+          <div class="qr-loader-corners"><i></i><i></i><i></i><i></i></div>
+          <div class="qr-loader-grid"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
         </div>
-        <div class="loading-text" id="qrLoadingText">กำลังเตรียมข้อมูลร้านค้า...</div>
+        <div class="loading-text" id="qrLoadingText">กำลังสร้าง QR Code...</div>
         </div>
       <div id="qrContentWrapper" class="qr-content">
         <img id="qrImage" class="qr-img" src="" alt="QR">
@@ -2412,6 +2414,12 @@ function generatePromptPayPayload(amount){
   payload += "54" + ("0"+amtStr.length).slice(-2) + amtStr + "5802TH6208070400006304";
   return payload + calculateCRC16(payload);
 }
+function buildQrDataUrl(payload, cellSize = 8, margin = 0){
+  const qr = qrcode(0, 'M');
+  qr.addData(payload);
+  qr.make();
+  return qr.createDataURL(cellSize, margin);
+}
 
 let qrGenerationFrame = null;
 let qrGenerationId = 0;
@@ -2459,6 +2467,7 @@ function majorityDate(){
 }
 
 function triggerQR(){
+  const qrLoadingStartedAt = performance.now();
   const amount = parseFloat(getAmountValue()) || 0;
   if(!selectedPumpNum || !selectedOil || amount <= 0){
     showToast('กรุณาระบุหน้าจ่าย ชนิดน้ำมัน และจำนวนเงินให้ครบ'); return;
@@ -2515,29 +2524,34 @@ function triggerQR(){
     qrGenerationFrame = null;
     const finish = () => {
       if(generationId !== qrGenerationId) return;
-      document.getElementById('loadingWrapper').style.display = 'none';
-      document.getElementById('qrContentWrapper').style.display = 'flex';
+      const remainingLoadingTime = Math.max(0, 700 - (performance.now() - qrLoadingStartedAt));
+      setTimeout(() => {
+        if(generationId !== qrGenerationId) return;
+        document.getElementById('loadingWrapper').style.display = 'none';
+        document.getElementById('qrContentWrapper').style.display = 'flex';
+      }, remainingLoadingTime);
     };
     try{
-      const qr = qrcode(0, 'M');
-      qr.addData(generatePromptPayPayload(amount));
-      qr.make();
-      const dataUrl = qr.createDataURL(10, 4);
-      if(typeof qrImage.decode === 'function'){
+      const payload = generatePromptPayPayload(amount);
+      const dataUrl = buildQrDataUrl(payload, 8, 0);
+      await new Promise((resolve, reject) => {
+        const onLoad = () => {
+          qrImage.onload = null;
+          qrImage.onerror = null;
+          resolve();
+        };
+        const onError = () => {
+          qrImage.onload = null;
+          qrImage.onerror = null;
+          reject(new Error('QR image failed to load'));
+        };
+        qrImage.onload = onLoad;
+        qrImage.onerror = onError;
         qrImage.src = dataUrl;
-        await qrImage.decode();
-      }else{
-        await new Promise((resolve, reject) => {
-          qrImage.onload = () => { qrImage.onload = null; qrImage.onerror = null; resolve(); };
-          qrImage.onerror = () => { qrImage.onload = null; qrImage.onerror = null; reject(new Error('QR image failed to load')); };
-          qrImage.src = dataUrl;
-          if(qrImage.complete && qrImage.naturalWidth) {
-            qrImage.onload = null;
-            qrImage.onerror = null;
-            resolve();
-          }
-        });
-      }
+        if(qrImage.complete && qrImage.naturalWidth) {
+          onLoad();
+        }
+      });
     }catch(err){
       if(generationId !== qrGenerationId) return;
       showToast('สร้าง QR ไม่สำเร็จ ลองใหม่อีกครั้ง');
