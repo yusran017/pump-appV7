@@ -1354,6 +1354,14 @@
         </div>
         <button type="button" class="switch" id="addMoreSwitch" onclick="toggleAddMoreSetting()"></button>
       </div>
+
+      <div class="settings-row">
+        <div>
+          <h4>หน้าต่างยืนยันเบอร์ลูกค้า</h4>
+          <p>ปิดแล้วจะสร้าง QR ทันทีหลังบันทึกเบอร์</p>
+        </div>
+        <button type="button" class="switch on" id="phoneConfirmSwitch" onclick="togglePhoneConfirmSetting()"></button>
+      </div>
       
       <div class="settings-row">
         <div>
@@ -1802,6 +1810,7 @@ let padVoice = (function(){ try { return localStorage.getItem('edc_pad_voice') |
 let padSoundOn = (function(){ try { return (safeGet('edc_pad_sound') || '1') !== '0'; } catch(e){ return true; } })();
 let lineEnabled = (function(){ try { return (safeGet('edc_line_enabled') || '1') !== '0'; } catch(e){ return true; } })();
 let addMoreEnabled = (function(){ try { return (safeGet('edc_add_more') || '0') === '1'; } catch(e){ return false; } })();
+let showPhoneConfirm = (function(){ try { return (safeGet('edc_show_phone_confirm') || '1') !== '0'; } catch(e){ return true; } })();
 
 let showDeleteBtn = (function(){ try { return (safeGet('edc_show_delete') || '1') !== '0'; } catch(e){ return true; } })();
 let showEditBtn = (function(){ try { return (safeGet('edc_show_edit') || '1') !== '0'; } catch(e){ return true; } })();
@@ -1856,6 +1865,12 @@ function toggleAddMoreSetting(){
   const sw = document.getElementById('addMoreSwitch');
   if(sw) sw.classList.toggle('on', addMoreEnabled);
   showToast(addMoreEnabled ? 'โอนเพิ่ม: เก็บเบอร์เดิมไว้' : 'ปิดโอนเพิ่ม: ครั้งถัดไปจะล้างเบอร์หลังบันทึก');
+}
+function togglePhoneConfirmSetting(){
+  showPhoneConfirm = !showPhoneConfirm;
+  safeSet('edc_show_phone_confirm', showPhoneConfirm ? '1' : '0');
+  const sw = document.getElementById('phoneConfirmSwitch');
+  if(sw) sw.classList.toggle('on', showPhoneConfirm);
 }
 function toggleDeleteSetting(){
   showDeleteBtn = !showDeleteBtn;
@@ -1959,6 +1974,8 @@ function openSettingsModal(){
   if(sw1) sw1.classList.toggle('on', lineEnabled);
   const sw2 = document.getElementById('addMoreSwitch');
   if(sw2) sw2.classList.toggle('on', addMoreEnabled);
+  const swPhoneConfirm = document.getElementById('phoneConfirmSwitch');
+  if(swPhoneConfirm) swPhoneConfirm.classList.toggle('on', showPhoneConfirm);
   const sw3 = document.getElementById('deleteSwitch');
   if(sw3) sw3.classList.toggle('on', showDeleteBtn);
   const sw4 = document.getElementById('editSwitch');
@@ -2170,7 +2187,10 @@ function savePadData(){
     finishPadSave(() => {
       currentMember = savedPhone;
       updateMainButtonsUI();
-      if(savedPhone.length === 10) showPhoneConfirm(savedPhone);
+      if(savedPhone.length === 10){
+        if(showPhoneConfirm) showPhoneConfirmModal(savedPhone);
+        else triggerQR();
+      }
     });
   } else if(padTarget === 'card'){
     if(padValue.length > 0 && padValue.length !== 16){ showToast('บัตรสมาชิกต้องมี 16 หลักเป๊ะๆ'); return; }
@@ -2393,22 +2413,21 @@ function generatePromptPayPayload(amount){
   return payload + calculateCRC16(payload);
 }
 
-let qrLoadTimers = [];
+let qrGenerationFrame = null;
+let qrGenerationId = 0;
 
-function showPhoneConfirm(phone){
+function showPhoneConfirmModal(phone){
   const el = document.getElementById('phoneConfirm');
   const num = document.getElementById('phoneConfirmNumber');
   const load = document.getElementById('phoneLoading');
   const loadText = document.getElementById('phoneLoadingText');
-  if(!el || !num) return;
+  if(!showPhoneConfirm || !el || !num) return;
   num.textContent = groupPhoneDigits(phone);
-  el.classList.add('active','busy');
-  if(load){ load.classList.add('show'); if(loadText) loadText.textContent = 'กำลังยืนยันเบอร์สมาชิก...'; }
+  el.classList.add('active');
+  el.classList.remove('busy');
+  if(load) load.classList.remove('show');
+  if(loadText) loadText.textContent = 'กำลังเตรียม...';
   playScanBeep();
-  setTimeout(() => {
-    el.classList.remove('busy');
-    if(load) load.classList.remove('show');
-  }, 1100);
 }
 function closePhoneConfirm(){
   const el = document.getElementById('phoneConfirm');
@@ -2417,15 +2436,8 @@ function closePhoneConfirm(){
   if(load) load.classList.remove('show');
 }
 function confirmPhoneAndCreateQR(){
-  const el = document.getElementById('phoneConfirm');
-  const load = document.getElementById('phoneLoading');
-  const loadText = document.getElementById('phoneLoadingText');
-  if(el) el.classList.add('busy');
-  if(load){ load.classList.add('show'); if(loadText) loadText.textContent = 'กำลังสร้าง QR Code...'; }
-  setTimeout(() => {
-    closePhoneConfirm();
-    triggerQR();
-  }, 1400);
+  closePhoneConfirm();
+  triggerQR();
 }
 
 
@@ -2452,7 +2464,9 @@ function triggerQR(){
     showToast('กรุณาระบุหน้าจ่าย ชนิดน้ำมัน และจำนวนเงินให้ครบ'); return;
   }
   
-  qrLoadTimers.forEach(clearTimeout); qrLoadTimers = [];
+  if(qrGenerationFrame !== null) cancelAnimationFrame(qrGenerationFrame);
+  qrGenerationFrame = null;
+  const generationId = ++qrGenerationId;
   document.getElementById('loadingWrapper').style.display = 'flex';
   document.getElementById('qrContentWrapper').style.display = 'none';
   const qb = document.querySelector('.qr-code-box'); if(qb) qb.classList.remove('has-slip');
@@ -2497,9 +2511,10 @@ function triggerQR(){
   }
   const oilLabel = oilKey(selectedOil) || selectedOil || '';
   qrLoadingText.textContent = 'กำลังสร้าง QR Code...';
-  qrLoadTimers.push(setTimeout(() => { qrLoadingText.textContent = 'เกือบเต็มแล้ว...'; }, 1100));
-  qrLoadTimers.push(setTimeout(() => {
+  qrGenerationFrame = requestAnimationFrame(async () => {
+    qrGenerationFrame = null;
     const finish = () => {
+      if(generationId !== qrGenerationId) return;
       document.getElementById('loadingWrapper').style.display = 'none';
       document.getElementById('qrContentWrapper').style.display = 'flex';
     };
@@ -2507,15 +2522,36 @@ function triggerQR(){
       const qr = qrcode(0, 'M');
       qr.addData(generatePromptPayPayload(amount));
       qr.make();
-      qrImage.src = qr.createDataURL(10, 4);
+      const dataUrl = qr.createDataURL(10, 4);
+      if(typeof qrImage.decode === 'function'){
+        qrImage.src = dataUrl;
+        await qrImage.decode();
+      }else{
+        await new Promise((resolve, reject) => {
+          qrImage.onload = () => { qrImage.onload = null; qrImage.onerror = null; resolve(); };
+          qrImage.onerror = () => { qrImage.onload = null; qrImage.onerror = null; reject(new Error('QR image failed to load')); };
+          qrImage.src = dataUrl;
+          if(qrImage.complete && qrImage.naturalWidth) {
+            qrImage.onload = null;
+            qrImage.onerror = null;
+            resolve();
+          }
+        });
+      }
     }catch(err){
+      if(generationId !== qrGenerationId) return;
       showToast('สร้าง QR ไม่สำเร็จ ลองใหม่อีกครั้ง');
     }
     finish();
-  }, 2300));
+  });
 }
 
-function closeQRModal(){ qrLoadTimers.forEach(clearTimeout); qrLoadTimers = []; qrModal.classList.remove('active'); }
+function closeQRModal(){
+  ++qrGenerationId;
+  if(qrGenerationFrame !== null) cancelAnimationFrame(qrGenerationFrame);
+  qrGenerationFrame = null;
+  qrModal.classList.remove('active');
+}
 function saveFromModal(){ closeQRModal(); setTimeout(saveRecord, 300); }
 
 function showToast(msg){
