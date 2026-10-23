@@ -1602,6 +1602,10 @@
         <div class="receipt-row"><span>การตรวจสอบสลิป</span><span id="vd-slip-verify" class="receipt-verify">-</span></div>
         <div class="receipt-row"><span>ธนาคารผู้โอน</span><span id="vd-bank" class="receipt-bank"><i class="receipt-bank-dot"></i><span id="vd-bank-name">-</span></span></div>
         <div class="receipt-row"><span>เลขอ้างอิงสลิป</span><span id="vd-trans-ref">-</span></div>
+        <div class="receipt-row" style="align-items:flex-start;">
+          <span>ข้อมูล Mini-QR<br><small style="opacity:.75;font-weight:500;">คัดลอกไปใช้กับแอปธนาคารหรือ API ได้</small></span>
+          <span id="vd-raw-qr" style="font-size:11px;word-break:break-all;text-align:right;max-width:60%;line-height:1.35;">-</span>
+        </div>
         <div class="receipt-row"><span>การเชื่อมโยงเวลา</span><span id="vd-time-link">-</span></div>
         <div class="receipt-divider"></div>
         <div class="receipt-row" style="margin-top:12px;"><span>หมายเหตุ</span><span id="vd-note" style="color:#0f172a;"></span></div>
@@ -2740,7 +2744,7 @@ function verifySlipTiming(qrInfo, ocrTimeText = ''){
     : null;
   const today = getLocalDateString(new Date()).replace(/-/g, '');
   const crossedDay = !!(qrInfo.qrEmbeddedDate && qrInfo.qrEmbeddedDate !== today);
-  const timeLinked = !!(currentQrSession && !crossedDay && scanDelaySec !== null && scanDelaySec <= 600);
+  const timeLinked = !!(currentQrSession && !crossedDay && scanDelaySec !== null && scanDelaySec <= 300);
   const slipTime = qrInfo.qrEmbeddedTime || ocrTimeText;
   const timeLinkLabel = scanDelaySec === null
     ? (slipTime ? `เวลาในสลิป ${slipTime}` : '')
@@ -3261,7 +3265,7 @@ async function processSlipImage(canvas, options = {}){
     if(!timing.timeLinked){
       currentSlipVerification.verifyStatus = 'QR_VERIFIED';
       setSlipSaveBlocked(false);
-      showSlipVerificationStatus(`☑️ อ่าน QR/CRC ได้ (${qrInfo.sendingBank || 'ไม่ทราบธนาคาร'}) แต่ไม่พบ QR เซสชันที่เชื่อมโยงภายใน 10 นาที กรุณาตรวจยอดด้วยตนเองก่อนบันทึก · ไม่ได้ตรวจสอบธุรกรรมกับธนาคาร`, '', true, true);
+      showSlipVerificationStatus(`☑️ อ่าน QR/CRC ได้ (${qrInfo.sendingBank || 'ไม่ทราบธนาคาร'}) แต่ไม่พบ QR เซสชันที่เชื่อมโยงภายใน 5 นาที กรุณาตรวจยอดด้วยตนเองก่อนบันทึก · ไม่ได้ตรวจสอบธุรกรรมกับธนาคาร`, '', true, true);
       return;
     }
     // ต้องมีวันที่ใน QR และตรงกับวันนี้เท่านั้น จึงจะบันทึกอัตโนมัติ (กันสลิปเก่าที่ไม่มีวันที่อ่านได้)
@@ -3277,7 +3281,7 @@ async function processSlipImage(canvas, options = {}){
       showSlipVerificationStatus(`☑️ อ่าน QR/CRC ได้ (${qrInfo.sendingBank || 'ไม่ทราบธนาคาร'}) แต่รูปแบบเลขอ้างอิงไม่ตรงกับธนาคารนี้ กรุณาตรวจด้วยตนเองก่อนบันทึก · ไม่ได้ตรวจสอบธุรกรรมกับธนาคาร`, '', true, true);
       return;
     }
-    // น่าเชื่อถือ: QR ผ่าน CRC + เลขอ้างอิงรูปแบบสมเหตุสมผล + ไม่ซ้ำ + ภายใน 10 นาที + มีวันที่วันนี้
+    // น่าเชื่อถือ: QR ผ่าน CRC + เลขอ้างอิงรูปแบบสมเหตุสมผล + ไม่ซ้ำ + ภายใน 5 นาที + มีวันที่วันนี้
     currentSlipVerification.verifyStatus = 'QR_VERIFIED';
     currentSlipVerification.qrSessionId = currentQrSession?.sessionId || '';
     setSlipSaveBlocked(true);
@@ -3330,7 +3334,7 @@ async function finalizeSlipVerification(qrInfo, timing, ocr, expectedAmount){
     currentSlipVerification.verifyStatus = 'QR_VERIFIED';
     closeSlipLiveScanner();
     setSlipSaveBlocked(false);
-    showSlipVerificationStatus(`☑️ อ่าน QR/CRC ได้ (${qrInfo.sendingBank}) แต่ไม่พบ QR เซสชันที่เชื่อมโยงภายใน 10 นาที กรุณาตรวจยอดด้วยตนเองก่อนบันทึก · ไม่ได้ตรวจสอบธุรกรรมกับธนาคาร`, '', true, true);
+    showSlipVerificationStatus(`☑️ อ่าน QR/CRC ได้ (${qrInfo.sendingBank}) แต่ไม่พบ QR เซสชันที่เชื่อมโยงภายใน 5 นาที กรุณาตรวจยอดด้วยตนเองก่อนบันทึก · ไม่ได้ตรวจสอบธุรกรรมกับธนาคาร`, '', true, true);
     return;
   }
 
@@ -4252,7 +4256,7 @@ function renderList(){
     const bankFull = THAI_BANKS[item.sendingBankCode]?.name || item.sendingBank || '';
     const bankTag = (bankShort || bankFull)
       ? `<span class="tag tag-bank" style="--bank-color:${bankColor}" title="${escapeHtml(bankFull || bankShort)}">${ICONS.bank}${escapeHtml(bankShort || bankFull)}</span>` : '';
-    const timeLinkTag = item.timeLinked && item.scanDelaySec != null && item.scanDelaySec <= 600
+    const timeLinkTag = item.timeLinked && item.scanDelaySec != null && item.scanDelaySec <= 300
       ? `<span class="tag tag-timelink" title="${escapeHtml(item.timeLinkLabel || '')}">${ICONS.timeLink} ${item.scanDelaySec}วิ</span>` : '';
     let memberTag = '';
     if(item.phone){
@@ -4367,6 +4371,10 @@ function openRecordView(id) {
   document.getElementById('vd-bank-name').textContent =
     THAI_BANKS[item.sendingBankCode]?.name || item.sendingBank || '-';
   document.getElementById('vd-trans-ref').textContent = item.transRef || '-';
+  const rawQrEl = document.getElementById('vd-raw-qr');
+  if(rawQrEl) rawQrEl.textContent = item.rawQrPayload || '-';
+  const rawQrEl = document.getElementById('vd-raw-qr');
+  if(rawQrEl) rawQrEl.textContent = item.rawQrPayload || '-';
   document.getElementById('vd-time-link').textContent = item.scanDelaySec != null
     ? `สแกนหลังสร้าง QR ${item.scanDelaySec} วินาที${item.qrEmbeddedTime ? ` · เวลาในสลิป ${item.qrEmbeddedTime}` : item.ocrTimeText ? ` · เวลา OCR ${item.ocrTimeText}` : ''}`
     : '-';
