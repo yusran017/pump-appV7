@@ -1,9 +1,8 @@
 /* Service Worker — ทำให้แอปเปิดได้แม้เน็ตหลุด และ Chrome เสนอให้ติดตั้ง */
-const CACHE = 'pump-transfer-v26';
+const CACHE = 'pump-transfer-v28';
 const ASSETS = [
   './',
   './index.html',
-  './liquid-bg.jpg',
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
@@ -33,7 +32,14 @@ const ASSETS = [
 ];
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));
+  e.waitUntil((async () => {
+    const cache = await caches.open(CACHE);
+    const results = await Promise.allSettled(ASSETS.map(asset => cache.add(asset)));
+    results.forEach((result, index) => {
+      if(result.status === 'rejected') console.warn('Service worker asset cache failed:', ASSETS[index], result.reason);
+    });
+    await self.skipWaiting();
+  })());
 });
 
 self.addEventListener('activate', e => {
