@@ -322,12 +322,25 @@
   .tag-card{background:rgba(139,92,246,.20);color:#a78bfa;border-color:rgba(139,92,246,.45);}
   .tag-phone{background:rgba(14,165,233,.20);color:#38bdf8;border-color:rgba(14,165,233,.45);}
   .tag-slip{background:rgba(234,179,8,.20);color:#facc15;border-color:rgba(234,179,8,.45);}
+  .tag-verify-auto{background:linear-gradient(135deg,rgba(16,185,129,.28),rgba(5,150,105,.38));color:#a7f3d0;border-color:#34d399;box-shadow:0 0 10px rgba(16,185,129,.2),inset 0 1px 0 rgba(255,255,255,.25);}
+  .tag-verify-qr{background:rgba(14,165,233,.24);color:#7dd3fc;border-color:#38bdf8;}
+  .tag-verify-manual{background:rgba(245,158,11,.22);color:#fde68a;border-color:#fbbf24;}
+  .tag-bank{background:color-mix(in srgb,var(--bank-color,#0284c7) 20%,transparent);color:#fff;border-color:var(--bank-color,#0284c7);}
+  .tag-timelink{background:rgba(139,92,246,.22);color:#c4b5fd;border-color:#a78bfa;}
+  .receipt-verify{font-weight:700;}
+  .receipt-bank{display:inline-flex;align-items:center;justify-content:flex-end;gap:6px;}
+  .receipt-bank-dot{width:9px;height:9px;flex:0 0 auto;border-radius:50%;background:var(--bank-color,#0284c7);box-shadow:0 0 8px var(--bank-color,#0284c7);}
   body.light-mode .tag-gas95{color:#c2410c}
   body.light-mode .tag-e20{color:#047857}
   body.light-mode .tag-b7{color:#1d4ed8}
   body.light-mode .tag-card{color:#6d28d9}
   body.light-mode .tag-phone{color:#0369a1}
   body.light-mode .tag-slip{color:#a16207}
+  body.light-mode .tag-verify-auto{color:#047857}
+  body.light-mode .tag-verify-qr{color:#0369a1}
+  body.light-mode .tag-verify-manual{color:#92400e}
+  body.light-mode .tag-bank{color:#1e293b}
+  body.light-mode .tag-timelink{color:#6d28d9}
 
   /* ปรับปรุงโครงสร้าง record-bottom เพื่อรองรับปุ่มจำนวนมากแบบ Wrap ยืดหยุ่น ให้ไม่ทับเวลา */
   .record-bottom{display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; font-size:11px; color:var(--text-muted); border-top:1px dashed var(--glass-brd); padding-top:12px; margin-left:6px; gap:8px;}
@@ -1579,6 +1592,10 @@
         <div class="receipt-row"><span>หน้าจ่าย</span><span id="vd-pump"></span></div>
         <div class="receipt-row"><span>ชนิดน้ำมัน</span><span id="vd-oil"></span></div>
         <div class="receipt-row"><span>สถานะ</span><span id="vd-status"></span></div>
+        <div class="receipt-row"><span>การตรวจสอบสลิป</span><span id="vd-slip-verify" class="receipt-verify">-</span></div>
+        <div class="receipt-row"><span>ธนาคารผู้โอน</span><span id="vd-bank" class="receipt-bank"><i class="receipt-bank-dot"></i><span id="vd-bank-name">-</span></span></div>
+        <div class="receipt-row"><span>เลขอ้างอิงสลิป</span><span id="vd-trans-ref">-</span></div>
+        <div class="receipt-row"><span>การเชื่อมโยงเวลา</span><span id="vd-time-link">-</span></div>
         <div class="receipt-divider"></div>
         <div class="receipt-row" style="margin-top:12px;"><span>หมายเหตุ</span><span id="vd-note" style="color:#0f172a;"></span></div>
         <div class="receipt-row" id="vd-extra-row" style="display:none; flex-direction:column; align-items:flex-start;">
@@ -1653,6 +1670,11 @@ const ICONS = {
   phone:'<svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8l1.2 2.4 2.6.4-1.9 1.8.5 2.6L19 13.9 16.6 15.2l.5-2.6-1.9-1.8 2.6-.4z"/></svg>',
   card: '<svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>',
   clip: '<svg viewBox="0 0 24 24"><path d="M21.4 11.05 12.2 20.2a5.5 5.5 0 0 1-7.8-7.8l9.2-9.1a3.7 3.7 0 1 1 5.2 5.2l-9.2 9.1a1.8 1.8 0 1 1-2.6-2.6l8.5-8.4"/></svg>',
+  shieldOk:'<svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11z"/><path d="m9 12 2 2 4-4"/></svg>',
+  qrOk:'<svg viewBox="0 0 24 24"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3z"/><path d="M14 14h3v3h-3zM20 14v2M17 20h4M20 18v3"/><path d="m12 13 1 1 2-2"/></svg>',
+  camManual:'<svg viewBox="0 0 24 24"><path d="M14 4h-4l-2 3H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3.5"/></svg>',
+  bank:'<svg viewBox="0 0 24 24"><path d="m3 9 9-6 9 6"/><path d="M4 10h16M5 10v9M9 10v9M15 10v9M19 10v9M3 21h18M2 19h20"/></svg>',
+  timeLink:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2M5 4l2 2M19 4l-2 2"/></svg>',
   down: '<svg width="17" height="17" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
   check:'<svg width="17" height="17" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>',
   hour: '<svg width="17" height="17" viewBox="0 0 24 24"><path d="M5 22h14M5 2h14M17 22v-4.2a2 2 0 0 0-.6-1.4L12 12l-4.4 4.4a2 2 0 0 0-.6 1.4V22M7 2v4.2a2 2 0 0 0 .6 1.4L12 12l4.4-4.4A2 2 0 0 0 17 6.2V2"/></svg>',
@@ -2549,7 +2571,7 @@ function parseTlvFields(payload, depth = 0){
     const valueEnd = valueStart + length;
     if(valueEnd > payload.length) return null;
     const field = { tag, value: payload.slice(valueStart, valueEnd), children: null };
-    if((tag >= '26' && tag <= '51') || tag === '62' || tag === '64'){
+    if((tag === '00' && field.value.length >= 12) || (tag >= '26' && tag <= '51') || tag === '62' || tag === '64'){
       field.children = parseTlvFields(field.value, depth + 1);
     }
     fields.push(field);
@@ -2558,64 +2580,99 @@ function parseTlvFields(payload, depth = 0){
   return fields;
 }
 
+const THAI_BANKS = {
+  '001': { code:'001', short:'KKP', name:'ธ.เกียรตินาคินภัทร (KKP)', color:'#5b21b6' },
+  '002': { code:'002', short:'BBL', name:'ธ.กรุงเทพ (BBL)', color:'#1e4598' },
+  '004': { code:'004', short:'KBank', name:'ธ.กสิกรไทย (KBank)', color:'#00a950' },
+  '005': { code:'005', short:'SCBT', name:'ธ.สแตนดาร์ดชาร์เตอร์ด', color:'#0072aa' },
+  '006': { code:'006', short:'KTB', name:'ธ.กรุงไทย (KTB)', color:'#00a6e6' },
+  '011': { code:'011', short:'ttb', name:'ธ.ทหารไทยธนชาต (ttb)', color:'#0050f0' },
+  '014': { code:'014', short:'SCB', name:'ธ.ไทยพาณิชย์ (SCB)', color:'#4e2a84' },
+  '017': { code:'017', short:'CITI', name:'ธ.ซิตี้แบงก์ (Citibank)', color:'#003b70' },
+  '018': { code:'018', short:'SMBC', name:'ธ.ซูมิโตโม มิตซุย (SMBC)', color:'#006837' },
+  '020': { code:'020', short:'SCBT', name:'ธ.สแตนดาร์ดชาร์เตอร์ด (ไทย)', color:'#0072aa' },
+  '022': { code:'022', short:'CIMBT', name:'ธ.ซีไอเอ็มบี ไทย (CIMBT)', color:'#b8121a' },
+  '024': { code:'024', short:'UOB', name:'ธ.ยูโอบี (UOB)', color:'#0033a1' },
+  '025': { code:'025', short:'BAY', name:'ธ.กรุงศรีอยุธยา (BAY)', color:'#d97706' },
+  '030': { code:'030', short:'GSB', name:'ธ.ออมสิน (GSB)', color:'#eb198d' },
+  '033': { code:'033', short:'GHB', name:'ธ.อาคารสงเคราะห์ (GHB)', color:'#f97316' },
+  '034': { code:'034', short:'BAAC', name:'ธ.ธ.ก.ส. (BAAC)', color:'#15803d' },
+  '035': { code:'035', short:'BAAC', name:'ธ.ธ.ก.ส. (BAAC)', color:'#15803d' },
+  '039': { code:'039', short:'MHCB', name:'ธ.มิซูโฮ (Mizuho)', color:'#1d4ed8' },
+  '066': { code:'066', short:'ISBT', name:'ธ.อิสลามแห่งประเทศไทย', color:'#047857' },
+  '067': { code:'067', short:'TISCO', name:'ธ.ทิสโก้ (TISCO)', color:'#0284c7' },
+  '069': { code:'069', short:'KKP', name:'ธ.เกียรตินาคินภัทร (KKP)', color:'#5b21b6' },
+  '070': { code:'070', short:'ICBC', name:'ธ.ไอซีบีซี (ไทย)', color:'#dc2626' },
+  '071': { code:'071', short:'TCRB', name:'ธ.ไทยเครดิต (TCRB)', color:'#0369a1' },
+  '073': { code:'073', short:'LHB', name:'ธ.แลนด์ แอนด์ เฮ้าส์ (LHB)', color:'#6d28d9' },
+  '098': { code:'098', short:'SME', name:'ธ.พัฒนาวิสาหกิจ (SME)', color:'#0d9488' }
+};
+
+function flattenTlvFields(fields, result = []){
+  (fields || []).forEach(field => {
+    result.push(field);
+    if(field.children) flattenTlvFields(field.children, result);
+  });
+  return result;
+}
+
 function parseThaiSlipMiniQR(rawPayload){
   const payload = String(rawPayload || '').trim();
-  if(payload.length <= 35 || !/^[\x20-\x7E]+$/.test(payload)) return null;
+  if(payload.length < 25 || !/^[\x20-\x7E]+$/.test(payload)) return null;
   const data = payload.slice(0, -4);
   const suppliedCrc = payload.slice(-4).toUpperCase();
-  if(calculateCRC16(data) !== suppliedCrc || payload.slice(-8, -4) !== '6304') return null;
+  const crcTag = payload.slice(-8, -4);
+  if((crcTag !== '9104' && crcTag !== '6304') || calculateCRC16(data) !== suppliedCrc) return null;
   const fields = parseTlvFields(payload.slice(0, -8));
-  if(!fields || fields[0]?.tag !== '00' || fields[0]?.value !== '01') return null;
-  const hasMerchantAccount = fields.some(field => field.tag >= '26' && field.tag <= '51');
-  const isThaiPayload = fields.some(field => field.tag === '58' && field.value === 'TH');
-  if(!hasMerchantAccount || !isThaiPayload) return null;
+  if(!fields) return null;
+  const flattened = flattenTlvFields(fields);
+  const tag00 = fields.find(field => field.tag === '00');
+  const tag00Children = tag00?.children || [];
+  const slipApiId = tag00Children.find(field => field.tag === '00')?.value;
+  const isThaiPayload = flattened.some(field => (field.tag === '51' || field.tag === '58') && field.value === 'TH');
+  if(!isThaiPayload && slipApiId !== '000001') return null;
 
-  const flattened = [];
-  const visit = list => (list || []).forEach(field => {
-    flattened.push(field);
-    if(field.children) visit(field.children);
-  });
-  visit(fields);
+  let sendingBankCode = tag00Children.find(field => field.tag === '01')?.value || '';
+  if(!/^\d{3}$/.test(sendingBankCode)){
+    sendingBankCode = flattened.find(field => field.tag === '01' && THAI_BANKS[field.value])?.value || '';
+  }
+  const bankInfo = THAI_BANKS[sendingBankCode];
 
-  const bankNames = {
-    '002':'ธ.กรุงเทพ (BBL)', '004':'ธ.กสิกรไทย (KBank)', '006':'ธ.กรุงไทย (KTB)',
-    '011':'ธ.ทหารไทยธนชาต (ttb)', '014':'ธ.ไทยพาณิชย์ (SCB)', '025':'ธ.กรุงศรี (BAY)',
-    '030':'ธ.ออมสิน (GSB)', '034':'ธ.ธ.ก.ส. (BAAC)'
-  };
-  const bankCodes = Object.keys(bankNames);
-  const bankField = flattened.find(field => ['00','01','02','03','04'].includes(field.tag) && /^\d{3}$/.test(field.value));
-  const sendingBankCode = bankField ? bankField.value : '';
-
-  const refFields = [];
-  const collectRefs = list => (list || []).forEach(field => {
-    if(field.tag === '62' && field.children){
-      field.children.forEach(child => {
-        if(['05','06','07','08','09','10'].includes(child.tag) && child.value.trim()) refFields.push(child.value.trim());
-      });
-    }
-    if(['05','06','07','08','09','10','61'].includes(field.tag) && field.value.trim()) refFields.push(field.value.trim());
-    if(field.children) collectRefs(field.children);
-  });
-  collectRefs(fields);
-  const isRef = value => /^[A-Za-z0-9-]{8,40}$/.test(value) && !bankCodes.includes(value);
-  let transRef = refFields.find(isRef) || '';
-  const dateMatch = transRef.match(/20\d{6}/);
-  const qrEmbeddedDate = dateMatch ? dateMatch[0] : '';
+  const isRef = value => typeof value === 'string' && value.length >= 8 && value.length <= 45 && /^[\x21-\x7E]+$/.test(value);
+  const nestedRef = tag00Children.find(field => ['02','03','04'].includes(field.tag) && isRef(field.value))?.value;
+  const tag62 = fields.find(field => field.tag === '62');
+  const tag62Ref = flattenTlvFields(tag62?.children || [])
+    .find(field => ['05','06','07','08','09','10'].includes(field.tag) && isRef(field.value))?.value;
+  const transRef = nestedRef || tag62Ref || '';
+  const dateTimeMatch = transRef.match(/(20\d{2})(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])(?:([01]\d|2[0-3])([0-5]\d)([0-5]\d)?)?/);
+  const qrEmbeddedDate = dateTimeMatch ? `${dateTimeMatch[1]}${dateTimeMatch[2]}${dateTimeMatch[3]}` : '';
+  const qrEmbeddedTime = dateTimeMatch?.[4]
+    ? `${dateTimeMatch[4]}:${dateTimeMatch[5]}${dateTimeMatch[6] ? ':' + dateTimeMatch[6] : ''}`
+    : '';
   return {
     sendingBankCode,
-    sendingBank: bankNames[sendingBankCode] || sendingBankCode,
+    sendingBank: bankInfo?.name || (sendingBankCode ? 'รหัสธนาคาร ' + sendingBankCode : 'ธนาคารในไทย'),
+    bankShort:bankInfo?.short || sendingBankCode || 'BANK',
+    bankColor:bankInfo?.color || '#0284c7',
     transRef,
     qrEmbeddedDate,
+    qrEmbeddedTime,
     rawQrPayload: payload
   };
 }
 
-function verifySlipTiming(qrInfo){
+function verifySlipTiming(qrInfo, ocrTimeText = ''){
   const scanDelaySec = currentQrSession
-    ? Math.round((Date.now() - currentQrSession.createdAt) / 1000)
+    ? Math.max(0, Math.round((Date.now() - currentQrSession.createdAt) / 1000))
     : null;
   const today = getLocalDateString(new Date()).replace(/-/g, '');
-  return { scanDelaySec, crossedDay: !!(qrInfo.qrEmbeddedDate && qrInfo.qrEmbeddedDate !== today) };
+  const crossedDay = !!(qrInfo.qrEmbeddedDate && qrInfo.qrEmbeddedDate !== today);
+  const timeLinked = !!(currentQrSession && !crossedDay && scanDelaySec !== null && scanDelaySec <= 600);
+  const slipTime = qrInfo.qrEmbeddedTime || ocrTimeText;
+  const timeLinkLabel = scanDelaySec === null
+    ? (slipTime ? `เวลาในสลิป ${slipTime}` : '')
+    : `สแกนหลังสร้าง QR ${scanDelaySec} วินาที${slipTime ? ` · เวลาในสลิป ${slipTime}` : ''}`;
+  return { scanDelaySec, crossedDay, timeLinked, timeLinkLabel };
 }
 
 function makeSlipImageCanvas(source){
@@ -2642,15 +2699,38 @@ function decodeSlipQr(canvas){
 }
 
 function createOcrCanvas(sourceCanvas){
+  const maxDim = 960;
+  const scale = Math.min(1, maxDim / Math.max(sourceCanvas.width, sourceCanvas.height));
   const canvas = document.createElement('canvas');
-  canvas.width = sourceCanvas.width;
-  canvas.height = sourceCanvas.height;
+  canvas.width = Math.max(1, Math.round(sourceCanvas.width * scale));
+  canvas.height = Math.max(1, Math.round(sourceCanvas.height * scale));
   const ctx = canvas.getContext('2d', { willReadFrequently:true });
   ctx.drawImage(sourceCanvas, 0, 0);
   const image = ctx.getImageData(0, 0, canvas.width, canvas.height);
-  for(let i = 0; i < image.data.length; i += 4){
+  const histogram = new Uint32Array(256);
+  const grays = new Uint8Array(image.data.length / 4);
+  for(let i = 0, pixel = 0; i < image.data.length; i += 4, pixel++){
     const gray = Math.round(image.data[i] * .299 + image.data[i+1] * .587 + image.data[i+2] * .114);
-    const contrast = gray > 175 ? 255 : gray < 105 ? 0 : Math.round((gray - 105) * (255 / 70));
+    grays[pixel] = gray;
+    histogram[gray]++;
+  }
+  const total = grays.length;
+  const percentile = target => {
+    let count = 0;
+    for(let value = 0; value < histogram.length; value++){
+      count += histogram[value];
+      if(count >= target) return value;
+    }
+    return 255;
+  };
+  const low = percentile(Math.max(1, Math.floor(total * .02)));
+  const high = percentile(Math.max(1, Math.floor(total * .98)));
+  const range = Math.max(1, high - low);
+  const stretchStrength = high - low < 32 ? 0 : .6;
+  for(let i = 0; i < image.data.length; i += 4){
+    const gray = grays[i / 4];
+    const stretched = Math.max(0, Math.min(255, ((gray - low) / range) * 255));
+    const contrast = Math.round(gray * (1 - stretchStrength) + stretched * stretchStrength);
     image.data[i] = image.data[i+1] = image.data[i+2] = contrast;
   }
   ctx.putImageData(image, 0, 0);
@@ -2659,7 +2739,7 @@ function createOcrCanvas(sourceCanvas){
 
 async function runFastSlipOCR(canvas, expectedAmount){
   const startedAt = Date.now();
-  const timeoutMs = 2200;
+  const timeoutMs = 3200;
   if(slipOcrInFlight) return { timedOut:true, text:'', ocrAmount:null, amountMatch:false, ocrReceiverMatch:false };
   slipOcrInFlight = true;
   let timeoutId;
@@ -2697,15 +2777,19 @@ async function runFastSlipOCR(canvas, expectedAmount){
     result = { timedOut:Date.now() - startedAt >= timeoutMs, failed:true, text:'' };
   }
   finally{ clearTimeout(timeoutId); }
-  const amounts = (result.text.match(/(?:\d{1,3}(?:,\d{3})+|\d+)\.\d{2}/g) || [])
-    .map(value => Number(value.replace(/,/g,''))).filter(Number.isFinite);
+  const amounts = (result.text.match(/(?:\d{1,3}(?:[,\s]\d{3})+|\d+)\s*\.\s*\d{2}/g) || [])
+    .map(value => Number(value.replace(/[,\s]/g,''))).filter(Number.isFinite);
   const expected = Number(expectedAmount);
   const matchingAmount = amounts.find(value => Math.round(value * 100) === Math.round(expected * 100));
   const ocrAmount = matchingAmount ?? amounts[0] ?? null;
   const receiverText = result.text.toUpperCase().replace(/\s+/g,'');
   const ocrReceiverMatch = ['ทุ่งยางแดง','เอ็นเตอร์ไพรส์','PTTTUNGYANGDAENG','BG094','0939H']
     .some(keyword => receiverText.includes(keyword.toUpperCase().replace(/\s+/g,'')));
-  return { timedOut:result.timedOut, failed:!!result.failed, text:result.text, ocrAmount, amountMatch:matchingAmount !== undefined, ocrReceiverMatch };
+  const timeMatch = result.text.match(/\b([01]?\d|2[0-3])\s*:\s*([0-5]\d)(?:\s*:\s*([0-5]\d))?\b/);
+  const ocrTimeText = timeMatch
+    ? `${String(timeMatch[1]).padStart(2,'0')}:${timeMatch[2]}${timeMatch[3] ? ':' + timeMatch[3] : ''}`
+    : '';
+  return { timedOut:result.timedOut, failed:!!result.failed, text:result.text, ocrAmount, amountMatch:matchingAmount !== undefined, ocrReceiverMatch, ocrTimeText };
 }
 
 function setSlipScanStatus(message, state = ''){
@@ -2907,11 +2991,19 @@ async function processSlipImage(canvas, options = {}){
   }
 
   if(!qrInfo.transRef){
+    const timing = verifySlipTiming(qrInfo);
     currentSlipVerification = {
+      sendingBankCode:qrInfo.sendingBankCode,
       sendingBank:qrInfo.sendingBank,
+      bankShort:qrInfo.bankShort,
+      bankColor:qrInfo.bankColor,
       rawQrPayload:qrInfo.rawQrPayload,
+      qrEmbeddedDate:qrInfo.qrEmbeddedDate,
+      qrEmbeddedTime:qrInfo.qrEmbeddedTime,
       qrSessionId:currentQrSession?.sessionId || '',
-      scanDelaySec:currentQrSession ? Math.round((Date.now() - currentQrSession.createdAt) / 1000) : null,
+      scanDelaySec:timing.scanDelaySec,
+      timeLinked:timing.timeLinked,
+      timeLinkLabel:timing.timeLinkLabel,
       verifyStatus:'QR_VERIFIED'
     };
     closeSlipLiveScanner();
@@ -2919,13 +3011,16 @@ async function processSlipImage(canvas, options = {}){
     const expectedAmount = currentQrSession?.expectedAmount ?? (parseFloat(getAmountValue()) || 0);
     const ocr = await runFastSlipOCR(canvas, expectedAmount);
     if(verificationGeneration !== slipVerificationGeneration) return;
+    const verifiedTiming = verifySlipTiming(qrInfo, ocr.ocrTimeText);
     currentSlipVerification.ocrAmount = ocr.ocrAmount ?? '';
     currentSlipVerification.ocrReceiverMatch = !!ocr.ocrReceiverMatch;
-    currentSlipVerification.scanDelaySec = currentQrSession
-      ? Math.round((Date.now() - currentQrSession.createdAt) / 1000)
-      : null;
+    currentSlipVerification.ocrTimeText = ocr.ocrTimeText || '';
+    currentSlipVerification.scanDelaySec = verifiedTiming.scanDelaySec;
+    currentSlipVerification.timeLinked = verifiedTiming.timeLinked;
+    currentSlipVerification.timeLinkLabel = verifiedTiming.timeLinkLabel;
     const amountHint = ocr.ocrAmount === null ? 'OCR อ่านยอดไม่ได้' : `OCR อ่านยอด ฿${Number(ocr.ocrAmount).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}`;
-    showSlipVerificationStatus(`อ่าน QR/CRC ได้ แต่ไม่พบเลขอ้างอิงสำหรับตรวจสลิปซ้ำ · ${amountHint} ตรวจด้วยตนเองก่อนบันทึก · ไม่ได้ตรวจสอบธุรกรรมกับธนาคาร`, '', true, true);
+    const dayWarning = verifiedTiming.crossedDay ? '⚠️ สลิปข้ามวัน · ' : '';
+    showSlipVerificationStatus(`${dayWarning}อ่าน QR/CRC ได้ แต่ไม่พบเลขอ้างอิงสำหรับตรวจสลิปซ้ำ · ${amountHint} ตรวจด้วยตนเองก่อนบันทึก · ไม่ได้ตรวจสอบธุรกรรมกับธนาคาร`, verifiedTiming.crossedDay ? 'error' : '', true, true);
     return;
   }
 
@@ -2934,10 +3029,10 @@ async function processSlipImage(canvas, options = {}){
     vibrationWarning();
     const message = `⚠️ สลิปซ้ำ! เลขอ้างอิง ${qrInfo.transRef} เคยบันทึกแล้วเมื่อเวลา ${duplicate.time || 'ไม่ทราบเวลา'}`;
     setSlipScanStatus(message, 'error');
-    stopSlipCamera();
+    closeSlipLiveScanner();
     setSlipSaveBlocked(true);
     currentSlipVerification = null;
-    showSlipVerificationStatus(message, 'error', false, false);
+    showSlipVerificationStatus(message, 'error', true, false);
     return;
   }
 
@@ -2945,12 +3040,19 @@ async function processSlipImage(canvas, options = {}){
   const expectedAmount = currentQrSession?.expectedAmount ?? (parseFloat(getAmountValue()) || 0);
   currentSlipVerification = {
     transRef:qrInfo.transRef,
+    sendingBankCode:qrInfo.sendingBankCode,
     sendingBank:qrInfo.sendingBank,
+    bankShort:qrInfo.bankShort,
+    bankColor:qrInfo.bankColor,
     rawQrPayload:qrInfo.rawQrPayload,
+    qrEmbeddedDate:qrInfo.qrEmbeddedDate,
+    qrEmbeddedTime:qrInfo.qrEmbeddedTime,
     ocrAmount:'',
     ocrReceiverMatch:false,
     qrSessionId:currentQrSession?.sessionId || '',
     scanDelaySec:timing.scanDelaySec,
+    timeLinked:timing.timeLinked,
+    timeLinkLabel:timing.timeLinkLabel,
     verifyStatus:'QR_VERIFIED'
   };
   setSlipScanStatus(`พบสลิป ${qrInfo.sendingBank || 'ไม่ทราบธนาคาร'} • กำลังตรวจสอบยอดเงิน ฿${Number(expectedAmount).toLocaleString('en-US')}...`);
@@ -2961,22 +3063,33 @@ async function processSlipImage(canvas, options = {}){
 
   const ocr = await runFastSlipOCR(canvas, expectedAmount);
   if(verificationGeneration !== slipVerificationGeneration) return;
-  await finalizeSlipVerification(qrInfo, timing, ocr, expectedAmount);
+  const verifiedTiming = verifySlipTiming(qrInfo, ocr.ocrTimeText);
+  currentSlipVerification.scanDelaySec = verifiedTiming.scanDelaySec;
+  currentSlipVerification.timeLinked = verifiedTiming.timeLinked;
+  currentSlipVerification.timeLinkLabel = verifiedTiming.timeLinkLabel;
+  currentSlipVerification.ocrTimeText = ocr.ocrTimeText;
+  await finalizeSlipVerification(qrInfo, verifiedTiming, ocr, expectedAmount);
 }
 
 async function finalizeSlipVerification(qrInfo, timing, ocr, expectedAmount){
   if(!currentSlipVerification) return;
   currentSlipVerification.ocrAmount = ocr.ocrAmount ?? '';
   currentSlipVerification.ocrReceiverMatch = !!ocr.ocrReceiverMatch;
-  currentSlipVerification.scanDelaySec = currentQrSession
-    ? Math.round((Date.now() - currentQrSession.createdAt) / 1000)
-    : null;
+  currentSlipVerification.scanDelaySec = timing.scanDelaySec;
 
   if(timing.crossedDay){
     currentSlipVerification.verifyStatus = 'QR_VERIFIED';
     closeSlipLiveScanner();
     setSlipSaveBlocked(false);
     showSlipVerificationStatus('⚠️ สลิปข้ามวัน! วันที่ในสลิปไม่ตรงกับวันนี้ กรุณาตรวจยอดด้วยตนเองก่อนบันทึก · ไม่ได้ตรวจสอบธุรกรรมกับธนาคาร', 'error', true, true);
+    return;
+  }
+
+  if(!timing.timeLinked){
+    currentSlipVerification.verifyStatus = 'QR_VERIFIED';
+    closeSlipLiveScanner();
+    setSlipSaveBlocked(false);
+    showSlipVerificationStatus(`☑️ อ่าน QR/CRC ได้ (${qrInfo.sendingBank}) แต่ไม่พบ QR เซสชันที่เชื่อมโยงภายใน 10 นาที กรุณาตรวจยอดด้วยตนเองก่อนบันทึก · ไม่ได้ตรวจสอบธุรกรรมกับธนาคาร`, '', true, true);
     return;
   }
 
@@ -3350,13 +3463,21 @@ function saveRecord(){
          records[idx].slipImage = currentSlipBase64;
          records[idx].slipFilename = currentSlipFilename;
          Object.assign(records[idx], {
+           sendingBankCode:currentSlipVerification?.sendingBankCode || '',
            transRef:currentSlipVerification?.transRef || '',
            sendingBank:currentSlipVerification?.sendingBank || '',
+           bankShort:currentSlipVerification?.bankShort || '',
+           bankColor:currentSlipVerification?.bankColor || '#0284c7',
            rawQrPayload:currentSlipVerification?.rawQrPayload || '',
+           qrEmbeddedDate:currentSlipVerification?.qrEmbeddedDate || '',
+           qrEmbeddedTime:currentSlipVerification?.qrEmbeddedTime || '',
            ocrAmount:currentSlipVerification?.ocrAmount ?? '',
+           ocrTimeText:currentSlipVerification?.ocrTimeText || '',
            ocrReceiverMatch:!!currentSlipVerification?.ocrReceiverMatch,
            qrSessionId:currentSlipVerification?.qrSessionId || '',
            scanDelaySec:currentSlipVerification?.scanDelaySec ?? null,
+           timeLinked:!!currentSlipVerification?.timeLinked,
+           timeLinkLabel:currentSlipVerification?.timeLinkLabel || '',
            verifyStatus:currentSlipVerification?.verifyStatus || 'MANUAL_PHOTO'
          });
       }
@@ -3383,13 +3504,21 @@ function saveRecord(){
     time: now.toLocaleTimeString('th-TH', { hour:'2-digit', minute:'2-digit', second:'2-digit' }),
     cleared:false, lineSent:false,
     slipImage: currentSlipBase64, slipFilename: currentSlipFilename,
+    sendingBankCode:currentSlipVerification?.sendingBankCode || '',
     transRef:currentSlipVerification?.transRef || '',
     sendingBank:currentSlipVerification?.sendingBank || '',
+    bankShort:currentSlipVerification?.bankShort || '',
+    bankColor:currentSlipVerification?.bankColor || '#0284c7',
     rawQrPayload:currentSlipVerification?.rawQrPayload || '',
+    qrEmbeddedDate:currentSlipVerification?.qrEmbeddedDate || '',
+    qrEmbeddedTime:currentSlipVerification?.qrEmbeddedTime || '',
     ocrAmount:currentSlipVerification?.ocrAmount ?? '',
+    ocrTimeText:currentSlipVerification?.ocrTimeText || '',
     ocrReceiverMatch:!!currentSlipVerification?.ocrReceiverMatch,
     qrSessionId:currentSlipVerification?.qrSessionId || currentQrSession?.sessionId || '',
     scanDelaySec:currentSlipVerification?.scanDelaySec ?? null,
+    timeLinked:!!currentSlipVerification?.timeLinked,
+    timeLinkLabel:currentSlipVerification?.timeLinkLabel || '',
     verifyStatus:currentSlipVerification?.verifyStatus || (currentSlipBase64 ? 'MANUAL_PHOTO' : 'NO_SLIP')
   };
 
@@ -3427,12 +3556,20 @@ function openEditMode(id) {
   currentSlipFilename = item.slipFilename || '';
   currentSlipVerification = item.slipImage ? {
     transRef:item.transRef || '',
+    sendingBankCode:item.sendingBankCode || '',
     sendingBank:item.sendingBank || '',
+    bankShort:item.bankShort || '',
+    bankColor:item.bankColor || '#0284c7',
     rawQrPayload:item.rawQrPayload || '',
+    qrEmbeddedDate:item.qrEmbeddedDate || '',
+    qrEmbeddedTime:item.qrEmbeddedTime || '',
     ocrAmount:item.ocrAmount ?? '',
+    ocrTimeText:item.ocrTimeText || '',
     ocrReceiverMatch:!!item.ocrReceiverMatch,
     qrSessionId:item.qrSessionId || '',
     scanDelaySec:item.scanDelaySec ?? null,
+    timeLinked:!!item.timeLinked,
+    timeLinkLabel:item.timeLinkLabel || '',
     verifyStatus:item.verifyStatus || 'MANUAL_PHOTO'
   } : null;
   needContact = item.needContact || false;
@@ -3816,6 +3953,12 @@ function exportCSVFallback(){
 /* ===================================================
    14. แสดงรายการ
    =================================================== */
+function escapeHtml(value){
+  return String(value ?? '').replace(/[&<>"']/g, character => ({
+    '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+  })[character]);
+}
+
 function renderList(){
   recordList.innerHTML = '';
   if(records.length === 0){
@@ -3840,8 +3983,19 @@ function renderList(){
     const delBtn   = showDeleteBtn ? `<button class="r-btn del" onclick="deleteRecord(${item.id})" title="ลบรายการ">${ICONS.trash}</button>` : '';
 
     const slipTag  = item.slipImage ? `<span class="tag tag-slip">${ICONS.clip} สลิป</span>` : '';
-    const bankTag = item.sendingBank && item.transRef
-      ? `<span class="tag tag-slip">${item.sendingBank} · ตรวจ QR</span>` : '';
+    const verifyTag = item.slipImage && item.verifyStatus === 'AUTO_OCR_MATCH'
+      ? `<span class="tag tag-verify-auto">${ICONS.shieldOk} QR+OCR · ยอดตรง</span>`
+      : item.slipImage && item.verifyStatus === 'QR_VERIFIED'
+        ? `<span class="tag tag-verify-qr">${ICONS.qrOk} QR ผ่าน CRC</span>`
+        : item.slipImage
+          ? `<span class="tag tag-verify-manual">${ICONS.camManual} ถ่ายเอง (แมนนวล)</span>`
+          : '';
+    const bankColor = /^#[0-9a-f]{6}$/i.test(item.bankColor || '') ? item.bankColor : '#0284c7';
+    const bankLabel = THAI_BANKS[item.sendingBankCode]?.name || item.sendingBank || '';
+    const bankTag = bankLabel
+      ? `<span class="tag tag-bank" style="--bank-color:${bankColor}">${ICONS.bank}${escapeHtml(bankLabel)}</span>` : '';
+    const timeLinkTag = item.timeLinked && item.scanDelaySec != null && item.scanDelaySec <= 600
+      ? `<span class="tag tag-timelink" title="${escapeHtml(item.timeLinkLabel || '')}">${ICONS.timeLink} ${item.scanDelaySec}วิ</span>` : '';
     let memberTag = '';
     if(item.phone){
       memberTag = item.phone.length === 16
@@ -3860,7 +4014,7 @@ function renderList(){
         <div class="tags">
           <span class="tag tag-pump">${item.pump}</span>
           <span class="tag ${oilClass}">${item.oilType}</span>
-          ${slipTag} ${bankTag} ${memberTag}
+          ${slipTag} ${verifyTag} ${bankTag} ${timeLinkTag} ${memberTag}
         </div>
         <div class="amount">฿${item.amount.toLocaleString()}</div>
       </div>
@@ -3936,6 +4090,28 @@ function openRecordView(id) {
   const st = document.getElementById('vd-status');
   st.textContent = item.cleared ? 'แจ้งแคชเชียร์แล้ว' : 'รอแจ้งแคชเชียร์';
   st.style.color = item.cleared ? '#10b981' : '#f59e0b';
+
+  const slipVerifyEl = document.getElementById('vd-slip-verify');
+  const verificationLabels = {
+    AUTO_OCR_MATCH:'✅ QR + OCR อ่านยอดตรง (ไม่ยืนยันธนาคาร)',
+    QR_VERIFIED:'☑️ QR ผ่าน CRC (ไม่ยืนยันธนาคาร)',
+    MANUAL_PHOTO:'📷 ถ่ายภาพสลิปเอง (แมนนวล)',
+    NO_SLIP:'ไม่มีสลิป'
+  };
+  const verifyStatus = item.verifyStatus || (item.slipImage ? 'MANUAL_PHOTO' : 'NO_SLIP');
+  slipVerifyEl.textContent = verificationLabels[verifyStatus] || verificationLabels.NO_SLIP;
+  slipVerifyEl.style.color = verifyStatus === 'AUTO_OCR_MATCH' ? '#059669'
+    : verifyStatus === 'QR_VERIFIED' ? '#0284c7'
+      : verifyStatus === 'MANUAL_PHOTO' ? '#b45309' : '#64748b';
+  const bankColor = /^#[0-9a-f]{6}$/i.test(item.bankColor || '') ? item.bankColor : '#0284c7';
+  const bankWrap = document.getElementById('vd-bank');
+  bankWrap.style.setProperty('--bank-color', bankColor);
+  document.getElementById('vd-bank-name').textContent =
+    THAI_BANKS[item.sendingBankCode]?.name || item.sendingBank || '-';
+  document.getElementById('vd-trans-ref').textContent = item.transRef || '-';
+  document.getElementById('vd-time-link').textContent = item.scanDelaySec != null
+    ? `สแกนหลังสร้าง QR ${item.scanDelaySec} วินาที${item.qrEmbeddedTime ? ` · เวลาในสลิป ${item.qrEmbeddedTime}` : item.ocrTimeText ? ` · เวลา OCR ${item.ocrTimeText}` : ''}`
+    : '-';
 
   const extraRow = document.getElementById('vd-extra-row');
   if(item.extraText && item.extraText !== '-') {
