@@ -1441,6 +1441,13 @@
         </div>
         <button type="button" class="switch on" id="lineSwitch" onclick="toggleLineSetting()"></button>
       </div>
+      <div class="settings-row">
+        <div>
+          <h4>ตรวจสอบยอดด้วย OCR</h4>
+          <p>ปิดแล้วจะสแกน QR อย่างเดียว แล้วบันทึกอัตโนมัติเมื่อข้อมูลน่าเชื่อถือ</p>
+        </div>
+        <button type="button" class="switch on" id="ocrSwitch" onclick="toggleOcrSetting()"></button>
+      </div>
 
       <div class="settings-row" style="align-items:flex-start;flex-direction:column; margin-top: 10px;">
         <div>
@@ -1897,6 +1904,7 @@ let showDeleteBtn = (function(){ try { return (safeGet('edc_show_delete') || '1'
 let showEditBtn = (function(){ try { return (safeGet('edc_show_edit') || '1') !== '0'; } catch(e){ return true; } })();
 let showViewBtn = (function(){ try { return (safeGet('edc_show_view') || '1') !== '0'; } catch(e){ return true; } })();
 let showSlipBtn = (function(){ try { return (safeGet('edc_show_slip') || '1') !== '0'; } catch(e){ return true; } })();
+let ocrEnabled = (function(){ try { return (safeGet('edc_ocr_enabled') || '1') !== '0'; } catch(e){ return true; } })();
 
 let qrEditOn = false;
 let needContact = false;
@@ -1980,6 +1988,12 @@ function toggleSlipSetting(){
   const sw = document.getElementById('slipSwitch');
   if(sw) sw.classList.toggle('on', showSlipBtn);
   renderList();
+}
+function toggleOcrSetting(){
+  ocrEnabled = !ocrEnabled;
+  safeSet('edc_ocr_enabled', ocrEnabled ? '1' : '0');
+  const sw = document.getElementById('ocrSwitch');
+  if(sw) sw.classList.toggle('on', ocrEnabled);
 }
 
 function toggleQrEdit(){
@@ -2065,6 +2079,8 @@ function openSettingsModal(){
   if(sw5) sw5.classList.toggle('on', showViewBtn);
   const sw6 = document.getElementById('slipSwitch');
   if(sw6) sw6.classList.toggle('on', showSlipBtn);
+  const swOcr = document.getElementById('ocrSwitch');
+  if(swOcr) swOcr.classList.toggle('on', ocrEnabled);
 
   const box = document.getElementById('storageBox');
   if(box){
@@ -3153,6 +3169,40 @@ async function processSlipImage(canvas, options = {}){
     timeLinkLabel:timing.timeLinkLabel,
     verifyStatus:'QR_VERIFIED'
   };
+  // ถ้าปิด OCR → ใช้ข้อมูลจาก QR อย่างเดียว แล้วบันทึกอัตโนมัติเมื่อน่าเชื่อถือ
+  if(!ocrEnabled){
+    closeSlipLiveScanner();
+    if(timing.crossedDay){
+      currentSlipVerification.verifyStatus = 'QR_VERIFIED';
+      setSlipSaveBlocked(false);
+      showSlipVerificationStatus('⚠️ สลิปข้ามวัน! วันที่ในสลิปไม่ตรงกับวันนี้ กรุณาตรวจยอดด้วยตนเองก่อนบันทึก · ไม่ได้ตรวจสอบธุรกรรมกับธนาคาร', 'error', true, true);
+      return;
+    }
+    if(!timing.timeLinked){
+      currentSlipVerification.verifyStatus = 'QR_VERIFIED';
+      setSlipSaveBlocked(false);
+      showSlipVerificationStatus(`☑️ อ่าน QR/CRC ได้ (${qrInfo.sendingBank || 'ไม่ทราบธนาคาร'}) แต่ไม่พบ QR เซสชันที่เชื่อมโยงภายใน 10 นาที กรุณาตรวจยอดด้วยตนเองก่อนบันทึก · ไม่ได้ตรวจสอบธุรกรรมกับธนาคาร`, '', true, true);
+      return;
+    }
+    // น่าเชื่อถือ: QR ผ่าน CRC + มีเลขอ้างอิง + ไม่ซ้ำ + ภายใน 10 นาที + ไม่ข้ามวัน
+    currentSlipVerification.verifyStatus = 'QR_VERIFIED';
+    currentSlipVerification.qrSessionId = currentQrSession?.sessionId || '';
+    setSlipSaveBlocked(true);
+    playScanBeep();
+    showSlipVerificationStatus(`✅ อ่าน QR/CRC ได้ (${qrInfo.sendingBank || 'ไม่ทราบธนาคาร'}) · เลขอ้างอิง ${qrInfo.transRef || '-'} · บันทึกอัตโนมัติ · ไม่ได้ตรวจสอบธุรกรรมกับธนาคาร`, 'success');
+    if(autoSlipSaveTimer) clearTimeout(autoSlipSaveTimer);
+    autoSlipSaveTimer = setTimeout(() => {
+      autoSlipSaveTimer = null;
+      if(!qrModal.classList.contains('active')) return;
+      const wasEditing = !!editingRecordId;
+      setSlipSaveBlocked(false);
+      closeQRModal();
+      saveRecord();
+      if(wasEditing){ playSuccess(); showSuccessAnimation(); }
+    }, 700);
+    return;
+  }
+
   setSlipScanStatus(`พบสลิป ${qrInfo.sendingBank || 'ไม่ทราบธนาคาร'} • กำลังตรวจสอบยอดเงิน ฿${Number(expectedAmount).toLocaleString('en-US')}...`);
 
   if(timing.crossedDay){
