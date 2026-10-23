@@ -3030,13 +3030,22 @@ async function openSlipLiveScanner(){
       if(slipScanBusy || !video.videoWidth || typeof window.jsQR !== 'function') return;
       slipScanBusy = true;
       try{
-        // 560px is enough for Mini-QR and much faster than 720–1080 on mid-range Android
-        const scale = Math.min(1, 560 / Math.max(video.videoWidth, 1));
+        // Mini-QR เล็กและหนาแน่น — ใช้ความละเอียดสูงขึ้นเล็กน้อย (720) เพื่อให้อ่านติดง่ายขึ้น
+        const scale = Math.min(1, 720 / Math.max(video.videoWidth, 1));
         slipDecodeCanvas.width = Math.max(1, Math.round(video.videoWidth * scale));
         slipDecodeCanvas.height = Math.max(1, Math.round(video.videoHeight * scale));
         const ctx = slipDecodeCanvas.getContext('2d', { willReadFrequently:true });
         ctx.drawImage(video, 0, 0, slipDecodeCanvas.width, slipDecodeCanvas.height);
-        const raw = decodeSlipQr(slipDecodeCanvas);
+        let raw = '';
+        // ลอง BarcodeDetector ของ Chrome ก่อน (เร็วและแม่นกับ Mini-QR บน Android)
+        if(window.BarcodeDetector){
+          try{
+            if(!window._slipBarcodeDetector) window._slipBarcodeDetector = new BarcodeDetector({ formats:['qr_code'] });
+            const codes = await window._slipBarcodeDetector.detect(slipDecodeCanvas);
+            if(codes && codes[0] && codes[0].rawValue) raw = String(codes[0].rawValue).trim();
+          }catch(e){ /* fall through to jsQR */ }
+        }
+        if(!raw) raw = decodeSlipQr(slipDecodeCanvas);
         if(raw){
           const still = makeSlipImageCanvas(video);
           stopSlipCamera();
@@ -3049,7 +3058,7 @@ async function openSlipLiveScanner(){
       }finally{
         slipScanBusy = false;
       }
-    }, 85);
+    }, 70);
   }catch(err){
     stopSlipCamera();
     setSlipScanStatus(err.name === 'NotAllowedError' ? 'ไม่ได้รับอนุญาตให้ใช้กล้อง' : 'เปิดกล้องไม่สำเร็จ เลือกรูปสลิปแทนได้', 'error');
@@ -3113,6 +3122,15 @@ async function processSlipImage(canvas, options = {}){
   if(!rawQrPayload){
     closeSlipLiveScanner();
     setSlipSaveBlocked(false);
+    if(!ocrEnabled){
+      currentSlipVerification = {
+        qrSessionId:currentQrSession?.sessionId || '',
+        scanDelaySec:currentQrSession ? Math.round((Date.now() - currentQrSession.createdAt) / 1000) : null,
+        verifyStatus:'MANUAL_PHOTO'
+      };
+      showSlipVerificationStatus('ไม่พบ QR ที่อ่านได้ กรุณาตรวจยอดด้วยตนเองก่อนบันทึก (ปิด OCR อยู่)', '', true, true);
+      return;
+    }
     const ocr = await runFastSlipOCR(canvas, currentQrSession?.expectedAmount ?? (parseFloat(getAmountValue()) || 0));
     if(verificationGeneration !== slipVerificationGeneration) return;
     currentSlipVerification = {
@@ -3134,6 +3152,16 @@ async function processSlipImage(canvas, options = {}){
     setSlipScanStatus('ไม่ใช่ QR สลิปธนาคารที่ถูกต้อง', 'error');
     closeSlipLiveScanner();
     setSlipSaveBlocked(false);
+    if(!ocrEnabled){
+      currentSlipVerification = {
+        rawQrPayload,
+        qrSessionId:currentQrSession?.sessionId || '',
+        scanDelaySec:currentQrSession ? Math.round((Date.now() - currentQrSession.createdAt) / 1000) : null,
+        verifyStatus:'MANUAL_PHOTO'
+      };
+      showSlipVerificationStatus('QR ไม่ผ่านการตรวจรูปแบบและ CRC กรุณาตรวจด้วยตนเองก่อนบันทึก (ปิด OCR อยู่)', 'error', true, true);
+      return;
+    }
     const ocr = await runFastSlipOCR(canvas, currentQrSession?.expectedAmount ?? (parseFloat(getAmountValue()) || 0));
     if(verificationGeneration !== slipVerificationGeneration) return;
     currentSlipVerification = {
@@ -3169,6 +3197,11 @@ async function processSlipImage(canvas, options = {}){
     };
     closeSlipLiveScanner();
     setSlipSaveBlocked(false);
+    if(!ocrEnabled){
+      const dayWarning = timing.crossedDay ? '⚠️ สลิปข้ามวัน · ' : '';
+      showSlipVerificationStatus(`${dayWarning}อ่าน QR/CRC ได้ แต่ไม่พบเลขอ้างอิงสำหรับตรวจสลิปซ้ำ กรุณาตรวจด้วยตนเองก่อนบันทึก (ปิด OCR อยู่)`, timing.crossedDay ? 'error' : '', true, true);
+      return;
+    }
     const expectedAmount = currentQrSession?.expectedAmount ?? (parseFloat(getAmountValue()) || 0);
     const ocr = await runFastSlipOCR(canvas, expectedAmount);
     if(verificationGeneration !== slipVerificationGeneration) return;
@@ -4319,7 +4352,7 @@ function openRecordView(id) {
   const slipVerifyEl = document.getElementById('vd-slip-verify');
   const verificationLabels = {
     AUTO_OCR_MATCH:'✅ QR + OCR อ่านยอดตรง (ไม่ยืนยันธนาคาร)',
-    QR_VERIFIED:'☑️ QR ผ่าน CRC (ไม่ยืนยันธนาคาร)',
+    QR_VERIFIED:'☑️ อ่าน QR ผ่าน (ไม่ยืนยันธนาคาร)',
     MANUAL_PHOTO:'📷 ถ่ายภาพสลิปเอง (แมนนวล)',
     NO_SLIP:'ไม่มีสลิป'
   };
