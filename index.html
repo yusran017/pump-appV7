@@ -2670,7 +2670,10 @@ function parseThaiSlipMiniQR(rawPayload){
     .map(f => f.value)
     .sort((a,b) => b.length - a.length)[0];
   const transRef = nestedRef || tag62Ref || anyRef || '';
-  const dateTimeMatch = transRef.match(/(20\d{2})(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])(?:([01]\d|2[0-3])([0-5]\d)([0-5]\d)?)?/);
+  // ค้นหาวันที่ในเลขอ้างอิงก่อน ถ้าไม่มีให้ค้นทั้ง payload (บางธนาคารฝังวันที่ไว้นอก transRef)
+  const dateTimeRe = /(20\d{2})(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])(?:([01]\d|2[0-3])([0-5]\d)([0-5]\d)?)?/;
+  let dateTimeMatch = transRef.match(dateTimeRe);
+  if(!dateTimeMatch) dateTimeMatch = payload.match(dateTimeRe);
   const qrEmbeddedDate = dateTimeMatch ? `${dateTimeMatch[1]}${dateTimeMatch[2]}${dateTimeMatch[3]}` : '';
   const qrEmbeddedTime = dateTimeMatch?.[4]
     ? `${dateTimeMatch[4]}:${dateTimeMatch[5]}${dateTimeMatch[6] ? ':' + dateTimeMatch[6] : ''}`
@@ -3184,7 +3187,14 @@ async function processSlipImage(canvas, options = {}){
       showSlipVerificationStatus(`☑️ อ่าน QR/CRC ได้ (${qrInfo.sendingBank || 'ไม่ทราบธนาคาร'}) แต่ไม่พบ QR เซสชันที่เชื่อมโยงภายใน 10 นาที กรุณาตรวจยอดด้วยตนเองก่อนบันทึก · ไม่ได้ตรวจสอบธุรกรรมกับธนาคาร`, '', true, true);
       return;
     }
-    // น่าเชื่อถือ: QR ผ่าน CRC + มีเลขอ้างอิง + ไม่ซ้ำ + ภายใน 10 นาที + ไม่ข้ามวัน
+    // ต้องมีวันที่ใน QR และตรงกับวันนี้เท่านั้น จึงจะบันทึกอัตโนมัติ (กันสลิปเก่าที่ไม่มีวันที่อ่านได้)
+    if(!qrInfo.qrEmbeddedDate){
+      currentSlipVerification.verifyStatus = 'QR_VERIFIED';
+      setSlipSaveBlocked(false);
+      showSlipVerificationStatus(`☑️ อ่าน QR/CRC ได้ (${qrInfo.sendingBank || 'ไม่ทราบธนาคาร'}) แต่ไม่พบวันที่ในสลิป กรุณาตรวจด้วยตนเองก่อนบันทึก (กันสลิปเก่า) · ไม่ได้ตรวจสอบธุรกรรมกับธนาคาร`, '', true, true);
+      return;
+    }
+    // น่าเชื่อถือ: QR ผ่าน CRC + มีเลขอ้างอิง + ไม่ซ้ำ + ภายใน 10 นาที + มีวันที่วันนี้
     currentSlipVerification.verifyStatus = 'QR_VERIFIED';
     currentSlipVerification.qrSessionId = currentQrSession?.sessionId || '';
     setSlipSaveBlocked(true);
@@ -3242,6 +3252,15 @@ async function finalizeSlipVerification(qrInfo, timing, ocr, expectedAmount){
   }
 
   if(ocr.amountMatch){
+    // แม้ยอดตรง ก็ต้องมีวันที่วันนี้จึงจะบันทึกอัตโนมัติ (กันสลิปเก่า)
+    if(!qrInfo.qrEmbeddedDate || timing.crossedDay){
+      currentSlipVerification.verifyStatus = 'QR_VERIFIED';
+      closeSlipLiveScanner();
+      setSlipSaveBlocked(false);
+      const why = !qrInfo.qrEmbeddedDate ? 'ไม่พบวันที่ในสลิป' : 'วันที่ในสลิปไม่ตรงกับวันนี้';
+      showSlipVerificationStatus(`☑️ OCR อ่านยอดตรง แต่ ${why} กรุณาตรวจด้วยตนเองก่อนบันทึก · ไม่ได้ตรวจสอบธุรกรรมกับธนาคาร`, '', true, true);
+      return;
+    }
     currentSlipVerification.verifyStatus = 'AUTO_OCR_MATCH';
     currentSlipVerification.qrSessionId = currentQrSession?.sessionId || '';
     closeSlipLiveScanner();
