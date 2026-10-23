@@ -2680,6 +2680,43 @@ function flattenTlvFields(fields, result = []){
   return result;
 }
 
+function extractTransRefMetadata(bankCode, transRef){
+  const ref = String(transRef || '').trim();
+  const result = { embeddedDate:'', embeddedTime:'', channel:'', source:'' };
+  if(!ref) return result;
+
+  // KBank (004): 016297061825BPM04988 style
+  if(bankCode === '004'){
+    const m = ref.match(/^0(\d{2})(\d{3})([01]\d|2[0-3])([0-5]\d)([0-5]\d)([A-Z0-9]{3})/);
+    if(m){
+      const year = 2010 + Number(m[1]);
+      const dayOfYear = Number(m[2]);
+      if(dayOfYear >= 1 && dayOfYear <= 366){
+        const dt = new Date(year, 0, dayOfYear);
+        if(!isNaN(dt.getTime())){
+          const y = dt.getFullYear();
+          const mo = String(dt.getMonth()+1).padStart(2,'0');
+          const da = String(dt.getDate()).padStart(2,'0');
+          result.embeddedDate = `${y}${mo}${da}`;
+          result.embeddedTime = `${m[3]}:${m[4]}:${m[5]}`;
+          result.channel = m[6];
+          result.source = 'kbank-julian';
+          return result;
+        }
+      }
+    }
+  }
+
+  // Generic YYYYMMDD[HHMMSS] for other banks (and KBank fallback)
+  const g = ref.match(/(20\d{2})(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])(?:([01]\d|2[0-3])([0-5]\d)([0-5]\d)?)?/);
+  if(g){
+    result.embeddedDate = `${g[1]}${g[2]}${g[3]}`;
+    if(g[4]) result.embeddedTime = `${g[4]}:${g[5]}${g[6] ? ':'+g[6] : ''}`;
+    result.source = 'yyyymmdd';
+  }
+  return result;
+}
+
 function parseThaiSlipMiniQR(rawPayload){
   const payload = String(rawPayload || '').trim();
   if(payload.length < 25 || !/^[\x20-\x7E]+$/.test(payload)) return null;
@@ -2718,14 +2755,19 @@ function parseThaiSlipMiniQR(rawPayload){
     .map(f => f.value)
     .sort((a,b) => b.length - a.length)[0];
   const transRef = nestedRef || tag62Ref || anyRef || '';
-  // ค้นหาวันที่ในเลขอ้างอิงก่อน ถ้าไม่มีให้ค้นทั้ง payload (บางธนาคารฝังวันที่ไว้นอก transRef)
-  const dateTimeRe = /(20\d{2})(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])(?:([01]\d|2[0-3])([0-5]\d)([0-5]\d)?)?/;
-  let dateTimeMatch = transRef.match(dateTimeRe);
-  if(!dateTimeMatch) dateTimeMatch = payload.match(dateTimeRe);
-  const qrEmbeddedDate = dateTimeMatch ? `${dateTimeMatch[1]}${dateTimeMatch[2]}${dateTimeMatch[3]}` : '';
-  const qrEmbeddedTime = dateTimeMatch?.[4]
-    ? `${dateTimeMatch[4]}:${dateTimeMatch[5]}${dateTimeMatch[6] ? ':' + dateTimeMatch[6] : ''}`
-    : '';
+  const meta = extractTransRefMetadata(sendingBankCode, transRef);
+  let qrEmbeddedDate = meta.embeddedDate;
+  let qrEmbeddedTime = meta.embeddedTime;
+  const qrChannel = meta.channel || '';
+  // Fallback: search whole payload if bank-specific parse failed
+  if(!qrEmbeddedDate){
+    const dateTimeRe = /(20\d{2})(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])(?:([01]\d|2[0-3])([0-5]\d)([0-5]\d)?)?/;
+    const dateTimeMatch = payload.match(dateTimeRe);
+    if(dateTimeMatch){
+      qrEmbeddedDate = `${dateTimeMatch[1]}${dateTimeMatch[2]}${dateTimeMatch[3]}`;
+      if(dateTimeMatch[4]) qrEmbeddedTime = `${dateTimeMatch[4]}:${dateTimeMatch[5]}${dateTimeMatch[6] ? ':' + dateTimeMatch[6] : ''}`;
+    }
+  }
   return {
     sendingBankCode,
     sendingBank: bankInfo?.name || (sendingBankCode ? 'รหัสธนาคาร ' + sendingBankCode : 'ธนาคารในไทย'),
@@ -2734,6 +2776,7 @@ function parseThaiSlipMiniQR(rawPayload){
     transRef,
     qrEmbeddedDate,
     qrEmbeddedTime,
+    qrChannel,
     rawQrPayload: payload
   };
 }
@@ -2746,10 +2789,19 @@ function verifySlipTiming(qrInfo, ocrTimeText = ''){
   const crossedDay = !!(qrInfo.qrEmbeddedDate && qrInfo.qrEmbeddedDate !== today);
   const timeLinked = !!(currentQrSession && !crossedDay && scanDelaySec !== null && scanDelaySec <= 300);
   const slipTime = qrInfo.qrEmbeddedTime || ocrTimeText;
+  let beforeQrCreated = false;
+  if(currentQrSession && slipTime && /^\d{2}:\d{2}/.test(slipTime)){
+    const parts = slipTime.split(':').map(Number);
+    const slipTs = new Date();
+    slipTs.setHours(parts[0]||0, parts[1]||0, parts[2]||0, 0);
+    // Allow 15s clock skew
+    if(slipTs.getTime() < currentQrSession.createdAt - 15000) beforeQrCreated = true;
+  }
+  const tooSlow = scanDelaySec !== null && scanDelaySec > 600;
   const timeLinkLabel = scanDelaySec === null
     ? (slipTime ? `เวลาในสลิป ${slipTime}` : '')
     : `สแกนหลังสร้าง QR ${scanDelaySec} วินาที${slipTime ? ` · เวลาในสลิป ${slipTime}` : ''}`;
-  return { scanDelaySec, crossedDay, timeLinked, timeLinkLabel };
+  return { scanDelaySec, crossedDay, timeLinked, timeLinkLabel, beforeQrCreated, tooSlow, slipTime };
 }
 
 function makeSlipImageCanvas(source){
@@ -2929,10 +2981,20 @@ async function runFastSlipOCR(canvas, expectedAmount){
   }
   finally{ clearTimeout(timeoutId); }
   const amounts = (result.text.match(/(?:\d{1,3}(?:[,\s]\d{3})+|\d+)\s*\.\s*\d{2}/g) || [])
-    .map(value => Number(value.replace(/[,\s]/g,''))).filter(Number.isFinite);
+    .map(value => Number(value.replace(/[,\s]/g,'')))
+    .filter(v => Number.isFinite(v) && v > 0); // กรอง 0.00 (ค่าธรรมเนียม) ออก
   const expected = Number(expectedAmount);
   const matchingAmount = amounts.find(value => Math.round(value * 100) === Math.round(expected * 100));
   const ocrAmount = matchingAmount ?? amounts[0] ?? null;
+  // Bank cross-check: QR bank vs OCR text
+  let bankCrossCheck = true;
+  const ocrUpper = (result.text || '').toUpperCase();
+  const otherBanks = Object.values(THAI_BANKS).filter(b => b.short && b.short.length >= 2);
+  const mentioned = otherBanks.filter(b => ocrUpper.includes(b.short.toUpperCase()) || ocrUpper.includes((b.name||'').replace(/ธ\.|\s/g,'').slice(0,6).toUpperCase()));
+  if(mentioned.length && currentSlipVerification?.sendingBankCode){
+    const expectedShort = THAI_BANKS[currentSlipVerification.sendingBankCode]?.short || '';
+    if(expectedShort && !mentioned.some(b => b.short === expectedShort)) bankCrossCheck = false;
+  }
   const receiverText = result.text.toUpperCase().replace(/\s+/g,'');
   const ocrReceiverMatch = ['ทุ่งยางแดง','เอ็นเตอร์ไพรส์','PTTTUNGYANGDAENG','BG094','0939H']
     .some(keyword => receiverText.includes(keyword.toUpperCase().replace(/\s+/g,'')));
@@ -2940,7 +3002,7 @@ async function runFastSlipOCR(canvas, expectedAmount){
   const ocrTimeText = timeMatch
     ? `${String(timeMatch[1]).padStart(2,'0')}:${timeMatch[2]}${timeMatch[3] ? ':' + timeMatch[3] : ''}`
     : '';
-  return { timedOut:result.timedOut, failed:!!result.failed, text:result.text, ocrAmount, amountMatch:matchingAmount !== undefined, ocrReceiverMatch, ocrTimeText };
+  return { timedOut:result.timedOut, failed:!!result.failed, text:result.text, ocrAmount, amountMatch:matchingAmount !== undefined, ocrReceiverMatch, ocrTimeText, bankCrossCheck };
 }
 
 function setSlipScanStatus(message, state = ''){
@@ -3108,8 +3170,32 @@ function updateSlipPreview(canvas){
   setPostSlipTools(true);
 }
 
+const TRANSREF_VAULT_KEY = 'edc_used_transrefs_vault';
+function loadTransRefVault(){
+  try{
+    const raw = localStorage.getItem(TRANSREF_VAULT_KEY);
+    const list = raw ? JSON.parse(raw) : [];
+    const cutoff = Date.now() - 30*86400000;
+    return Array.isArray(list) ? list.filter(x => x && x.ts > cutoff) : [];
+  }catch(e){ return []; }
+}
+function checkAndSaveTransRefVault(transRef, timeStr, amount){
+  if(!transRef) return;
+  let vault = loadTransRefVault();
+  if(!vault.some(x => x.ref === transRef)){
+    vault.push({ ref:transRef, time:timeStr||'', amount:amount||0, ts:Date.now() });
+    if(vault.length > 1500) vault = vault.slice(-1500);
+    try{ localStorage.setItem(TRANSREF_VAULT_KEY, JSON.stringify(vault)); }catch(e){}
+  }
+}
 function isDuplicateSlip(transRef){
-  return !!transRef && records.find(record => (editingRecordId === null || editingRecordId === undefined || record.id !== editingRecordId) && record.transRef === transRef);
+  if(!transRef) return null;
+  const inRecords = records.find(record => (editingRecordId === null || editingRecordId === undefined || record.id !== editingRecordId) && record.transRef === transRef);
+  if(inRecords) return inRecords;
+  const vault = loadTransRefVault();
+  const hit = vault.find(x => x.ref === transRef);
+  if(hit) return { time: hit.time || 'กะก่อนหน้า', fromVault:true };
+  return null;
 }
 
 function vibrationWarning(){
@@ -3281,7 +3367,20 @@ async function processSlipImage(canvas, options = {}){
       showSlipVerificationStatus(`☑️ อ่าน QR/CRC ได้ (${qrInfo.sendingBank || 'ไม่ทราบธนาคาร'}) แต่รูปแบบเลขอ้างอิงไม่ตรงกับธนาคารนี้ กรุณาตรวจด้วยตนเองก่อนบันทึก · ไม่ได้ตรวจสอบธุรกรรมกับธนาคาร`, '', true, true);
       return;
     }
-    // น่าเชื่อถือ: QR ผ่าน CRC + เลขอ้างอิงรูปแบบสมเหตุสมผล + ไม่ซ้ำ + ภายใน 5 นาที + มีวันที่วันนี้
+    if(timing.beforeQrCreated){
+      currentSlipVerification.verifyStatus = 'QR_VERIFIED';
+      setSlipSaveBlocked(false);
+      vibrationWarning();
+      showSlipVerificationStatus(`⚠️ เวลาโอนในสลิป (${timing.slipTime || '-'}) เกิดก่อนเวลาสร้าง QR! ลูกค้าอาจใช้สลิปเก่าหรือไม่ได้สแกนจาก QR นี้`, 'error', true, true);
+      return;
+    }
+    if(timing.tooSlow){
+      currentSlipVerification.verifyStatus = 'QR_VERIFIED';
+      setSlipSaveBlocked(false);
+      showSlipVerificationStatus(`⚠️ สแกนช้าเกิน 10 นาทีหลังสร้าง QR กรุณาตรวจสอบด้วยตาเปล่าก่อนบันทึก`, '', true, true);
+      return;
+    }
+    // น่าเชื่อถือ: QR ผ่าน CRC + เลขอ้างอิงรูปแบบสมเหตุสมผล + ไม่ซ้ำ + ภายใน 5 นาที + มีวันที่วันนี้ + เวลาไม่ก่อนสร้าง QR
     currentSlipVerification.verifyStatus = 'QR_VERIFIED';
     currentSlipVerification.qrSessionId = currentQrSession?.sessionId || '';
     setSlipSaveBlocked(true);
@@ -3353,6 +3452,28 @@ async function finalizeSlipVerification(qrInfo, timing, ocr, expectedAmount){
       closeSlipLiveScanner();
       setSlipSaveBlocked(false);
       showSlipVerificationStatus(`☑️ OCR อ่านยอดตรง แต่รูปแบบเลขอ้างอิงไม่ตรงกับธนาคารนี้ กรุณาตรวจด้วยตนเองก่อนบันทึก · ไม่ได้ตรวจสอบธุรกรรมกับธนาคาร`, '', true, true);
+      return;
+    }
+    if(timing.beforeQrCreated){
+      currentSlipVerification.verifyStatus = 'QR_VERIFIED';
+      closeSlipLiveScanner();
+      setSlipSaveBlocked(false);
+      vibrationWarning();
+      showSlipVerificationStatus(`⚠️ เวลาโอนในสลิป (${timing.slipTime || '-'}) เกิดก่อนเวลาสร้าง QR! ลูกค้าอาจใช้สลิปเก่าหรือไม่ได้สแกนจาก QR นี้`, 'error', true, true);
+      return;
+    }
+    if(timing.tooSlow){
+      currentSlipVerification.verifyStatus = 'QR_VERIFIED';
+      closeSlipLiveScanner();
+      setSlipSaveBlocked(false);
+      showSlipVerificationStatus(`⚠️ สแกนช้าเกิน 10 นาทีหลังสร้าง QR กรุณาตรวจสอบด้วยตาเปล่าก่อนบันทึก`, '', true, true);
+      return;
+    }
+    if(ocr.bankCrossCheck === false){
+      currentSlipVerification.verifyStatus = 'QR_VERIFIED';
+      closeSlipLiveScanner();
+      setSlipSaveBlocked(false);
+      showSlipVerificationStatus(`⚠️ OCR พบชื่อธนาคารบนสลิปไม่ตรงกับ QR (${qrInfo.sendingBank || 'ไม่ทราบ'}) ระวังสลิปตัดต่อ กรุณาตรวจด้วยตนเอง`, 'error', true, true);
       return;
     }
     currentSlipVerification.verifyStatus = 'AUTO_OCR_MATCH';
@@ -3786,6 +3907,7 @@ function saveRecord(){
   records.unshift(newRecord);
   saveToStorage();
   persistPut(newRecord);
+  if(newRecord.transRef) checkAndSaveTransRefVault(newRecord.transRef, newRecord.time, newRecord.amount);
 
   setAmountValue('');
   currentSlipBase64 = null; currentSlipFilename = ""; currentSlipVerification = null; currentQrSession = null; currentNote=''; extraFills=[]; needContact=false;
@@ -3905,9 +4027,11 @@ function deleteRecord(id){
   }
 }
 function resetDayRecords(){
-  if(confirm('ต้องการเริ่มกะใหม่ และลบข้อมูลของรอบนี้ทั้งหมดใช่หรือไม่?')){
+  if(confirm('ต้องการเริ่มกะใหม่ และลบข้อมูลของรอบนี้ทั้งหมดใช่หรือไม่?\n(ประวัติเลขอ้างอิงสลิปซ้ำข้ามกะจะยังถูกเก็บไว้)')){
     playClear();
-    records = []; saveToStorage(); persistClearAll(); showToast('เริ่มวันใหม่เรียบร้อย');
+    records = []; saveToStorage(); persistClearAll();
+    // ไม่ลบ edc_used_transrefs_vault — กันสลิปซ้ำข้ามกะ
+    showToast('เริ่มวันใหม่เรียบร้อย (คลังเลขอ้างอิงยังอยู่)');
   }
 }
 
