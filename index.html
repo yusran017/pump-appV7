@@ -2624,6 +2624,50 @@ const THAI_BANKS = {
   '098': { code:'098', short:'SME', name:'ธ.พัฒนาวิสาหกิจ (SME)', color:'#0d9488' }
 };
 
+// รูปแบบเลขอ้างอิงที่สมเหตุสมผลตามธนาคาร (ไม่ใช้ API — อิงความยาวและตัวอักษรที่พบจริง)
+// ใช้เป็นตัวกรองก่อนบันทึกอัตโนมัติเท่านั้น ไม่บล็อกการบันทึกด้วยมือ
+const BANK_REF_PATTERNS = {
+  // ธนาคารใหญ่ — เลขอ้างอิงมักยาวและมีตัวเลข/ตัวอักษรผสม
+  '002': { min:12, max:25, re:/^[0-9A-Za-z]{12,25}$/, note:'BBL มักเป็นตัวเลข/ผสม 12–25 หลัก' },
+  '004': { min:10, max:30, re:/^[0-9A-Za-z]{10,30}$/, note:'KBank มักเป็นตัวอักษรผสมตัวเลข' },
+  '006': { min:10, max:28, re:/^[0-9A-Za-z]{10,28}$/, note:'KTB' },
+  '011': { min:10, max:28, re:/^[0-9A-Za-z]{10,28}$/, note:'ttb' },
+  '014': { min:12, max:30, re:/^[0-9A-Za-z]{12,30}$/, note:'SCB มักขึ้นต้นด้วยวันที่หรือตัวอักษรผสม' },
+  '025': { min:10, max:28, re:/^[0-9A-Za-z]{10,28}$/, note:'BAY' },
+  '030': { min:8,  max:25, re:/^[0-9A-Za-z]{8,25}$/,  note:'GSB' },
+  '033': { min:8,  max:25, re:/^[0-9A-Za-z]{8,25}$/,  note:'GHB' },
+  '034': { min:8,  max:25, re:/^[0-9A-Za-z]{8,25}$/,  note:'BAAC' },
+  '035': { min:8,  max:25, re:/^[0-9A-Za-z]{8,25}$/,  note:'BAAC' },
+  // ธนาคารอื่น ๆ — ใช้กฎหลวมที่ปลอดภัย
+  '001': { min:8, max:30, re:/^[0-9A-Za-z]{8,30}$/, note:'KKP' },
+  '005': { min:8, max:30, re:/^[0-9A-Za-z]{8,30}$/, note:'SCBT' },
+  '017': { min:8, max:30, re:/^[0-9A-Za-z]{8,30}$/, note:'CITI' },
+  '018': { min:8, max:30, re:/^[0-9A-Za-z]{8,30}$/, note:'SMBC' },
+  '020': { min:8, max:30, re:/^[0-9A-Za-z]{8,30}$/, note:'SCBT' },
+  '022': { min:8, max:30, re:/^[0-9A-Za-z]{8,30}$/, note:'CIMBT' },
+  '024': { min:8, max:30, re:/^[0-9A-Za-z]{8,30}$/, note:'UOB' },
+  '039': { min:8, max:30, re:/^[0-9A-Za-z]{8,30}$/, note:'MHCB' },
+  '066': { min:8, max:30, re:/^[0-9A-Za-z]{8,30}$/, note:'ISBT' },
+  '067': { min:8, max:30, re:/^[0-9A-Za-z]{8,30}$/, note:'TISCO' },
+  '069': { min:8, max:30, re:/^[0-9A-Za-z]{8,30}$/, note:'KKP' },
+  '070': { min:8, max:30, re:/^[0-9A-Za-z]{8,30}$/, note:'ICBC' },
+  '071': { min:8, max:30, re:/^[0-9A-Za-z]{8,30}$/, note:'TCRB' },
+  '073': { min:8, max:30, re:/^[0-9A-Za-z]{8,30}$/, note:'LHB' },
+  '098': { min:8, max:30, re:/^[0-9A-Za-z]{8,30}$/, note:'SME' }
+};
+const DEFAULT_REF_PATTERN = { min:6, max:40, re:/^[\x21-\x7E]{6,40}$/, note:'ทั่วไป' };
+
+function isPlausibleTransRef(bankCode, transRef){
+  if(!transRef || typeof transRef !== 'string') return false;
+  const ref = transRef.trim();
+  if(ref.length < 6 || ref.length > 50) return false;
+  // ต้องมีตัวเลขอย่างน้อย 4 ตัว และไม่มีอักขระควบคุม
+  if(!/[0-9]{4,}/.test(ref)) return false;
+  if(/[\x00-\x1F]/.test(ref)) return false;
+  const pattern = BANK_REF_PATTERNS[bankCode] || DEFAULT_REF_PATTERN;
+  return pattern.re.test(ref);
+}
+
 function flattenTlvFields(fields, result = []){
   (fields || []).forEach(field => {
     result.push(field);
@@ -3194,7 +3238,13 @@ async function processSlipImage(canvas, options = {}){
       showSlipVerificationStatus(`☑️ อ่าน QR/CRC ได้ (${qrInfo.sendingBank || 'ไม่ทราบธนาคาร'}) แต่ไม่พบวันที่ในสลิป กรุณาตรวจด้วยตนเองก่อนบันทึก (กันสลิปเก่า) · ไม่ได้ตรวจสอบธุรกรรมกับธนาคาร`, '', true, true);
       return;
     }
-    // น่าเชื่อถือ: QR ผ่าน CRC + มีเลขอ้างอิง + ไม่ซ้ำ + ภายใน 10 นาที + มีวันที่วันนี้
+    if(!isPlausibleTransRef(qrInfo.sendingBankCode, qrInfo.transRef)){
+      currentSlipVerification.verifyStatus = 'QR_VERIFIED';
+      setSlipSaveBlocked(false);
+      showSlipVerificationStatus(`☑️ อ่าน QR/CRC ได้ (${qrInfo.sendingBank || 'ไม่ทราบธนาคาร'}) แต่รูปแบบเลขอ้างอิงไม่ตรงกับธนาคารนี้ กรุณาตรวจด้วยตนเองก่อนบันทึก · ไม่ได้ตรวจสอบธุรกรรมกับธนาคาร`, '', true, true);
+      return;
+    }
+    // น่าเชื่อถือ: QR ผ่าน CRC + เลขอ้างอิงรูปแบบสมเหตุสมผล + ไม่ซ้ำ + ภายใน 10 นาที + มีวันที่วันนี้
     currentSlipVerification.verifyStatus = 'QR_VERIFIED';
     currentSlipVerification.qrSessionId = currentQrSession?.sessionId || '';
     setSlipSaveBlocked(true);
@@ -3259,6 +3309,13 @@ async function finalizeSlipVerification(qrInfo, timing, ocr, expectedAmount){
       setSlipSaveBlocked(false);
       const why = !qrInfo.qrEmbeddedDate ? 'ไม่พบวันที่ในสลิป' : 'วันที่ในสลิปไม่ตรงกับวันนี้';
       showSlipVerificationStatus(`☑️ OCR อ่านยอดตรง แต่ ${why} กรุณาตรวจด้วยตนเองก่อนบันทึก · ไม่ได้ตรวจสอบธุรกรรมกับธนาคาร`, '', true, true);
+      return;
+    }
+    if(!isPlausibleTransRef(qrInfo.sendingBankCode, qrInfo.transRef)){
+      currentSlipVerification.verifyStatus = 'QR_VERIFIED';
+      closeSlipLiveScanner();
+      setSlipSaveBlocked(false);
+      showSlipVerificationStatus(`☑️ OCR อ่านยอดตรง แต่รูปแบบเลขอ้างอิงไม่ตรงกับธนาคารนี้ กรุณาตรวจด้วยตนเองก่อนบันทึก · ไม่ได้ตรวจสอบธุรกรรมกับธนาคาร`, '', true, true);
       return;
     }
     currentSlipVerification.verifyStatus = 'AUTO_OCR_MATCH';
