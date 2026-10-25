@@ -623,6 +623,8 @@
     display:flex;flex:1 1 0;flex-direction:column;align-items:center;
     width:100%;min-height:0;max-height:100%;margin:0;overflow:hidden;
   }
+  .qr-code-box.has-slip.photo-mode{border:3px solid #22c55e;box-shadow:0 0 0 4px rgba(34,197,94,.25);}
+  .qr-code-box.has-slip.photo-mode .slip-ok{color:#22c55e;font-weight:700;}
   .qr-code-box.has-slip .slip-preview-img{
     flex:1 1 0;width:100%;height:100%;min-height:0;max-width:100%;max-height:none;
     object-fit:contain;border:0;border-radius:8px;box-shadow:none;
@@ -963,7 +965,9 @@
   .pad-sheet .numpad-display{
     min-height:86px;height:86px;font-size:clamp(34px,8.5vw,46px);letter-spacing:1.6px;margin:6px 0 8px;
     display:flex;align-items:center;justify-content:center;line-height:1;
+    flex-direction:row;flex-wrap:nowrap;white-space:nowrap;overflow:hidden;
   }
+  .pad-sheet .numpad-display .slot{display:inline-flex;}
   .pad-sheet .numpad-display-card{font-size:clamp(22px,6vw,32px);letter-spacing:1.2px;}
   .voice-row{display:none;gap:8px;margin:0 0 10px;justify-content:center;align-items:center;}
   .voice-row.show{display:flex;}
@@ -1117,6 +1121,10 @@
         <span class="spin-member" aria-hidden="true"><i></i><i></i><i></i></span>
         <span id="phoneLoadingText">กำลังเตรียม...</span>
       </div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin:8px 0 4px;">
+      <span style="font-size:12px;color:var(--text-muted);">แสดงหน้าต่างยืนยัน</span>
+      <button type="button" class="switch" id="phoneConfirmInlineSwitch" onclick="togglePhoneConfirmSetting()"></button>
+    </div>
     <div class="phone-actions">
       <button type="button" class="btn-phone-qr" onclick="confirmPhoneAndCreateQR()">
         <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3"/><path d="M21 14v7h-7"/><path d="M14 21h.01"/></svg>
@@ -1398,13 +1406,7 @@
         <button type="button" class="switch" id="addMoreSwitch" onclick="toggleAddMoreSetting()"></button>
       </div>
 
-      <div class="settings-row">
-        <div>
-          <h4>หน้าต่างยืนยันเบอร์ลูกค้า</h4>
-          <p>ปิดแล้วจะสร้าง QR ทันทีหลังบันทึกเบอร์</p>
-        </div>
-        <button type="button" class="switch" id="phoneConfirmSwitch" onclick="togglePhoneConfirmSetting()"></button>
-      </div>
+      
       
       <div class="settings-row">
         <div>
@@ -1909,7 +1911,7 @@ function setAmountValue(v){
 function groupPhoneDigits(v){ v=String(v||''); if(v.length===10) return v.slice(0,3)+'-'+v.slice(3,6)+'-'+v.slice(6); return v; }
 
 let padVoice = (function(){ try { return localStorage.getItem('edc_pad_voice') || 'male'; } catch(e){ return 'male'; } })();
-let padSoundOn = (function(){ try { return (safeGet('edc_pad_sound') || '1') !== '0'; } catch(e){ return true; } })();
+let padSoundOn = (function(){ try { return (safeGet('edc_pad_sound') || '0') === '1'; } catch(e){ return false; } })();
 let lineEnabled = (function(){ try { return (safeGet('edc_line_enabled') || '0') === '1'; } catch(e){ return false; } })();
 let addMoreEnabled = (function(){ try { return (safeGet('edc_add_more') || '0') === '1'; } catch(e){ return false; } })();
 let showPhoneConfirm = (function(){ try { return (safeGet('edc_show_phone_confirm') || '0') === '1'; } catch(e){ return false; } })();
@@ -1975,6 +1977,8 @@ function togglePhoneConfirmSetting(){
   safeSet('edc_show_phone_confirm', showPhoneConfirm ? '1' : '0');
   const sw = document.getElementById('phoneConfirmSwitch');
   if(sw) sw.classList.toggle('on', showPhoneConfirm);
+  const swInline = document.getElementById('phoneConfirmInlineSwitch');
+  if(swInline) swInline.classList.toggle('on', showPhoneConfirm);
 }
 function toggleDeleteSetting(){
   showDeleteBtn = !showDeleteBtn;
@@ -2185,6 +2189,11 @@ function renderPad(){
   const counter = document.getElementById('padCounter');
   const maxLen  = PAD_MAXLEN[padTarget];
   if(padTarget === 'amount'){
+    display.classList.remove('edc-phone','empty');
+    display.style.display = 'flex';
+    display.style.flexDirection = 'row';
+    display.style.flexWrap = 'nowrap';
+    display.style.whiteSpace = 'nowrap';
     if(!padValue){
       display.textContent = '0';
       display.classList.add('placeholder');
@@ -2293,10 +2302,6 @@ function closeCardModal(){ closePadModal(); }
 
 /* เพิ่มการบล็อกแก้ราคาตอนแก้ไข ถ้ามีสลิปแนบอยู่ */
 function openAmountModal(){ 
-  if(!amountEditable) {
-    showToast('ล็อคราคา เนื่องจากมีการแนบสลิปแล้ว');
-    return;
-  }
   openPadModal('amount'); 
 }
 function openSlipPriceModal(){
@@ -2329,15 +2334,8 @@ function savePadData(){
         /^(slip_P[^_]+_)[^_]+(THB_.*)$/,
         (_, prefix, suffix) => `${prefix}${getAmountValue()}${suffix}`
       );
-      amountEditable = false;
-      amountInput.classList.add('locked');
       if(currentQrSession) currentQrSession.expectedAmount = n;
-      if(currentSlipVerification){
-        currentSlipVerification = { verifyStatus:'MANUAL_PHOTO' };
-        setSlipSaveBlocked(false);
-        showSlipVerificationStatus('มีการแก้ยอดแล้ว กรุณาตรวจภาพสลิปด้วยตนเองก่อนบันทึก', '', true, true);
-      }
-      showToast('เปลี่ยนราคาแล้ว และล็อคราคาเรียบร้อย');
+      showToast('เปลี่ยนราคาแล้ว');
     }
     closePadModal();
   }
@@ -3572,6 +3570,8 @@ function setSlipSaveBlocked(blocked){
 }
 
 function showPhoneConfirmModal(phone){
+  const swInline = document.getElementById('phoneConfirmInlineSwitch');
+  if(swInline) swInline.classList.toggle('on', showPhoneConfirm);
   const el = document.getElementById('phoneConfirm');
   const num = document.getElementById('phoneConfirmNumber');
   const load = document.getElementById('phoneLoading');
@@ -3853,7 +3853,16 @@ async function handleSlipUpload(event){
       if(preview) preview.src = currentSlipBase64;
       updateSlipPreview(null);
       qrModal.classList.add('has-slip');
-      showToast('ใส่รูปสลิปแล้ว');
+      const box = document.querySelector('.qr-code-box');
+      if(box) box.classList.add('photo-mode');
+      const ok = document.querySelector('.slip-ok');
+      if(ok) ok.textContent = 'บันทึกภาพสลิปแล้ว';
+      clearSlipVerificationStatus();
+      const status = document.getElementById('slipVerificationStatus');
+      if(status) status.style.display = 'none';
+      const actions = document.getElementById('slipVerificationActions');
+      if(actions) actions.style.display = 'none';
+      showToast('บันทึกภาพสลิปแล้ว');
     }catch(err){
       console.error('Photo attach failed:', err);
       showToast('ใส่รูปไม่สำเร็จ กรุณาลองใหม่');
@@ -4455,9 +4464,7 @@ function renderList(){
       ? `<span class="tag tag-verify-auto">${ICONS.shieldOk} ถูกต้อง · ยอดตรง</span>`
       : item.slipImage && item.verifyStatus === 'QR_VERIFIED'
         ? `<span class="tag tag-verify-qr">${ICONS.qrOk} QR ผ่าน</span>`
-        : item.slipImage
-          ? `<span class="tag tag-verify-manual">${ICONS.camManual} ถ่ายเอง</span>`
-          : '';
+        : '';
     const bankColor = /^#[0-9a-f]{6}$/i.test(item.bankColor || '') ? item.bankColor : '#0284c7';
     const bankShort = THAI_BANKS[item.sendingBankCode]?.short || item.bankShort || '';
     const bankFull = THAI_BANKS[item.sendingBankCode]?.name || item.sendingBank || '';
@@ -4485,7 +4492,7 @@ function renderList(){
           <span class="tag ${oilClass}">${item.oilType}</span>
           ${slipTag} ${verifyTag} ${bankTag} ${timeLinkTag} ${memberTag}
         </div>
-        <div class="amount">฿${item.amount.toLocaleString()}</div>
+        <div class="amount" style="font-weight:800;font-size:1.15em;">฿${item.amount.toLocaleString()}</div>
       </div>
       <div class="record-bottom">
         <div class="record-time">${ICONS.clock} ${item.time}</div>
@@ -4560,29 +4567,38 @@ function openRecordView(id) {
   st.textContent = item.cleared ? 'แจ้งแคชเชียร์แล้ว' : 'รอแจ้งแคชเชียร์';
   st.style.color = item.cleared ? '#10b981' : '#f59e0b';
 
-  const slipVerifyEl = document.getElementById('vd-slip-verify');
-  const verificationLabels = {
-    AUTO_OCR_MATCH:'✅ QR + OCR อ่านยอดตรง (ไม่ยืนยันธนาคาร)',
-    QR_VERIFIED:'☑️ อ่าน QR ผ่าน (ไม่ยืนยันธนาคาร)',
-    MANUAL_PHOTO:'📷 ถ่ายภาพสลิปเอง (แมนนวล)',
-    NO_SLIP:'ไม่มีสลิป'
-  };
   const verifyStatus = item.verifyStatus || (item.slipImage ? 'MANUAL_PHOTO' : 'NO_SLIP');
-  slipVerifyEl.textContent = verificationLabels[verifyStatus] || verificationLabels.NO_SLIP;
-  slipVerifyEl.style.color = verifyStatus === 'AUTO_OCR_MATCH' ? '#059669'
-    : verifyStatus === 'QR_VERIFIED' ? '#0284c7'
-      : verifyStatus === 'MANUAL_PHOTO' ? '#b45309' : '#64748b';
-  const bankColor = /^#[0-9a-f]{6}$/i.test(item.bankColor || '') ? item.bankColor : '#0284c7';
+  const isManual = verifyStatus === 'MANUAL_PHOTO' || verifyStatus === 'NO_SLIP';
+  const slipVerifyEl = document.getElementById('vd-slip-verify');
   const bankWrap = document.getElementById('vd-bank');
-  bankWrap.style.setProperty('--bank-color', bankColor);
-  document.getElementById('vd-bank-name').textContent =
-    THAI_BANKS[item.sendingBankCode]?.name || item.sendingBank || '-';
-  document.getElementById('vd-trans-ref').textContent = item.transRef || '-';
-  const rawQrEl = document.getElementById('vd-raw-qr');
-  if(rawQrEl) rawQrEl.textContent = item.rawQrPayload || '-';
-  document.getElementById('vd-time-link').textContent = item.scanDelaySec != null
-    ? `สแกนหลังสร้าง QR ${item.scanDelaySec} วินาที${item.qrEmbeddedTime ? ` · เวลาในสลิป ${item.qrEmbeddedTime}` : item.ocrTimeText ? ` · เวลา OCR ${item.ocrTimeText}` : ''}`
-    : '-';
+  const transRefEl = document.getElementById('vd-trans-ref');
+  const rawQrRow = document.getElementById('vd-raw-qr')?.closest('.receipt-row');
+  const timeLinkEl = document.getElementById('vd-time-link');
+  // ซ่อนรายละเอียด QR เมื่อเป็นถ่ายรูปปกติ
+  const qrDetailRows = [slipVerifyEl?.closest('.receipt-row'), bankWrap?.closest('.receipt-row'), transRefEl?.closest('.receipt-row'), rawQrRow, timeLinkEl?.closest('.receipt-row')];
+  qrDetailRows.forEach(row => { if(row) row.style.display = isManual ? 'none' : ''; });
+  if(!isManual){
+    const verificationLabels = {
+      AUTO_OCR_MATCH:'✅ QR + OCR อ่านยอดตรง (ไม่ยืนยันธนาคาร)',
+      QR_VERIFIED:'☑️ อ่าน QR ผ่าน (ไม่ยืนยันธนาคาร)',
+      MANUAL_PHOTO:'📷 ถ่ายภาพสลิปเอง (แมนนวล)',
+      NO_SLIP:'ไม่มีสลิป'
+    };
+    if(slipVerifyEl){
+      slipVerifyEl.textContent = verificationLabels[verifyStatus] || verificationLabels.NO_SLIP;
+      slipVerifyEl.style.color = verifyStatus === 'AUTO_OCR_MATCH' ? '#059669' : verifyStatus === 'QR_VERIFIED' ? '#0284c7' : '#64748b';
+    }
+    const bankColor = /^#[0-9a-f]{6}$/i.test(item.bankColor || '') ? item.bankColor : '#0284c7';
+    if(bankWrap) bankWrap.style.setProperty('--bank-color', bankColor);
+    const bankName = document.getElementById('vd-bank-name');
+    if(bankName) bankName.textContent = THAI_BANKS[item.sendingBankCode]?.name || item.sendingBank || '-';
+    if(transRefEl) transRefEl.textContent = item.transRef || '-';
+    const rawQrEl = document.getElementById('vd-raw-qr');
+    if(rawQrEl) rawQrEl.textContent = item.rawQrPayload || '-';
+    if(timeLinkEl) timeLinkEl.textContent = item.scanDelaySec != null
+      ? `สแกนหลังสร้าง QR ${item.scanDelaySec} วินาที${item.qrEmbeddedTime ? ` · เวลาในสลิป ${item.qrEmbeddedTime}` : item.ocrTimeText ? ` · เวลา OCR ${item.ocrTimeText}` : ''}`
+      : '-';
+  }
 
   const extraRow = document.getElementById('vd-extra-row');
   if(item.extraText && item.extraText !== '-') {
