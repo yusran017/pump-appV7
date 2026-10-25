@@ -624,34 +624,37 @@
     width:100%;min-height:0;max-height:100%;margin:0;overflow:hidden;
   }
   .qr-code-box.has-slip.photo-mode{border:3px solid #22c55e;box-shadow:0 0 0 4px rgba(34,197,94,.25);}
-  /* Photo full-screen white frame */
+  /* Photo full-screen: white area fills, green frame, buttons at screen bottom */
+  #qrModal.has-slip .modal-card{display:flex;flex-direction:column;height:100dvh;}
   #qrModal.has-slip .qr-code-box.has-slip{
-    width:100%!important;max-width:none!important;height:auto!important;
+    width:100%!important;max-width:none!important;
     flex:1 1 auto!important;min-height:0!important;max-height:none!important;
-    margin:0!important;padding:10px!important;background:#fff!important;
+    margin:0!important;padding:8px 10px!important;background:#fff!important;
     border-radius:0!important;align-self:stretch!important;
     display:flex!important;flex-direction:column!important;
   }
   #qrModal.has-slip .qr-content{flex:1 1 auto!important;min-height:0!important;display:flex!important;}
   #qrModal.has-slip .slip-preview-container{
     flex:1 1 auto!important;min-height:0!important;width:100%!important;
-    display:flex!important;flex-direction:column!important;align-items:center!important;
+    display:flex!important;flex-direction:column!important;align-items:stretch!important;
+    justify-content:space-between!important;padding:4px 0;
   }
+  #qrModal.has-slip .slip-ok{color:#16a34a!important;font-size:15px!important;font-weight:700!important;text-align:center;margin:4px 0 6px!important;}
   #qrModal.has-slip .slip-preview-img{
-    flex:1 1 auto!important;width:100%!important;height:auto!important;
-    max-height:none!important;min-height:0!important;object-fit:contain!important;
-    border:4px solid #22c55e!important;border-radius:8px!important;
+    flex:1 1 auto!important;width:100%!important;min-height:0!important;
+    max-height:none!important;object-fit:contain!important;
+    border:4px solid #22c55e!important;border-radius:10px!important;
+    background:#fff;
   }
-  #qrModal.has-slip #storeDetails{display:none!important;}
-  #qrModal.has-slip .qr-price-bar{
-    width:100%!important;max-width:none!important;margin:0!important;
-    background:#fff!important;color:#0f172a!important;
-    font-size:14px;font-weight:600;padding:6px 12px;
-    border-radius:0!important;border-top:1px solid #e5e7eb;
+  #qrModal.has-slip .slip-price-display{
+    color:#16a34a!important;font-size:20px!important;font-weight:800!important;
+    text-align:center;margin:6px 0 4px!important;background:transparent!important;border:0!important;
   }
+  #qrModal.has-slip #storeDetails,#qrModal.has-slip .qr-price-bar{display:none!important;}
   #qrModal.has-slip .qr-card-footer{
-    position:sticky;bottom:0;background:var(--glass-bg,#0f172a);
-    padding-bottom:calc(10px + env(safe-area-inset-bottom));z-index:5;
+    position:sticky;bottom:0;margin-top:auto;
+    background:#0f172a;padding:10px 12px calc(10px + env(safe-area-inset-bottom));
+    z-index:10;border-top:1px solid rgba(255,255,255,.08);
   }
   .qr-code-box.has-slip.photo-mode .slip-ok{color:#22c55e;font-weight:700;}
   .qr-code-box.has-slip .slip-preview-img{
@@ -1601,7 +1604,7 @@
         </div>
       </div>
     </div>
-    <div class="qr-price-bar" id="modalPrice">จำนวนเงิน 0 บาท</div>
+    <div class="qr-price-bar" id="modalPrice">0 บาท</div>
     <div class="store-details" id="storeDetails">
       <div class="store-name">ชื่อบัญชี : หจก. ทุ่งยางแดงเอ็นเตอร์ไพรส์</div>
       <div>รหัสร้านค้า : BG094353WQ20000939H</div>
@@ -3688,7 +3691,7 @@ function triggerQR(){
 
   document.getElementById('modalPump').textContent = selectedPumpNum || '-';
   paintOilCell();
-  modalPrice.textContent = 'จำนวนเงิน ' + formatThaiBaht(amount);
+  modalPrice.textContent = formatThaiBaht(amount);
 
   if(!editingRecordId) {
     currentSlipBase64 = null; currentSlipVerification = null; currentNote = ''; extraFills = [];
@@ -3897,7 +3900,13 @@ async function handleSlipUpload(event){
       const box = document.querySelector('.qr-code-box');
       if(box) box.classList.add('photo-mode');
       const ok = document.querySelector('.slip-ok');
-      if(ok) ok.textContent = 'บันทึกภาพสลิปแล้ว';
+      if(ok) ok.textContent = 'บันทึกสลิปแล้ว';
+      const priceBtn = document.getElementById('slipPriceDisplay');
+      if(priceBtn){
+        const amt = parseFloat(getAmountValue()) || 0;
+        priceBtn.textContent = amt > 0 ? formatThaiBaht(amt) : '';
+        priceBtn.style.display = 'block';
+      }
       clearSlipVerificationStatus();
       const status = document.getElementById('slipVerificationStatus');
       if(status) status.style.display = 'none';
