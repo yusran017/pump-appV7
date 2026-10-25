@@ -1336,6 +1336,10 @@
       <div class="numpad-display" id="padDisplay">0</div>
       <div class="pad-progress" id="padProgress" style="display:none;"><i></i></div>
       <div class="numpad-counter" id="padCounter">0 บาท</div>
+      <div id="phoneConfirmPadToggle" style="display:none;align-items:center;justify-content:center;gap:8px;margin:0 0 8px;">
+        <span style="font-size:12px;color:var(--text-muted);">แสดงหน้าต่างยืนยันเบอร์ให้ลูกค้า</span>
+        <button type="button" class="switch" id="phoneConfirmPadSwitch" onclick="togglePhoneConfirmSetting()"></button>
+      </div>
       <div class="voice-row" id="voiceRow">
         <button type="button" class="voice-ico active" id="voiceMale" onclick="setPadVoice('male')" title="เสียงผู้ชาย">
           <svg width="18" height="18" viewBox="0 0 24 24"><circle cx="9" cy="9" r="4"/><path d="M16 8h5v5"/><path d="M21 8l-6.2 6.2"/><path d="M5 22v-3a4 4 0 0 1 4-4h0"/></svg>
@@ -1979,6 +1983,8 @@ function togglePhoneConfirmSetting(){
   if(sw) sw.classList.toggle('on', showPhoneConfirm);
   const swInline = document.getElementById('phoneConfirmInlineSwitch');
   if(swInline) swInline.classList.toggle('on', showPhoneConfirm);
+  const swPad = document.getElementById('phoneConfirmPadSwitch');
+  if(swPad) swPad.classList.toggle('on', showPhoneConfirm);
 }
 function toggleDeleteSetting(){
   showDeleteBtn = !showDeleteBtn;
@@ -2158,6 +2164,10 @@ function configurePadChrome(){
   disp.classList.toggle('numpad-display-card', padTarget === 'card');
   const voiceRow = document.getElementById('voiceRow');
   if(voiceRow) voiceRow.classList.toggle('show', padTarget === 'phone');
+  const phoneToggle = document.getElementById('phoneConfirmPadToggle');
+  if(phoneToggle) phoneToggle.style.display = padTarget === 'phone' ? 'flex' : 'none';
+  const swPad = document.getElementById('phoneConfirmPadSwitch');
+  if(swPad) swPad.classList.toggle('on', showPhoneConfirm);
   setPadVoice(padVoice);
   paintMuteBtn();
   if(padTarget === 'phone'){
@@ -3851,7 +3861,12 @@ async function handleSlipUpload(event){
       currentSlipVerification = { verifyStatus:'MANUAL_PHOTO' };
       const preview = document.getElementById('slipPreviewImg');
       if(preview) preview.src = currentSlipBase64;
-      updateSlipPreview(null);
+      const prevContainer = document.getElementById('slipPreviewContainer');
+      if(prevContainer) prevContainer.style.display = 'flex';
+      const qrImg = document.getElementById('qrImage');
+      if(qrImg) qrImg.style.display = 'none';
+      const priceEl = document.getElementById('modalPrice');
+      if(priceEl) priceEl.style.display = '';
       qrModal.classList.add('has-slip');
       const box = document.querySelector('.qr-code-box');
       if(box) box.classList.add('photo-mode');
