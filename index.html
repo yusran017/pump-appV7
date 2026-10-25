@@ -1403,7 +1403,7 @@
           <h4>หน้าต่างยืนยันเบอร์ลูกค้า</h4>
           <p>ปิดแล้วจะสร้าง QR ทันทีหลังบันทึกเบอร์</p>
         </div>
-        <button type="button" class="switch on" id="phoneConfirmSwitch" onclick="togglePhoneConfirmSetting()"></button>
+        <button type="button" class="switch" id="phoneConfirmSwitch" onclick="togglePhoneConfirmSetting()"></button>
       </div>
       
       <div class="settings-row">
@@ -1418,7 +1418,7 @@
           <h4>ปุ่มแก้ไขรายการ</h4>
           <p>แสดงปุ่มแก้ไขเพื่อแก้ข้อมูลย้อนหลัง</p>
         </div>
-        <button type="button" class="switch on" id="editSwitch" onclick="toggleEditSetting()"></button>
+        <button type="button" class="switch" id="editSwitch" onclick="toggleEditSetting()"></button>
       </div>
       <div class="settings-row">
         <div>
@@ -1439,14 +1439,21 @@
           <h4>ส่งไลน์</h4>
           <p>แสดงปุ่มส่ง LINE ในหน้ารายการ</p>
         </div>
-        <button type="button" class="switch on" id="lineSwitch" onclick="toggleLineSetting()"></button>
+        <button type="button" class="switch" id="lineSwitch" onclick="toggleLineSetting()"></button>
       </div>
       <div class="settings-row">
         <div>
           <h4>ตรวจสอบยอดด้วย OCR</h4>
           <p>ปิดแล้วจะสแกน QR อย่างเดียว แล้วบันทึกอัตโนมัติเมื่อข้อมูลน่าเชื่อถือ</p>
         </div>
-        <button type="button" class="switch on" id="ocrSwitch" onclick="toggleOcrSetting()"></button>
+        <button type="button" class="switch" id="ocrSwitch" onclick="toggleOcrSetting()"></button>
+      </div>
+      <div class="settings-row">
+        <div>
+          <h4>โหมดปุ่มสลิป</h4>
+          <p id="slipModeLabel">ถ่ายรูปปกติ</p>
+        </div>
+        <button type="button" class="switch" id="slipModeSwitch" onclick="toggleSlipScanMode()"></button>
       </div>
 
       <div class="settings-row" style="align-items:flex-start;flex-direction:column; margin-top: 10px;">
@@ -1550,7 +1557,7 @@
           <img id="slipPreviewImg" class="slip-preview-img" src="">
           <div id="slipVerificationStatus" class="slip-verification-status" role="status" aria-live="polite"></div>
           <div id="slipVerificationActions" class="slip-verification-actions">
-            <button type="button" onclick="openSlipLiveScanner()">สแกนใหม่</button>
+            <button type="button" onclick="openSlipByMode()">สแกนใหม่</button>
             <button type="button" onclick="openSlipPriceModal()">แก้ไขยอด</button>
             <button type="button" class="primary" id="slipManualSaveButton" onclick="saveFromModal()">บันทึกเอง</button>
           </div>
@@ -1900,15 +1907,16 @@ function groupPhoneDigits(v){ v=String(v||''); if(v.length===10) return v.slice(
 
 let padVoice = (function(){ try { return localStorage.getItem('edc_pad_voice') || 'male'; } catch(e){ return 'male'; } })();
 let padSoundOn = (function(){ try { return (safeGet('edc_pad_sound') || '1') !== '0'; } catch(e){ return true; } })();
-let lineEnabled = (function(){ try { return (safeGet('edc_line_enabled') || '1') !== '0'; } catch(e){ return true; } })();
+let lineEnabled = (function(){ try { return (safeGet('edc_line_enabled') || '0') === '1'; } catch(e){ return false; } })();
 let addMoreEnabled = (function(){ try { return (safeGet('edc_add_more') || '0') === '1'; } catch(e){ return false; } })();
-let showPhoneConfirm = (function(){ try { return (safeGet('edc_show_phone_confirm') || '1') !== '0'; } catch(e){ return true; } })();
+let showPhoneConfirm = (function(){ try { return (safeGet('edc_show_phone_confirm') || '0') === '1'; } catch(e){ return false; } })();
 
 let showDeleteBtn = (function(){ try { return (safeGet('edc_show_delete') || '1') !== '0'; } catch(e){ return true; } })();
-let showEditBtn = (function(){ try { return (safeGet('edc_show_edit') || '1') !== '0'; } catch(e){ return true; } })();
+let showEditBtn = (function(){ try { return (safeGet('edc_show_edit') || '0') === '1'; } catch(e){ return false; } })();
 let showViewBtn = (function(){ try { return (safeGet('edc_show_view') || '1') !== '0'; } catch(e){ return true; } })();
 let showSlipBtn = (function(){ try { return (safeGet('edc_show_slip') || '1') !== '0'; } catch(e){ return true; } })();
-let ocrEnabled = (function(){ try { return (safeGet('edc_ocr_enabled') || '1') !== '0'; } catch(e){ return true; } })();
+let ocrEnabled = (function(){ try { return (safeGet('edc_ocr_enabled') || '0') === '1'; } catch(e){ return false; } })();
+let slipScanMode = (function(){ try { return (safeGet('edc_slip_scan_mode') || 'photo') === 'qr' ? 'qr' : 'photo'; } catch(e){ return 'photo'; } })();
 
 let qrEditOn = false;
 let needContact = false;
@@ -1999,6 +2007,14 @@ function toggleOcrSetting(){
   const sw = document.getElementById('ocrSwitch');
   if(sw) sw.classList.toggle('on', ocrEnabled);
 }
+function toggleSlipScanMode(){
+  slipScanMode = slipScanMode === 'qr' ? 'photo' : 'qr';
+  safeSet('edc_slip_scan_mode', slipScanMode);
+  const sw = document.getElementById('slipModeSwitch');
+  const label = document.getElementById('slipModeLabel');
+  if(sw) sw.classList.toggle('on', slipScanMode === 'qr');
+  if(label) label.textContent = slipScanMode === 'qr' ? 'สแกน Mini-QR อัตโนมัติ' : 'ถ่ายรูปปกติ';
+}
 
 function toggleQrEdit(){
   qrEditOn = !qrEditOn;
@@ -2085,6 +2101,10 @@ function openSettingsModal(){
   if(sw6) sw6.classList.toggle('on', showSlipBtn);
   const swOcr = document.getElementById('ocrSwitch');
   if(swOcr) swOcr.classList.toggle('on', ocrEnabled);
+  const swMode = document.getElementById('slipModeSwitch');
+  const modeLabel = document.getElementById('slipModeLabel');
+  if(swMode) swMode.classList.toggle('on', slipScanMode === 'qr');
+  if(modeLabel) modeLabel.textContent = slipScanMode === 'qr' ? 'สแกน Mini-QR อัตโนมัติ' : 'ถ่ายรูปปกติ';
 
   const box = document.getElementById('storageBox');
   if(box){
@@ -3056,6 +3076,15 @@ function showStoreQr(){
   document.getElementById('qrContentWrapper').style.display = 'flex';
 }
 
+function openSlipByMode(){
+  if(slipScanMode === 'qr'){
+    openSlipLiveScanner();
+  }else{
+    const input = document.getElementById('slipInput');
+    if(input) input.click();
+    else showToast('ไม่พบช่องถ่ายรูป');
+  }
+}
 async function openSlipLiveScanner(){
   if(!window.isSecureContext || !navigator.mediaDevices?.getUserMedia){
     showToast('กล้องใช้ได้เมื่อเปิดผ่าน https:// หรือเบราว์เซอร์ที่รองรับกล้อง');
