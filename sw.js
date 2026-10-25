@@ -1,5 +1,5 @@
 /* Service Worker — ทำให้แอปเปิดได้แม้เน็ตหลุด และ Chrome เสนอให้ติดตั้ง */
-const CACHE = 'pump-transfer-v35';
+const CACHE = 'pump-transfer-v36';
 const ASSETS = [
   './',
   './index.html',

@@ -1474,6 +1474,9 @@
   </div>
 </div>
 
+<!-- Native camera input (outside any modal) -->
+<input type="file" id="nativeSlipInput" accept="image/*" capture="environment" style="position:fixed;left:-9999px;top:-9999px;opacity:0;" onchange="handleSlipUpload(event)">
+
 <!-- ================= CLEANUP MODAL (ลบข้อมูลเก่า) ================= -->
 <div id="cleanupModal" class="modal-overlay">
   <div class="modal-card">
@@ -3081,20 +3084,30 @@ function openSlipByMode(){
     openSlipLiveScanner();
     return;
   }
-  // โหมดถ่ายรูปปกติ: ปิด UI สแกนทั้งหมด แล้วเปิดกล้องเต็มจอของเครื่องโดยตรง
+  // โหมดถ่ายรูปปกติ: ห้ามเปิด UI สแกนใด ๆ — ซ่อน modal แล้วเปิดกล้องเต็มจอของเครื่อง
   stopSlipCamera();
   qrModal.classList.remove('slip-scanning');
   const container = document.getElementById('slipScannerContainer');
   const controls = document.getElementById('slipScanControls');
   if(container) container.style.display = 'none';
   if(controls) controls.style.display = 'none';
-  const input = document.getElementById('slipInput');
-  if(input){
-    input.value = '';
-    input.click();
-  }else{
+  // ซ่อน modal ชั่วคราว เพื่อให้กล้องเครื่องเต็มจอไม่มี UI แอปทับ
+  qrModal.style.display = 'none';
+  const input = document.getElementById('nativeSlipInput') || document.getElementById('slipInput');
+  if(!input){
+    qrModal.style.display = '';
     showToast('ไม่พบช่องถ่ายรูป');
+    return;
   }
+  input.value = '';
+  // คืน modal หลังถ่ายเสร็จหรือยกเลิก
+  const restore = () => {
+    qrModal.style.display = '';
+    window.removeEventListener('focus', restore);
+  };
+  window.addEventListener('focus', restore, { once:true });
+  setTimeout(() => { if(qrModal.style.display === 'none') qrModal.style.display = ''; }, 8000);
+  input.click();
 }
 async function openSlipLiveScanner(){
   if(!window.isSecureContext || !navigator.mediaDevices?.getUserMedia){
