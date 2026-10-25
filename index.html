@@ -3832,6 +3832,36 @@ async function handleSlipUpload(event){
   const file = event.target.files && event.target.files[0];
   event.target.value = '';
   if(!file) return;
+  // คืน modal ถ้าถูกซ่อนไว้ระหว่างเปิดกล้องเครื่อง
+  if(qrModal.style.display === 'none') qrModal.style.display = '';
+
+  // โหมดถ่ายรูปปกติ: ใส่รูปทันที ไม่ตรวจ QR / OCR / เวลา
+  if(slipScanMode !== 'qr'){
+    stopSlipCamera();
+    qrModal.classList.remove('slip-scanning');
+    try{
+      const dataUrl = await new Promise((resolve,reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(reader.error || new Error('Image read failed'));
+        reader.readAsDataURL(file);
+      });
+      currentSlipBase64 = dataUrl;
+      currentSlipFilename = file.name || 'slip.jpg';
+      currentSlipVerification = { verifyStatus:'MANUAL_PHOTO' };
+      const preview = document.getElementById('slipPreviewImg');
+      if(preview) preview.src = currentSlipBase64;
+      updateSlipPreview(null);
+      qrModal.classList.add('has-slip');
+      showToast('ใส่รูปสลิปแล้ว');
+    }catch(err){
+      console.error('Photo attach failed:', err);
+      showToast('ใส่รูปไม่สำเร็จ กรุณาลองใหม่');
+    }
+    return;
+  }
+
+  // โหมดสแกน Mini-QR: ตรวจตามปกติ
   const uploadGeneration = ++slipVerificationGeneration;
   stopSlipCamera();
   showToast('กำลังตรวจ QR และจัดรูปสลิป...');
