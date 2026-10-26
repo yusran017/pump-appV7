@@ -1,5 +1,5 @@
 /* Service Worker — ทำให้แอปเปิดได้แม้เน็ตหลุด และ Chrome เสนอให้ติดตั้ง */
-const CACHE = 'pump-transfer-v46';
+const CACHE = 'pump-transfer-v47';
 const ASSETS = [
   './',
   './index.html',
@@ -29,6 +29,8 @@ const ASSETS = [
   './audio/female/8.mp3',
   './audio/female/9.mp3',
   './audio/beep.mp3'
+  './audio/qr-ready.mp3',
+  './audio/save-success.mp3',
 ];
 
 self.addEventListener('install', e => {

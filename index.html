@@ -1760,6 +1760,22 @@ function playScanBeep(){
     scanBeepAudio.play().catch(()=>{});
   }catch(e){}
 }
+let qrReadyAudio = null;
+function playQrReady(){
+  try{
+    if(!qrReadyAudio) qrReadyAudio = new Audio('audio/qr-ready.mp3');
+    qrReadyAudio.currentTime = 0;
+    qrReadyAudio.play().catch(()=>{});
+  }catch(e){}
+}
+let saveSuccessAudio = null;
+function playSaveSuccess(){
+  try{
+    if(!saveSuccessAudio) saveSuccessAudio = new Audio('audio/save-success.mp3');
+    saveSuccessAudio.currentTime = 0;
+    saveSuccessAudio.play().catch(()=>{});
+  }catch(e){}
+}
 document.addEventListener('pointerdown', ensureSfx, {once:true});
 
 /* ===================================================
@@ -3789,6 +3805,7 @@ function triggerQR(){
         if(generationId !== qrGenerationId) return;
         document.getElementById('loadingWrapper').style.display = 'none';
         document.getElementById('qrContentWrapper').style.display = 'flex';
+        playQrReady();
         currentQrSession = {
           sessionId:'QR-' + Date.now(),
           createdAt:Date.now(),
@@ -4109,7 +4126,7 @@ function saveRecord(){
 
   if(!addMoreEnabled) currentMember = "";
   updateMainButtonsUI();
-  playSuccess();
+  playSaveSuccess();
   showSuccessAnimation();
 }
 
