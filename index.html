@@ -3855,7 +3855,7 @@ function triggerQR(){
         document.getElementById('loadingWrapper').style.display = 'none';
         document.getElementById('qrContentWrapper').style.display = 'flex';
         playQrReady();
-        setTimeout(() => playScanVoice(), 3000);
+        setTimeout(() => playScanVoice(), 8000);
         currentQrSession = {
           sessionId:'QR-' + Date.now(),
           createdAt:Date.now(),
@@ -4176,8 +4176,8 @@ function saveRecord(){
 
   if(!addMoreEnabled) currentMember = "";
   updateMainButtonsUI();
-  playSaveSuccess();
   showSuccessAnimation();
+  setTimeout(() => playSaveSuccess(), 4500);
 }
 
 function openEditMode(id) {
