@@ -3737,7 +3737,7 @@ function pickVoiceAndShowQR(gender){
 let femaleScanAudio = null, maleScanAudio = null;
 function playScanVoice(){
   try{
-    const src = qrVoiceChoice === 'female' ? 'audio/fale-scan.wav' : 'audio/man-scan.wav';
+    const src = qrVoiceChoice === 'female' ? 'audio/fale.wav' : 'audio/man-scan.wav';
     const audio = qrVoiceChoice === 'female'
       ? (femaleScanAudio || (femaleScanAudio = new Audio(src)))
       : (maleScanAudio || (maleScanAudio = new Audio(src)));
@@ -3855,7 +3855,7 @@ function triggerQR(){
         document.getElementById('loadingWrapper').style.display = 'none';
         document.getElementById('qrContentWrapper').style.display = 'flex';
         playQrReady();
-        setTimeout(() => playScanVoice(), 1600);
+        setTimeout(() => playScanVoice(), 3000);
         currentQrSession = {
           sessionId:'QR-' + Date.now(),
           createdAt:Date.now(),

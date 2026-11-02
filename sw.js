@@ -1,5 +1,5 @@
 /* Service Worker — ทำให้แอปเปิดได้แม้เน็ตหลุด และ Chrome เสนอให้ติดตั้ง */
-const CACHE = 'pump-transfer-v48';
+const CACHE = 'pump-transfer-v49';
 const ASSETS = [
   './',
   './index.html',
@@ -31,7 +31,7 @@ const ASSETS = [
   './audio/beep.mp3'
   './audio/qr-ready.mp3',
   './audio/save-success.mp3',
-  './audio/fale-scan.wav',
+  './audio/fale.wav',
   './audio/man-scan.wav',
 ];
 
