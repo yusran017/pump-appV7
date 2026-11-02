@@ -1180,6 +1180,16 @@
   }
   #qrModal.has-slip .slip-ok{color:#059669!important;}
   #qrModal.has-slip #storeDetails{display:none!important;}
+
+  .voice-pick-btn{
+    width:110px;height:110px;border-radius:28px;border:2px solid var(--glass-brd);
+    background:var(--glass-2);color:var(--text);cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:var(--shadow-md), var(--inner-light);
+    transition:transform .12s;
+  }
+  .voice-pick-btn svg{stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;}
+  .voice-pick-btn:active{transform:scale(.92);}
 </style>
 </head>
 <body>
@@ -1187,6 +1197,20 @@
 <div class="aurora"><i></i><i></i><i></i></div>
 
 
+
+<!-- ===== เลือกเสียงก่อนแสดง QR ===== -->
+<div id="voicePickModal" class="modal-overlay" style="z-index:2500;">
+  <div class="modal-card" style="max-width:320px;padding:28px 20px;text-align:center;">
+    <div style="display:flex;justify-content:center;gap:28px;margin:10px 0 6px;">
+      <button type="button" class="voice-pick-btn" onclick="pickVoiceAndShowQR('male')" aria-label="เสียงผู้ชาย">
+        <svg viewBox="0 0 24 24" width="72" height="72"><circle cx="9" cy="9" r="4"/><path d="M16 8h5v5"/><path d="M21 8l-6.2 6.2"/><path d="M5 22v-3a4 4 0 0 1 4-4h0"/></svg>
+      </button>
+      <button type="button" class="voice-pick-btn" onclick="pickVoiceAndShowQR('female')" aria-label="เสียงผู้หญิง">
+        <svg viewBox="0 0 24 24" width="72" height="72"><circle cx="12" cy="8" r="4"/><path d="M12 12v8"/><path d="M9 17h6"/><path d="M8 22l4-4 4 4"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
 <!-- ===== ยืนยันเบอร์สมาชิก ===== -->
 <div id="phoneConfirm" class="phone-confirm">
   <div class="phone-card">
@@ -1252,7 +1276,7 @@
     </div>
 
     <div class="card glass">
-      <form id="transferForm" onsubmit="event.preventDefault(); triggerQR();">
+      <form id="transferForm" onsubmit="event.preventDefault(); askVoiceThenQR();">
 
         <div class="section-label">
           <span><svg width="17" height="17" viewBox="0 0 24 24"><path d="M3 22v-8a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v8"/><path d="M14 13h2a2 2 0 0 1 2 2v2a2 2 0 0 0 4 0v-7a3 3 0 0 0-3-3h-1"/><path d="M5 12V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v8"/></svg> เลขที่หน้าจ่าย</span>
@@ -1309,7 +1333,7 @@
         </div>
 
         <div class="action-btn-row">
-          <button type="button" class="btn-qr-show" id="btnQrCreate" onclick="triggerQR()">
+          <button type="button" class="btn-qr-show" id="btnQrCreate" onclick="askVoiceThenQR()">
             <svg width="21" height="21" viewBox="0 0 24 24"><rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/><path d="M3 12h.01"/><path d="M12 3h.01"/><path d="M12 16v.01"/><path d="M16 12h1"/><path d="M21 12v.01"/><path d="M12 21v-1"/></svg>
             <span>สร้าง QR</span>
           </button>
@@ -2419,7 +2443,7 @@ function savePadData(){
       updateMainButtonsUI();
       if(savedPhone.length === 10){
         if(showPhoneConfirm) showPhoneConfirmModal(savedPhone);
-        else triggerQR();
+        else askVoiceThenQR();
       }
     });
   } else if(padTarget === 'card'){
@@ -3694,7 +3718,32 @@ function closePhoneConfirm(){
 }
 function confirmPhoneAndCreateQR(){
   closePhoneConfirm();
+  askVoiceThenQR();
+}
+let qrVoiceChoice = (function(){ try { return localStorage.getItem('edc_qr_voice') || 'male'; } catch(e){ return 'male'; } })();
+function askVoiceThenQR(){
+  const amount = parseFloat(getAmountValue()) || 0;
+  if(!selectedPumpNum || !selectedOil || amount <= 0){
+    showToast('กรุณาระบุหน้าจ่าย ชนิดน้ำมัน และจำนวนเงินให้ครบ'); return;
+  }
+  document.getElementById('voicePickModal').classList.add('active');
+}
+function pickVoiceAndShowQR(gender){
+  qrVoiceChoice = gender === 'female' ? 'female' : 'male';
+  try { localStorage.setItem('edc_qr_voice', qrVoiceChoice); } catch(e){}
+  document.getElementById('voicePickModal').classList.remove('active');
   triggerQR();
+}
+let femaleScanAudio = null, maleScanAudio = null;
+function playScanVoice(){
+  try{
+    const src = qrVoiceChoice === 'female' ? 'audio/fale-scan.wav' : 'audio/man-scan.wav';
+    const audio = qrVoiceChoice === 'female'
+      ? (femaleScanAudio || (femaleScanAudio = new Audio(src)))
+      : (maleScanAudio || (maleScanAudio = new Audio(src)));
+    audio.currentTime = 0;
+    audio.play().catch(()=>{});
+  }catch(e){}
 }
 
 
@@ -3806,6 +3855,7 @@ function triggerQR(){
         document.getElementById('loadingWrapper').style.display = 'none';
         document.getElementById('qrContentWrapper').style.display = 'flex';
         playQrReady();
+        setTimeout(() => playScanVoice(), 1600);
         currentQrSession = {
           sessionId:'QR-' + Date.now(),
           createdAt:Date.now(),
