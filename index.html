@@ -3741,9 +3741,7 @@ function scheduleScanVoice(delayMs){
   scanVoiceTimer = setTimeout(() => { scanVoiceTimer = null; playScanVoice(); }, delayMs);
 }
 function onQrTap(){
-  // ลูกค้าพร้อมสแกนแล้ว แตะ QR เพื่อเล่นเสียงเตือนอีกครั้งหลัง 2.5 วินาที
   scheduleScanVoice(2500);
-  showToast('จะเล่นเสียงอีกครั้งใน 2.5 วินาที');
 }
 function playScanVoice(){
   try{
