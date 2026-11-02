@@ -1555,6 +1555,13 @@
       </div>
       <div class="settings-row">
         <div>
+          <h4>เสียงเตือนสลิป</h4>
+          <p>เปิดแล้วจะให้เลือกเสียงผู้ชาย/ผู้หญิง ก่อนแสดง QR</p>
+        </div>
+        <button type="button" class="switch" id="scanVoiceSwitch" onclick="toggleScanVoiceSetting()"></button>
+      </div>
+      <div class="settings-row">
+        <div>
           <h4>โหมดปุ่มสลิป</h4>
           <p id="slipModeLabel">ถ่ายรูปปกติ</p>
         </div>
@@ -2232,6 +2239,8 @@ function openSettingsModal(){
   const swMode = document.getElementById('slipModeSwitch');
   const modeLabel = document.getElementById('slipModeLabel');
   if(swMode) swMode.classList.toggle('on', slipScanMode === 'qr');
+  const swVoice = document.getElementById('scanVoiceSwitch');
+  if(swVoice) swVoice.classList.toggle('on', scanVoiceEnabled);
   if(modeLabel) modeLabel.textContent = slipScanMode === 'qr' ? 'สแกน Mini-QR อัตโนมัติ' : 'ถ่ายรูปปกติ';
 
   const box = document.getElementById('storageBox');
@@ -3721,10 +3730,21 @@ function confirmPhoneAndCreateQR(){
   askVoiceThenQR();
 }
 let qrVoiceChoice = (function(){ try { return localStorage.getItem('edc_qr_voice') || 'male'; } catch(e){ return 'male'; } })();
+let scanVoiceEnabled = (function(){ try { return (safeGet('edc_scan_voice') || '0') === '1'; } catch(e){ return false; } })();
+function toggleScanVoiceSetting(){
+  scanVoiceEnabled = !scanVoiceEnabled;
+  safeSet('edc_scan_voice', scanVoiceEnabled ? '1' : '0');
+  const sw = document.getElementById('scanVoiceSwitch');
+  if(sw) sw.classList.toggle('on', scanVoiceEnabled);
+}
 function askVoiceThenQR(){
   const amount = parseFloat(getAmountValue()) || 0;
   if(!selectedPumpNum || !selectedOil || amount <= 0){
     showToast('กรุณาระบุหน้าจ่าย ชนิดน้ำมัน และจำนวนเงินให้ครบ'); return;
+  }
+  if(!scanVoiceEnabled){
+    triggerQR();
+    return;
   }
   document.getElementById('voicePickModal').classList.add('active');
 }
@@ -3741,7 +3761,8 @@ function scheduleScanVoice(delayMs){
   scanVoiceTimer = setTimeout(() => { scanVoiceTimer = null; playScanVoice(); }, delayMs);
 }
 function onQrTap(){
-  scheduleScanVoice(2500);
+  if(!scanVoiceEnabled) return;
+  scheduleScanVoice(1500);
 }
 function playScanVoice(){
   try{
@@ -3863,7 +3884,7 @@ function triggerQR(){
         document.getElementById('loadingWrapper').style.display = 'none';
         document.getElementById('qrContentWrapper').style.display = 'flex';
         playQrReady();
-        scheduleScanVoice(2500);
+        if(scanVoiceEnabled) scheduleScanVoice(1500);
         currentQrSession = {
           sessionId:'QR-' + Date.now(),
           createdAt:Date.now(),
