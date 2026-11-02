@@ -3863,7 +3863,7 @@ function triggerQR(){
         document.getElementById('loadingWrapper').style.display = 'none';
         document.getElementById('qrContentWrapper').style.display = 'flex';
         playQrReady();
-        scheduleScanVoice(2000);
+        scheduleScanVoice(2500);
         currentQrSession = {
           sessionId:'QR-' + Date.now(),
           createdAt:Date.now(),
