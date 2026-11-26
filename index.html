@@ -2666,13 +2666,45 @@ function calculateCRC16(data){
   }
   return ("0000"+crc.toString(16).toUpperCase()).slice(-4);
 }
+function encodePromptPayTlv(tag, value){
+  const text = String(value);
+  if(!/^\d{2}$/.test(tag) || !/^[\x20-\x7E]*$/.test(text) || text.length > 99){
+    throw new RangeError('Invalid PromptPay TLV field');
+  }
+  return tag + String(text.length).padStart(2, '0') + text;
+}
 function generatePromptPayPayload(amount){
-  const STATIC_PAYLOAD = "00020101021130820016A00000067701011201150107537000882050219BG094353WQ20000939H0316PTTTUNGYANGDAENG53037645802TH62080704000063042BAF";
-  if(!amount || amount <= 0) return STATIC_PAYLOAD;
-  let payload = "00020101021230820016A00000067701011201150107537000882050219BG094353WQ20000939H0316PTTTUNGYANGDAENG5303764";
-  const amtStr = Number(amount).toFixed(2);
-  payload += "54" + ("0"+amtStr.length).slice(-2) + amtStr + "5802TH6208070400006304";
-  return payload + calculateCRC16(payload);
+  const merchantAccount = [
+    encodePromptPayTlv('00', 'A000000677010112'),
+    encodePromptPayTlv('01', '010753700088205'),
+    encodePromptPayTlv('02', 'BG094353WQ20000939H'),
+    encodePromptPayTlv('03', 'PTTTUNGYANGDAENG(YUSRAN)')
+  ].join('');
+  const amountValue = amount === null || amount === undefined ? '' : String(amount).trim();
+  const amountMatch = amountValue ? /^([+-]?)(\d*)(?:\.(\d*))?$/.exec(amountValue) : null;
+  if(amountValue && (!amountMatch || !(amountMatch[2] || amountMatch[3]))) throw new TypeError('Invalid PromptPay amount');
+  const amountWhole = amountMatch?.[2] || '0';
+  const amountFraction = amountMatch?.[3] || '';
+  const hasPositiveAmount = Boolean(amountMatch && amountMatch[1] !== '-' && /[1-9]/.test(amountWhole + amountFraction));
+  let amountText = '';
+  if(hasPositiveAmount){
+    let amountMinorUnits = BigInt(amountWhole) * 100n
+      + BigInt(amountFraction.slice(0, 2).padEnd(2, '0'));
+    if(amountFraction.length > 2 && amountFraction[2] >= '5') amountMinorUnits++;
+    if(amountMinorUnits === 0n) throw new RangeError('PromptPay amount must be representable in baht and satang');
+    amountText = `${amountMinorUnits / 100n}.${String(amountMinorUnits % 100n).padStart(2, '0')}`;
+  }
+  const payload = [
+    encodePromptPayTlv('00', '01'),
+    encodePromptPayTlv('01', hasPositiveAmount ? '12' : '11'),
+    encodePromptPayTlv('30', merchantAccount),
+    encodePromptPayTlv('53', '764'),
+    ...(hasPositiveAmount ? [encodePromptPayTlv('54', amountText)] : []),
+    encodePromptPayTlv('58', 'TH'),
+    encodePromptPayTlv('62', encodePromptPayTlv('07', '0000'))
+  ].join('');
+  const crcPayload = payload + '6304';
+  return crcPayload + calculateCRC16(crcPayload);
 }
 function buildQrDataUrl(payload, cellSize = 8, margin = 0){
   const qr = qrcode(0, 'M');
